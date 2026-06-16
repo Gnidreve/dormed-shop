@@ -1,8 +1,31 @@
 <script lang="ts">
     import Check from 'lucide-svelte/icons/check';
+    import FileCheck from 'lucide-svelte/icons/file-check';
+    import PackageCheck from 'lucide-svelte/icons/package-check';
     import Phone from 'lucide-svelte/icons/phone';
+    import ShieldCheck from 'lucide-svelte/icons/shield-check';
+    import Truck from 'lucide-svelte/icons/truck';
     import AppHead from '@/components/AppHead.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
+
+    const trustItems = [
+        {
+            icon: PackageCheck,
+            label: 'direkt bestellen',
+        },
+        {
+            icon: Truck,
+            label: 'Lieferung oder Abholung',
+        },
+        {
+            icon: FileCheck,
+            label: 'inkl. GWE und Einweisung',
+        },
+        {
+            icon: ShieldCheck,
+            label: 'Gewährleistung und geprüfte Qualität',
+        },
+    ] as const;
 
     const features = [
         'Diagnostik',
@@ -42,10 +65,10 @@
                     Verlässliche Medizintechnik für Ihre Patientenversorgung
                 </p>
 
-                <ul class="mb-10 space-y-2.5">
+                <ul class="mb-10 flex flex-col gap-2.5">
                     {#each features as feature}
                         <li class="flex items-center gap-2.5 font-semibold text-white">
-                            <Check class="h-4 w-4 shrink-0" />
+                            <Check class="size-4 shrink-0" />
                             {feature}
                         </li>
                     {/each}
@@ -56,7 +79,7 @@
                     class="group inline-flex items-center gap-4 rounded-xl bg-white/10 px-5 py-3.5 backdrop-blur-sm transition hover:bg-white/20"
                 >
                     <div class="rounded-full bg-white/20 p-2.5 transition group-hover:bg-white/30">
-                        <Phone class="h-5 w-5 text-white" />
+                        <Phone class="size-5 text-white" />
                     </div>
                     <span class="text-2xl font-bold tracking-wide text-white lg:text-3xl">
                         02301 – 188/600
@@ -65,4 +88,20 @@
             </div>
         </div>
     </section>
+
+    <!-- Trust bar -->
+    <div class="border-b border-t bg-white">
+        <div class="mx-auto max-w-7xl px-4 lg:px-8">
+            <div class="grid grid-cols-2 divide-x divide-y lg:grid-cols-4 lg:divide-y-0">
+                {#each trustItems as item}
+                    <div class="flex items-center gap-3 px-6 py-5">
+                        <item.icon class="size-8 shrink-0 text-[#1a6bbf]" strokeWidth={1.5} />
+                        <span class="text-sm font-semibold leading-snug text-[#0d1f44]">
+                            {item.label}
+                        </span>
+                    </div>
+                {/each}
+            </div>
+        </div>
+    </div>
 </div>

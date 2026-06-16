@@ -2,6 +2,8 @@
     import { Link, page, router } from '@inertiajs/svelte';
     import ChevronRight from 'lucide-svelte/icons/chevron-right';
     import LogOut from 'lucide-svelte/icons/log-out';
+    import MapPin from 'lucide-svelte/icons/map-pin';
+    import Package from 'lucide-svelte/icons/package';
     import Search from 'lucide-svelte/icons/search';
     import Settings from 'lucide-svelte/icons/settings';
     import User from 'lucide-svelte/icons/user';
@@ -145,13 +147,13 @@
                             onclick={clearSearch}
                             class="absolute right-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground"
                         >
-                            <X class="h-4 w-4" />
+                            <X class="size-4" />
                         </Button>
                     {:else}
                         <span
                             class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                         >
-                            <Search class="h-4 w-4" />
+                            <Search class="size-4" />
                         </span>
                     {/if}
                 </div>
@@ -183,7 +185,7 @@
                                             onclick={() => (isOpen = false)}
                                         >
                                             <div
-                                                class="h-9 w-9 shrink-0 rounded bg-gray-100"
+                                                class="size-9 shrink-0 rounded bg-gray-100"
                                             ></div>
                                             <span
                                                 class="flex-1 truncate text-sm"
@@ -207,7 +209,7 @@
                                 <span
                                     class="flex items-center gap-1 font-medium"
                                 >
-                                    <ChevronRight class="h-4 w-4" />
+                                    <ChevronRight class="size-4" />
                                     Alle Suchergebnisse anzeigen
                                 </span>
                                 <span class="text-muted-foreground">
@@ -226,7 +228,7 @@
                     <DropdownMenuTrigger asChild>
                         {#snippet children(props)}
                             <Button variant="ghost" size="icon" {...props}>
-                                <User class="h-5 w-5" />
+                                <User class="size-5" />
                                 <span class="sr-only">Konto</span>
                             </Button>
                         {/snippet}
@@ -253,7 +255,33 @@
                                             prefetch
                                             onclick={props.onClick}
                                         >
-                                            <Settings class="mr-2 h-4 w-4" />
+                                            <Package class="mr-2 size-4" />
+                                            Bestellungen
+                                        </Link>
+                                    {/snippet}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                    {#snippet children(props)}
+                                        <Link
+                                            class={props.class}
+                                            href={toUrl(editProfile())}
+                                            prefetch
+                                            onclick={props.onClick}
+                                        >
+                                            <MapPin class="mr-2 size-4" />
+                                            Adressen
+                                        </Link>
+                                    {/snippet}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                    {#snippet children(props)}
+                                        <Link
+                                            class={props.class}
+                                            href={toUrl(editProfile())}
+                                            prefetch
+                                            onclick={props.onClick}
+                                        >
+                                            <Settings class="mr-2 size-4" />
                                             Einstellungen
                                         </Link>
                                     {/snippet}
@@ -271,7 +299,7 @@
                                             router.flushAll();
                                         }}
                                     >
-                                        <LogOut class="mr-2 h-4 w-4" />
+                                        <LogOut class="mr-2 size-4" />
                                         Abmelden
                                     </Link>
                                 {/snippet}
@@ -285,7 +313,7 @@
                                             href="/login"
                                             onclick={props.onClick}
                                         >
-                                            <User class="mr-2 h-4 w-4" />
+                                            <User class="mr-2 size-4" />
                                             Anmelden
                                         </Link>
                                     {/snippet}
@@ -297,7 +325,7 @@
                                             href="/register"
                                             onclick={props.onClick}
                                         >
-                                            <UserPlus class="mr-2 h-4 w-4" />
+                                            <UserPlus class="mr-2 size-4" />
                                             Registrieren
                                         </Link>
                                     {/snippet}

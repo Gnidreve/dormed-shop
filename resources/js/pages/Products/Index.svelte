@@ -84,7 +84,7 @@
                         <div
                             class="mb-3 aspect-square w-full rounded bg-gray-100"
                         ></div>
-                        <div class="space-y-1">
+                        <div class="flex flex-col gap-1">
                             <p
                                 class="line-clamp-2 text-sm font-medium text-gray-900 group-hover:text-[#1a6bbf]"
                             >

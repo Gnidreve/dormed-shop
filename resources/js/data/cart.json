@@ -1,0 +1,64 @@
+{
+    "items": [
+        {
+            "id": 1,
+            "name": "Akku Li-ion 4,2V (BT-410 LED)",
+            "sku": "SW10010",
+            "deliveryFrom": "23.06.26",
+            "deliveryTo": "30.06.26",
+            "unitPrice": 46.41,
+            "quantity": 1,
+            "imageUrl": null
+        }
+    ],
+    "shippingMethods": [
+        {
+            "id": "dpd_standard",
+            "label": "Standardversand (DPD)",
+            "price": 9.52,
+            "selected": true
+        },
+        {
+            "id": "dpd_video",
+            "label": "Standardversand (DPD) + Video-Einweisung",
+            "price": 9.52,
+            "selected": false
+        },
+        {
+            "id": "self_pickup",
+            "label": "Selbstabholung",
+            "price": 0.0,
+            "selected": false
+        },
+        {
+            "id": "personal_delivery",
+            "label": "Persönliche Lieferung inkl. Einweisung & Installation",
+            "price": null,
+            "selected": false
+        }
+    ],
+    "paymentMethods": [
+        {
+            "id": "cod",
+            "label": "Nachnahme",
+            "description": "Zahlung bei Erhalt der Ware.",
+            "selected": true
+        },
+        {
+            "id": "prepayment",
+            "label": "Vorkasse",
+            "description": "Sie zahlen einfach vorab und erhalten die Ware bequem und günstig.",
+            "selected": false
+        }
+    ],
+    "vatRate": 19,
+    "coupon": null,
+    "customer": {
+        "name": "Max Mustermann",
+        "street": "Musterstraße 1",
+        "zip": "12345",
+        "city": "Musterstadt",
+        "country": "Deutschland",
+        "billingMatchesDelivery": true
+    }
+}

@@ -12,6 +12,7 @@
         Sheet,
         SheetClose,
         SheetContent,
+        SheetTitle,
         SheetTrigger,
     } from '@/components/ui/sheet';
 
@@ -53,7 +54,10 @@
     );
 
     const subtotal = $derived(
-        items.reduce((sum, item) => sum + item.price * (quantities[item.id] ?? 1), 0),
+        items.reduce(
+            (sum, item) => sum + item.price * (quantities[item.id] ?? 1),
+            0,
+        ),
     );
     const shipping = 9.52;
 </script>
@@ -61,16 +65,12 @@
 <Sheet>
     <SheetTrigger asChild>
         {#snippet children(props)}
-            <Button
-                variant="ghost"
-                class="gap-2 px-3"
-                onclick={props.onclick}
-            >
+            <Button variant="ghost" class="gap-2 px-3" onclick={props.onclick}>
                 <div class="relative">
-                    <ShoppingCart class="h-5 w-5" />
+                    <ShoppingCart class="size-5" />
                     {#if cartCount > 0}
                         <span
-                            class="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-[#1a6bbf] text-[10px] font-bold text-white"
+                            class="absolute -right-2 -top-2 flex size-4 items-center justify-center rounded-full bg-[#1a6bbf] text-[10px] font-bold text-white"
                         >
                             {cartCount}
                         </span>
@@ -88,6 +88,8 @@
         hideClose
         class="flex w-full flex-col gap-0 p-0 sm:max-w-105"
     >
+        <SheetTitle class="sr-only">Warenkorb</SheetTitle>
+
         <!-- Back button -->
         <SheetClose asChild>
             {#snippet children(props)}
@@ -95,7 +97,7 @@
                     onclick={props.onClick}
                     class="flex w-full items-center gap-2 border-b bg-gray-100 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-gray-200 hover:text-gray-900"
                 >
-                    <ChevronLeft class="h-4 w-4" />
+                    <ChevronLeft class="size-4" />
                     Weiter einkaufen
                 </button>
             {/snippet}
@@ -118,7 +120,7 @@
                     <div class="flex gap-3">
                         <!-- Image -->
                         <div
-                            class="h-16 w-16 shrink-0 rounded border bg-gray-50 flex items-center justify-center"
+                            class="flex size-16 shrink-0 items-center justify-center rounded border bg-gray-50"
                         >
                             {#if item.image}
                                 <img
@@ -127,21 +129,23 @@
                                     class="h-full w-full object-contain p-1"
                                 />
                             {:else}
-                                <ShoppingCart class="h-6 w-6 text-gray-300" />
+                                <ShoppingCart class="size-6 text-gray-300" />
                             {/if}
                         </div>
 
                         <!-- Info + remove -->
                         <div class="min-w-0 flex-1">
                             <div class="flex items-start justify-between gap-2">
-                                <p class="text-sm font-semibold leading-snug text-gray-900">
+                                <p
+                                    class="text-sm font-semibold leading-snug text-gray-900"
+                                >
                                     {item.name}
                                 </p>
                                 <button
                                     class="shrink-0 rounded p-0.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
                                     aria-label="Entfernen"
                                 >
-                                    <X class="h-4 w-4" />
+                                    <X class="size-4" />
                                 </button>
                             </div>
                             <p class="mt-0.5 text-xs text-gray-400">
@@ -157,7 +161,7 @@
                     <div class="mt-3 flex items-center justify-between">
                         <div class="flex items-center rounded border">
                             <button
-                                class="flex h-8 w-8 items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-800 disabled:opacity-40"
+                                class="flex size-8 items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-800 disabled:opacity-40"
                                 onclick={() =>
                                     (quantities[item.id] = Math.max(
                                         1,
@@ -165,29 +169,31 @@
                                     ))}
                                 disabled={quantities[item.id] <= 1}
                             >
-                                <Minus class="h-3.5 w-3.5" />
+                                <Minus class="size-3.5" />
                             </button>
                             <span class="w-8 text-center text-sm font-medium">
                                 {quantities[item.id] ?? 1}
                             </span>
                             <button
-                                class="flex h-8 w-8 items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-800"
+                                class="flex size-8 items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-800"
                                 onclick={() =>
                                     (quantities[item.id] =
                                         (quantities[item.id] ?? 1) + 1)}
                             >
-                                <Plus class="h-3.5 w-3.5" />
+                                <Plus class="size-3.5" />
                             </button>
                         </div>
                         <span class="text-sm font-semibold text-gray-900">
-                            {formatPrice(item.price * (quantities[item.id] ?? 1))}*
+                            {formatPrice(
+                                item.price * (quantities[item.id] ?? 1),
+                            )}*
                         </span>
                     </div>
                 </div>
             {/each}
 
             <!-- Summary -->
-            <div class="mt-4 space-y-2 border-t pt-4 text-sm">
+            <div class="mt-4 flex flex-col gap-2 border-t pt-4 text-sm">
                 <div class="flex justify-between">
                     <span class="text-gray-600">Zwischensumme</span>
                     <span class="font-semibold">{formatPrice(subtotal)}*</span>
@@ -195,9 +201,12 @@
                 <div class="flex justify-between">
                     <div>
                         <span class="text-gray-600">Versandkosten</span>
-                        <p class="text-xs text-gray-400">Standardversand (DPD)</p>
+                        <p class="text-xs text-gray-400">
+                            Standardversand (DPD)
+                        </p>
                     </div>
-                    <span class="font-semibold">+ {formatPrice(shipping)}*</span>
+                    <span class="font-semibold">+ {formatPrice(shipping)}*</span
+                    >
                 </div>
             </div>
 
@@ -212,6 +221,7 @@
                 </p>
                 <div class="flex overflow-hidden rounded-md border">
                     <Input
+                        disabled
                         bind:value={couponCode}
                         placeholder="Gutscheincode eingeben ..."
                         class="rounded-none border-0 focus-visible:ring-0"
@@ -220,7 +230,7 @@
                         class="flex items-center justify-center border-l px-3 text-gray-500 hover:bg-gray-50 hover:text-gray-800"
                         aria-label="Gutschein einlösen"
                     >
-                        <Check class="h-4 w-4" />
+                        <Check class="size-4" />
                     </button>
                 </div>
             </div>
@@ -228,11 +238,21 @@
 
         <!-- Footer -->
         <div class="border-t bg-white px-5 pb-6 pt-4">
-            <Button
-                class="w-full bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90"
-            >
-                Zur Kasse
-            </Button>
+            <SheetClose asChild>
+                {#snippet children(closeProps)}
+                    <Button asChild class="w-full bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90">
+                        {#snippet children(btnProps)}
+                            <Link
+                                href="/checkout"
+                                class={btnProps.class}
+                                onclick={closeProps.onClick as () => void}
+                            >
+                                Zur Kasse
+                            </Link>
+                        {/snippet}
+                    </Button>
+                {/snippet}
+            </SheetClose>
             <div class="mt-3 text-center">
                 <Link
                     href="/warenkorb"
