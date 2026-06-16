@@ -18,7 +18,6 @@
         SidebarMenuItem,
     } from '@/components/ui/sidebar';
     import { toUrl } from '@/lib/utils';
-    import { dashboard } from '@/routes';
     import type { NavItem } from '@/types';
 
     let {
@@ -30,7 +29,7 @@
     const mainNavItems: NavItem[] = [
         {
             title: 'Dashboard',
-            href: dashboard(),
+            href: '/admin',
             icon: LayoutGrid,
         },
     ];
@@ -57,7 +56,7 @@
                     {#snippet children(props)}
                         <Link
                             {...props}
-                            href={toUrl(dashboard())}
+                            href="/admin"
                             class={props.class}
                         >
                             <AppLogo />
