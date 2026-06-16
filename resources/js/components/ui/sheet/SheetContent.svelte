@@ -9,10 +9,12 @@
     let {
         side = 'right',
         class: className = '',
+        hideClose = false,
         children,
     }: {
         side?: 'right' | 'left' | 'top' | 'bottom';
         class?: string;
+        hideClose?: boolean;
         children?: Snippet;
     } = $props();
 
@@ -66,15 +68,17 @@
             in:fly={panelTransition()}
             out:fly={panelTransition()}
         >
-            <button
-                type="button"
-                class="ring-offset-background focus-visible:ring-ring absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none"
-                aria-label="Close"
-                onclick={close}
-            >
-                <X class="size-4" />
-                <span class="sr-only">Close</span>
-            </button>
+            {#if !hideClose}
+                <button
+                    type="button"
+                    class="ring-offset-background focus-visible:ring-ring absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none"
+                    aria-label="Close"
+                    onclick={close}
+                >
+                    <X class="size-4" />
+                    <span class="sr-only">Close</span>
+                </button>
+            {/if}
             {@render children?.()}
         </div>
     </div>

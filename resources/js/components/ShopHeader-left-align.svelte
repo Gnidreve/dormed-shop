@@ -4,8 +4,8 @@
     import LogOut from 'lucide-svelte/icons/log-out';
     import Search from 'lucide-svelte/icons/search';
     import Settings from 'lucide-svelte/icons/settings';
+    import ShoppingCart from 'lucide-svelte/icons/shopping-cart';
     import User from 'lucide-svelte/icons/user';
-    import CartSheet from '@/components/CartSheet.svelte';
     import UserPlus from 'lucide-svelte/icons/user-plus';
     import X from 'lucide-svelte/icons/x';
     import { Button } from '@/components/ui/button';
@@ -44,6 +44,8 @@
     } = $props();
 
     const auth = $derived(page.props.auth);
+
+    const formattedTotal = $derived(formatPrice(cartTotal));
 
     type SearchResult = { id: number; name: string; price: string };
 
@@ -129,7 +131,7 @@
             </Link>
 
             <!-- Search -->
-            <div bind:this={searchContainerEl} class="relative mx-8 flex-1">
+            <div bind:this={searchContainerEl} class="relative flex-1">
                 <div class="relative">
                     <Input
                         type="search"
@@ -307,7 +309,21 @@
                     </DropdownMenuContent>
                 </DropdownMenu>
 
-                <CartSheet {cartTotal} {cartCount} />
+                <Button variant="ghost" class="gap-2 px-3">
+                    <div class="relative">
+                        <ShoppingCart class="h-5 w-5" />
+                        {#if cartCount > 0}
+                            <span
+                                class="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-[#1a6bbf] text-[10px] font-bold text-white"
+                            >
+                                {cartCount}
+                            </span>
+                        {/if}
+                    </div>
+                    <span class="text-sm font-medium text-[#1a3a5c]">
+                        {formattedTotal}*
+                    </span>
+                </Button>
             </div>
         </div>
     </div>
@@ -315,7 +331,7 @@
     <!-- Nav row -->
     <div class="border-t">
         <div class="mx-auto max-w-7xl px-4 lg:px-8">
-            <nav class="flex items-center justify-center">
+            <nav class="flex items-center">
                 {#each navItems as item (item.label)}
                     <Link
                         href={item.href}

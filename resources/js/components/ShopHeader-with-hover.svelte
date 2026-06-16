@@ -4,8 +4,8 @@
     import LogOut from 'lucide-svelte/icons/log-out';
     import Search from 'lucide-svelte/icons/search';
     import Settings from 'lucide-svelte/icons/settings';
+    import ShoppingCart from 'lucide-svelte/icons/shopping-cart';
     import User from 'lucide-svelte/icons/user';
-    import CartSheet from '@/components/CartSheet.svelte';
     import UserPlus from 'lucide-svelte/icons/user-plus';
     import X from 'lucide-svelte/icons/x';
     import { Button } from '@/components/ui/button';
@@ -26,14 +26,49 @@
     import { toUrl } from '@/lib/utils';
     import type { Customer } from '@/types';
 
+    type MegaMenuKey = 'artikelgruppen' | 'verbrauchsartikel' | null;
+
     const navItems = [
-        { label: 'Home', href: '/' },
-        { label: 'Alle Produkte', href: '/products' },
-        { label: 'Ultraschallsysteme', href: '/ultraschallsysteme' },
-        { label: 'Zubehör', href: '/zubehoer' },
-        { label: 'Verbrauchsartikel', href: '/verbrauchsartikel' },
-        { label: 'Hilfe & Kontakt', href: '/hilfe' },
+        { label: 'Home', href: '/', menu: null },
+        { label: 'Artikelgruppen', href: '/artikelgruppen', menu: 'artikelgruppen' as MegaMenuKey },
+        { label: 'Verbrauchsartikel', href: '/verbrauchsartikel', menu: 'verbrauchsartikel' as MegaMenuKey },
+        { label: 'Hilfe & Kontakt', href: '/hilfe', menu: null },
     ] as const;
+
+    const megaMenus: Record<string, { label: string; href: string }[]> = {
+        artikelgruppen: [
+            { label: 'Kleingeräte', href: '/artikelgruppen/kleingeraete' },
+            { label: 'Pulsoximetrie', href: '/artikelgruppen/pulsoximetrie' },
+            { label: 'Notfall', href: '/artikelgruppen/notfall' },
+            { label: 'Diagnostik', href: '/artikelgruppen/diagnostik' },
+            { label: 'Monitoring', href: '/artikelgruppen/monitoring' },
+            { label: 'Zubehör', href: '/artikelgruppen/zubehoer' },
+        ],
+        verbrauchsartikel: [
+            { label: 'Einmalhandschuhe', href: '/verbrauchsartikel/handschuhe' },
+            { label: 'Verbandmaterial', href: '/verbrauchsartikel/verbandmaterial' },
+            { label: 'Desinfektionsmittel', href: '/verbrauchsartikel/desinfektion' },
+        ],
+    };
+
+    let activeMenu = $state<MegaMenuKey>(null);
+    let closeTimer: ReturnType<typeof setTimeout>;
+
+    function openMenu(key: MegaMenuKey) {
+        clearTimeout(closeTimer);
+        activeMenu = key;
+    }
+
+    function scheduleClose() {
+        closeTimer = setTimeout(() => {
+            activeMenu = null;
+        }, 120);
+    }
+
+    function closeMenu() {
+        clearTimeout(closeTimer);
+        activeMenu = null;
+    }
 
     let {
         cartTotal = 0,
@@ -44,6 +79,10 @@
     } = $props();
 
     const auth = $derived(page.props.auth);
+
+    const formattedTotal = $derived(
+        formatPrice(cartTotal),
+    );
 
     type SearchResult = { id: number; name: string; price: string };
 
@@ -102,10 +141,7 @@
     }
 
     function handleClickOutside(e: MouseEvent) {
-        if (
-            searchContainerEl &&
-            !searchContainerEl.contains(e.target as Node)
-        ) {
+        if (searchContainerEl && !searchContainerEl.contains(e.target as Node)) {
             isOpen = false;
         }
     }
@@ -120,16 +156,14 @@
 <header class="bg-white shadow-sm">
     <!-- Top row: logo + search + icons -->
     <div class="border-b">
-        <div
-            class="mx-auto flex h-16 max-w-7xl items-center gap-6 px-4 lg:px-8"
-        >
+        <div class="mx-auto flex h-16 max-w-7xl items-center gap-6 px-4 lg:px-8">
             <!-- Logo -->
             <Link href="/" class="shrink-0">
                 <img src="/logo.svg" alt="dormed 24" class="h-10 w-auto" />
             </Link>
 
             <!-- Search -->
-            <div bind:this={searchContainerEl} class="relative mx-8 flex-1">
+            <div bind:this={searchContainerEl} class="relative flex-1">
                 <div class="relative">
                     <Input
                         type="search"
@@ -162,15 +196,11 @@
                         class="absolute left-0 right-0 top-[calc(100%+4px)] z-50 overflow-hidden rounded-md border bg-white shadow-lg"
                     >
                         {#if isLoading}
-                            <div
-                                class="px-4 py-3 text-sm text-muted-foreground"
-                            >
+                            <div class="px-4 py-3 text-sm text-muted-foreground">
                                 Suche ...
                             </div>
                         {:else if results.length === 0}
-                            <div
-                                class="px-4 py-3 text-sm text-muted-foreground"
-                            >
+                            <div class="px-4 py-3 text-sm text-muted-foreground">
                                 Keine Ergebnisse für „{query}"
                             </div>
                         {:else}
@@ -185,9 +215,7 @@
                                             <div
                                                 class="h-9 w-9 shrink-0 rounded bg-gray-100"
                                             ></div>
-                                            <span
-                                                class="flex-1 truncate text-sm"
-                                            >
+                                            <span class="flex-1 truncate text-sm">
                                                 {product.name}
                                             </span>
                                             <span
@@ -204,9 +232,7 @@
                                 class="flex items-center justify-between border-t px-4 py-2.5 text-sm text-[#1a6bbf] hover:bg-accent"
                                 onclick={() => (isOpen = false)}
                             >
-                                <span
-                                    class="flex items-center gap-1 font-medium"
-                                >
+                                <span class="flex items-center gap-1 font-medium">
                                     <ChevronRight class="h-4 w-4" />
                                     Alle Suchergebnisse anzeigen
                                 </span>
@@ -307,24 +333,96 @@
                     </DropdownMenuContent>
                 </DropdownMenu>
 
-                <CartSheet {cartTotal} {cartCount} />
+                <Button variant="ghost" class="gap-2 px-3">
+                    <div class="relative">
+                        <ShoppingCart class="h-5 w-5" />
+                        {#if cartCount > 0}
+                            <span
+                                class="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-[#1a6bbf] text-[10px] font-bold text-white"
+                            >
+                                {cartCount}
+                            </span>
+                        {/if}
+                    </div>
+                    <span class="text-sm font-medium text-[#1a3a5c]">
+                        {formattedTotal}*
+                    </span>
+                </Button>
             </div>
         </div>
     </div>
 
-    <!-- Nav row -->
-    <div class="border-t">
+    <!-- Nav row + mega menu -->
+    <div class="relative">
         <div class="mx-auto max-w-7xl px-4 lg:px-8">
-            <nav class="flex items-center justify-center">
+            <nav class="flex items-center">
                 {#each navItems as item (item.label)}
-                    <Link
-                        href={item.href}
-                        class="border-b-2 border-transparent px-4 py-3 text-sm font-medium text-gray-600 transition-colors hover:border-[#1a6bbf] hover:text-[#1a3a5c]"
-                    >
-                        {item.label}
-                    </Link>
+                    {#if item.menu}
+                        <button
+                            class="flex items-center gap-0.5 border-b-2 px-4 py-3 text-sm font-medium transition-colors
+                                {activeMenu === item.menu
+                                    ? 'border-[#1a6bbf] text-[#1a3a5c]'
+                                    : 'border-transparent text-gray-600 hover:text-[#1a3a5c]'}"
+                            onmouseenter={() => openMenu(item.menu)}
+                            onmouseleave={scheduleClose}
+                        >
+                            {item.label}
+                            <ChevronRight
+                                class="h-3.5 w-3.5 transition-transform duration-150 {activeMenu === item.menu
+                                    ? 'rotate-90'
+                                    : ''}"
+                            />
+                        </button>
+                    {:else}
+                        <Link
+                            href={item.href}
+                            class="border-b-2 border-transparent px-4 py-3 text-sm font-medium text-gray-600 transition-colors hover:border-[#1a6bbf] hover:text-[#1a3a5c]"
+                        >
+                            {item.label}
+                        </Link>
+                    {/if}
                 {/each}
             </nav>
         </div>
+
+        <!-- Mega menu panel -->
+        {#if activeMenu && megaMenus[activeMenu]}
+            <div
+                class="absolute left-0 right-0 top-full z-40 border-t border-b bg-white shadow-lg"
+                onmouseenter={() => openMenu(activeMenu)}
+                onmouseleave={scheduleClose}
+            >
+                <div class="mx-auto max-w-7xl px-4 py-4 lg:px-8">
+                    <div class="mb-3 flex items-center justify-between">
+                        <Link
+                            href={navItems.find((n) => n.menu === activeMenu)?.href ?? '/'}
+                            class="flex items-center gap-1 text-sm font-semibold text-[#1a3a5c] hover:underline"
+                            onclick={closeMenu}
+                        >
+                            Zur Kategorie {navItems.find((n) => n.menu === activeMenu)?.label}
+                            <ChevronRight class="h-4 w-4" />
+                        </Link>
+                        <button
+                            onclick={closeMenu}
+                            class="rounded p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                            aria-label="Menü schließen"
+                        >
+                            <X class="h-4 w-4" />
+                        </button>
+                    </div>
+                    <div class="flex flex-wrap">
+                        {#each megaMenus[activeMenu] as cat (cat.label)}
+                            <Link
+                                href={cat.href}
+                                onclick={closeMenu}
+                                class="border-l border-gray-300 px-5 py-1 text-sm font-medium text-[#1a3a5c] transition-colors hover:text-[#1a6bbf]"
+                            >
+                                {cat.label}
+                            </Link>
+                        {/each}
+                    </div>
+                </div>
+            </div>
+        {/if}
     </div>
 </header>
