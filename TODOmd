@@ -1,0 +1,9 @@
+# Datenbankstruktur anlegen
+
+- Getrennte admin benutzer (Mitarbeiter oder Admin) von den normalen usern die über die aktuelle login konvention login und registern können. Hierbei brauchen wir halt bei den admins einen superadmin. diese begrifflichkeit würde ich gerne nehmen.
+  -Eine Datenbank struktur (nahe zu Shopware) die Produkte hersteller und ggf. seperat getrennte kategorien ermöglich (wenn kategorien getrennt, dann mit relation zu den produkten; notwendigkeit von seperaten kategorien (views)?)
+- users für mitarbeiter benutzen und customer seperat einrichten? zwei getrennte login forms benötigt (superadmin fällt weg, aber user würden sich unter /admin einloggen)
+
+# Frontend Landingpage mit Componenten
+
+- Wir brauchen am Ende wiederverwertbare Header/footer components, beser noch ein layout component
