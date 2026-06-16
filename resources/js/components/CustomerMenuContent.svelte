@@ -8,16 +8,16 @@
         DropdownMenuLabel,
         DropdownMenuSeparator,
     } from '@/components/ui/dropdown-menu';
-    import UserInfo from '@/components/UserInfo.svelte';
+    import CustomerInfo from '@/components/CustomerInfo.svelte';
     import { toUrl } from '@/lib/utils';
     import { logout } from '@/routes';
     import { edit } from '@/routes/profile';
-    import type { User } from '@/types';
+    import type { Customer } from '@/types';
 
     let {
         user,
     }: {
-        user: User;
+        user: Customer;
     } = $props();
 
     function handleLogout(propsOnClick?: () => void) {
@@ -30,7 +30,7 @@
 
 <DropdownMenuLabel class="p-0 font-normal">
     <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-        <UserInfo {user} showEmail={true} />
+        <CustomerInfo {user} showEmail={true} />
     </div>
 </DropdownMenuLabel>
 <DropdownMenuSeparator />

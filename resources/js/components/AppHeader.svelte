@@ -38,7 +38,7 @@
         TooltipProvider,
         TooltipTrigger,
     } from '@/components/ui/tooltip';
-    import UserMenuContent from '@/components/UserMenuContent.svelte';
+    import CustomerMenuContent from '@/components/CustomerMenuContent.svelte';
     import { currentUrlState } from '@/lib/currentUrl.svelte';
     import { getInitials } from '@/lib/initials';
     import { toUrl } from '@/lib/utils';
@@ -259,7 +259,7 @@
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" class="w-56">
                         {#if auth.user}
-                            <UserMenuContent user={auth.user} />
+                            <CustomerMenuContent user={auth.user} />
                         {/if}
                     </DropdownMenuContent>
                 </DropdownMenu>

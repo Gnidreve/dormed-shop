@@ -5,13 +5,13 @@
         AvatarImage,
     } from '@/components/ui/avatar';
     import { getInitials } from '@/lib/initials';
-    import type { User } from '@/types';
+    import type { Customer } from '@/types';
 
     let {
         user,
         showEmail = false,
     }: {
-        user: User;
+        user: Customer;
         showEmail?: boolean;
     } = $props();
 

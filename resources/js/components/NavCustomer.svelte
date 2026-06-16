@@ -12,8 +12,8 @@
         SidebarMenuItem,
         useSidebar,
     } from '@/components/ui/sidebar';
-    import UserInfo from '@/components/UserInfo.svelte';
-    import UserMenuContent from '@/components/UserMenuContent.svelte';
+    import CustomerInfo from '@/components/CustomerInfo.svelte';
+    import CustomerMenuContent from '@/components/CustomerMenuContent.svelte';
 
     const user = $derived(page.props.auth.user);
     const { isMobile, state: sidebarState } = useSidebar();
@@ -33,7 +33,7 @@
                             aria-expanded={props['aria-expanded']}
                             data-state={props['data-state']}
                         >
-                            <UserInfo {user} />
+                            <CustomerInfo {user} />
                             <ChevronsUpDown class="ml-auto size-4" />
                         </SidebarMenuButton>
                     {/snippet}
@@ -46,7 +46,7 @@
                     align="end"
                     sideOffset={4}
                 >
-                    <UserMenuContent {user} />
+                    <CustomerMenuContent {user} />
                 </DropdownMenuContent>
             </DropdownMenu>
         </SidebarMenuItem>

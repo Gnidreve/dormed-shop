@@ -7,7 +7,7 @@
     import AppLogo from '@/components/AppLogo.svelte';
     import NavFooter from '@/components/NavFooter.svelte';
     import NavMain from '@/components/NavMain.svelte';
-    import NavUser from '@/components/NavUser.svelte';
+    import NavCustomer from '@/components/NavCustomer.svelte';
     import {
         Sidebar,
         SidebarContent,
@@ -74,7 +74,7 @@
 
     <SidebarFooter>
         <NavFooter items={footerNavItems} />
-        <NavUser />
+        <NavCustomer />
     </SidebarFooter>
 </Sidebar>
 {@render children?.()}
