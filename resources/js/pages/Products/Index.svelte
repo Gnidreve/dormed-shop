@@ -7,6 +7,7 @@
     type Product = {
         id: number;
         name: string;
+        slug: string;
         price: string;
         description: string | null;
         manufacturer: { id: number; name: string } | null;
@@ -78,7 +79,7 @@
             >
                 {#each products.data as product (product.id)}
                     <Link
-                        href="/products/{product.id}"
+                        href={ProductController.show.url({ slug: product.slug })}
                         class="group rounded-lg border bg-white p-3 shadow-sm transition hover:shadow-md"
                     >
                         <div

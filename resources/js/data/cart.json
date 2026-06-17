@@ -3,6 +3,7 @@
         {
             "id": 1,
             "name": "Akku Li-ion 4,2V (BT-410 LED)",
+            "slug": "akku_li_ion_4_2v_bt_410_led",
             "sku": "SW10010",
             "deliveryFrom": "23.06.26",
             "deliveryTo": "30.06.26",

@@ -1,0 +1,128 @@
+# sono-markt.de — Referenzanalyse
+
+Wettbewerber-Referenz für dormed-shop. Wird seitenweise erweitert.
+
+---
+
+# Global SEO-Analyse
+
+**Domain:** sono-markt.de
+**Ausrichtung:** B2B-Fachhandel für mobile Ultraschallgeräte, primär Ärzte/Praxen
+**Zielgruppen:** Allgemeinmedizin, Orthopädie, Notfallmedizin, HNO, Physiotherapie, Heilpraktik
+
+## Globale SEO-Stärken
+
+- Keyword-Fokus: "mobile Ultraschallgeräte kaufen", "Sonographiesysteme", "tragbares Ultraschallgerät"
+- Fachrichtungs-Segmentierung als eigene URL-Zweige → starke Keyword-Cluster
+- Alt-Texte mit Keywords: "mobiles handheld Ultraschallgeraet online-shop"
+- Logo Alt-Text: "sono-markt - online-shop_ultraschallgeräte kaufen"
+- Klarer Expertenpositionierung ("30 Jahre Erfahrung")
+- Telefonnummer im Header → lokales SEO-Signal
+
+## Globale SEO-Schwächen / Potenziale für uns
+
+- Kaum erkennbare Schema.org-Markup-Nutzung
+- Footer nicht vollständig crawlbar
+- Keine sichtbaren Meta-Keywords (moderner Standard: irrelevant)
+
+## Navigation / Menüstruktur
+
+```
+Home
+Fachrichtungen
+  ├─ Allgemeinmedizin
+  ├─ Orthopädie
+  ├─ Notfallmedizin
+  ├─ HNO
+  ├─ Physiotherapie
+  └─ Heilpraktik
+Ultraschallgeräte
+Zubehör
+Hilfe & Kontakt
+```
+
+## Kontakt (Header)
+
+- Tel: 089 / 21 54 66 907
+- Mail: info@sono-markt.de
+
+---
+
+# Seiten
+
+## /index.html (Frontpage)
+
+### Inhalt
+
+**H1:** "Mobile Ultraschallgeräte für Ihre Praxis"
+
+**H2 / Subheading:** "Maximale Flexibilität mit mobilen Ultraschallgeräten — Finden Sie das passende tragbare Ultraschallgerät für Ihre Anforderungen"
+
+**H2 (Section):** "Expertise nutzen — Flexibilität erleben — Zuverlässigkeit genießen"
+
+**Kernaussagen im Hero:**
+
+- Individuell konfigurierbar oder vorkonfiguriert
+- "Jetzt sicher und direkt kaufen"
+- Lieferung oder Abholung
+- Inklusive GWE (Geräteeinweisung) und Einweisung
+- Gewährleistung und geprüfte Qualität
+- Über 30 Jahre Erfahrung in der diagnostischen Sonographie
+- Akkubetriebene Geräte für Hausbesuche und Notfälle
+
+**USPs:**
+
+- Maximale Flexibilität
+- 30 Jahre Erfahrung
+- Akkubetrieben
+- Kostenlose Erstberatung
+- Geprüfte Qualität
+- Einweisung inklusive
+
+### SEO-Analyse
+
+| Element           | Wert                                                                   |
+| ----------------- | ---------------------------------------------------------------------- |
+| Title             | `mobile Ultraschallgeräte kaufen \| Fachhandel für Sonographiesysteme` |
+| Meta Description  | — (nicht extrahierbar)                                                 |
+| H1                | "Mobile Ultraschallgeräte für Ihre Praxis"                             |
+| Primär-Keyword    | "mobile Ultraschallgeräte kaufen"                                      |
+| Sekundär-Keywords | "tragbares Ultraschallgerät", "Sonographiesysteme", "akkubetrieben"    |
+
+**Stärken:**
+
+- Title enthält Haupt-Keyword + Branding ("Fachhandel")
+- H1 direkt auf Produktkategorie ausgerichtet
+- USPs adressieren Kaufentscheidungs-Kriterien (Erfahrung, Einweisung, Qualität)
+
+**Potenziale für uns:**
+
+- Explizite Preistransparenz auf der Frontpage fehlt bei sono-markt → Chance
+- GWE/Einweisung als differenzierendes Merkmal → sollten wir ebenfalls hervorheben
+- "30 Jahre Erfahrung" ist starkes Trust-Signal → ähnliches für dormed ausarbeiten
+
+---
+
+## /ultraschallgeraete (bei uns /ultraschallsysteme)
+
+### SEO-Analyse
+
+— _Noch nicht analysiert. Seite fetchen und ergänzen._
+
+---
+
+## /fachrichtungen/:name
+
+— _Noch nicht analysiert._
+
+---
+
+## /zubehoer
+
+— _Noch nicht analysiert._
+
+---
+
+## /hilfe-kontakt
+
+— _Noch nicht analysiert._

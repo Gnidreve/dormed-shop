@@ -26,6 +26,15 @@ class ProductController extends Controller
         ]);
     }
 
+    public function show(Product $product): Response
+    {
+        $product->load('manufacturer');
+
+        return Inertia::render('Products/Show', [
+            'product' => $product,
+        ]);
+    }
+
     public function search(Request $request): JsonResponse
     {
         $query = $request->string('q')->trim();
@@ -37,7 +46,7 @@ class ProductController extends Controller
         $results = Product::where('name', 'like', "%{$query}%")
             ->orderBy('name')
             ->limit(5)
-            ->get(['id', 'name', 'price']);
+            ->get(['id', 'name', 'slug', 'price']);
 
         $total = Product::where('name', 'like', "%{$query}%")->count();
 

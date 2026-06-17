@@ -20,7 +20,8 @@
 <AppHead title="Admin Login" />
 
 <Form
-    {...AdminLoginController.login.form()}
+    action={AdminLoginController.login.url()}
+    method="post"
     resetOnSuccess={['password']}
     class="flex flex-col gap-6"
 >

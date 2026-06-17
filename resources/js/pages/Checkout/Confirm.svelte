@@ -218,7 +218,7 @@
                                             </div>
                                             <div>
                                                 <Link
-                                                    href="/products/{item.id}"
+                                                    href="/products/{item.slug}"
                                                     class="font-semibold text-[#1a6bbf] hover:underline"
                                                 >
                                                     {item.name}

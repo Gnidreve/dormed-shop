@@ -47,7 +47,7 @@
 
     const auth = $derived(page.props.auth);
 
-    type SearchResult = { id: number; name: string; price: string };
+    type SearchResult = { id: number; name: string; slug: string; price: string };
 
     let query = $state('');
     let results = $state<SearchResult[]>([]);
@@ -180,7 +180,7 @@
                                 {#each results as product (product.id)}
                                     <li class="border-b last:border-b-0">
                                         <Link
-                                            href="/products/{product.id}"
+                                            href={ProductController.show.url({ slug: product.slug })}
                                             class="flex items-center gap-3 px-4 py-2.5 hover:bg-accent"
                                             onclick={() => (isOpen = false)}
                                         >

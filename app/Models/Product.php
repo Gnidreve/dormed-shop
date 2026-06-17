@@ -8,6 +8,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $manufacturer_id
+ * @property string $name
+ * @property string|null $description
+ * @property string $price
+ */
 #[Fillable(['manufacturer_id', 'name', 'description', 'price'])]
 class Product extends Model
 {
