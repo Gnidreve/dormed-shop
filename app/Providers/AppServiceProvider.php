@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\View\Factory as ViewFactory;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,7 +24,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        view()->addLocation(resource_path());
+        /** @var ViewFactory $view */
+        $view = view();
+        $view->addLocation(resource_path());
 
         $this->configureDefaults();
     }

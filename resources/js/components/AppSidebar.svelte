@@ -14,6 +14,7 @@
     import NavFooter from '@/components/NavFooter.svelte';
     import NavMain from '@/components/NavMain.svelte';
     import NavCustomer from '@/components/NavCustomer.svelte';
+    import NavAdmin from '@/components/NavAdmin.svelte';
     import {
         Sidebar,
         SidebarContent,
@@ -98,6 +99,7 @@
 
     <SidebarFooter>
         <NavFooter items={footerNavItems} />
+        <NavAdmin />
         <NavCustomer />
     </SidebarFooter>
 </Sidebar>

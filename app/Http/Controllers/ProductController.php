@@ -46,7 +46,7 @@ class ProductController extends Controller
         $results = Product::where('name', 'like', "%{$query}%")
             ->orderBy('name')
             ->limit(5)
-            ->get(['id', 'name', 'slug', 'price']);
+            ->get(['id', 'name', 'price']);
 
         $total = Product::where('name', 'like', "%{$query}%")->count();
 

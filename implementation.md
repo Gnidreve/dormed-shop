@@ -7,26 +7,45 @@ Diese Implementierung trennt Kundendaten sauber von Adressdaten.
 Ein Kunde kann:
 
 - privat oder geschäftlich sein
-- eine oder mehrere Adressen besitzen
-- getrennte Rechnungs- und Lieferadressen verwenden
+- eine oder mehrere Adressen besitzen (Rechnungs- und Lieferadresse)
 - pro Bestellung eingefrorene Adressdaten bekommen
 
-Wichtig: Bestellungen speichern Adressen als Snapshot, damit spätere Änderungen am Kundenprofil keine alten Rechnungen oder Lieferdaten verändern.
+Wichtig: Bestellungen speichern Adressen als Snapshot direkt in der `orders`-Tabelle, damit spätere Änderungen am Kundenprofil keine alten Rechnungen oder Lieferdaten verändern.
 
 ---
 
 ## Grundidee
 
-Nicht alle Adressfelder gehören direkt in die `customers`-Tabelle.
-
-Stattdessen:
-
 ```text
 customers
-└── customer_addresses
-└── orders
-    └── order_addresses
+└── customer_addresses   (aktuelle Kundenadressen)
+└── orders               (Adress-Snapshot direkt in der Tabelle)
 ```
+
+Kein separates `order_addresses`-Modell. Die Rechnungs- und Lieferadresse jeder Bestellung wird als prefixierte Spalten direkt in `orders` gespeichert.
+
+---
+
+## Konflikt mit bestehender `customers`-Tabelle
+
+Die aktuelle `customers`-Tabelle ist eine Auth-Tabelle mit:
+
+```text
+name                     // einzelnes Feld
+email
+email_verified_at
+password
+remember_token
+two_factor_secret
+two_factor_recovery_codes
+two_factor_confirmed_at
+```
+
+Diese Tabelle muss migriert werden:
+
+- `name` → `first_name` + `last_name` (aufteilen)
+- Auth-Felder (`password`, `email_verified_at`, `remember_token`, `two_factor_*`) bleiben erhalten
+- Neue Felder ergänzen: `customer_type`, `phone`, `company_name`, `vat_id`
 
 ---
 
@@ -34,35 +53,41 @@ customers
 
 ### `customers`
 
-Speichert die eigentlichen Kundendaten.
+Speichert Kundendaten und Auth-Informationen.
 
 ```text
 id
-customer_type        // private | business
-first_name
+customer_type            // private | business
+first_name               // war: name (aufgeteilt)
 last_name
 email
-phone
-company_name         // nullable
-vat_id               // nullable
+email_verified_at
+password
+remember_token
+phone                    // nullable
+company_name             // nullable
+vat_id                   // nullable
+two_factor_secret        // nullable
+two_factor_recovery_codes// nullable
+two_factor_confirmed_at  // nullable
 created_at
 updated_at
 ```
 
 ### `customer_addresses`
 
-Speichert aktuelle Adressen eines Kunden.
+Speichert aktuelle Adressen eines Kunden. Nur `billing` und `shipping`.
 
 ```text
 id
 customer_id
-address_type         // private | business | billing | shipping
-company_name         // nullable
+address_type             // billing | shipping
+company_name             // nullable
 first_name
 last_name
 street
 house_number
-address_extra        // nullable
+address_extra            // nullable
 zip
 city
 country_code
@@ -73,102 +98,83 @@ updated_at
 
 ### `orders`
 
-Speichert Bestellungen.
+Speichert Bestellungen inkl. eingefrorener Adress-Snapshots als direkte Spalten.
 
 ```text
 id
-customer_id
-order_number
-status
-total_gross
-total_net
-currency
-created_at
-updated_at
-```
-
-### `order_addresses`
-
-Speichert eingefrorene Adressen pro Bestellung.
-
-```text
-id
-order_id
-address_type         // billing | shipping
-company_name
-first_name
-last_name
-street
-house_number
-address_extra
-zip
-city
-country_code
+customer_id              // nullable (Gastbestellung möglich)
+order_number             // unique
+status                   // pending | paid | shipped | cancelled | completed
+total_net                // decimal
+total_gross              // decimal
+currency                 // z.B. EUR
+billing_company_name     // nullable
+billing_first_name
+billing_last_name
+billing_street
+billing_house_number
+billing_address_extra    // nullable
+billing_zip
+billing_city
+billing_country_code
+shipping_company_name    // nullable
+shipping_first_name
+shipping_last_name
+shipping_street
+shipping_house_number
+shipping_address_extra   // nullable
+shipping_zip
+shipping_city
+shipping_country_code
 created_at
 updated_at
 ```
 
 ---
 
-## Warum Adressen nicht direkt in `customers`?
+## Warum Adress-Snapshot direkt in `orders`?
 
-Schlecht skalierbares Beispiel:
+Eine separate `order_addresses`-Tabelle würde für billing und shipping immer genau zwei Zeilen pro Bestellung erzeugen — mit einem `address_type`-Feld zur Unterscheidung. Das ist unnötige Komplexität für ein festes 1:2-Verhältnis.
 
-```text
-customers
-- private_street
-- private_city
-- business_street
-- business_city
-- billing_street
-- billing_city
-- shipping_street
-- shipping_city
-```
+Stattdessen: prefixierte Spalten direkt in `orders`.
 
-Probleme:
-
-- viele `NULL`-Spalten
-- schwer erweiterbar
-- mehrere Lieferadressen kaum sauber möglich
-- alte Bestellungen könnten durch Profiländerungen verfälscht werden
-- keine klare Trennung zwischen Stammdaten und Adressdaten
+Vorteile:
+- Eine Bestellung = eine Zeile, alles sichtbar
+- Kein Join nötig für Adressen
+- Kein `address_type`-Enum im order_addresses-Kontext
 
 ---
 
 ## Empfohlene Laravel-Struktur
 
 ```bash
-php artisan make:model Customer -m
-php artisan make:model CustomerAddress -m
-php artisan make:model Order -m
-php artisan make:model OrderAddress -m
+php artisan make:model CustomerAddress -mf
+php artisan make:migration modify_customers_table
+php artisan make:migration modify_orders_table
 ```
 
 ---
 
-## Migration: `customers`
+## Migration: `customers` anpassen
 
 ```php
-Schema::create('customers', function (Blueprint $table) {
-    $table->id();
-
-    $table->string('customer_type')->default('private');
+Schema::table('customers', function (Blueprint $table) {
+    $table->string('customer_type')->default('private')->after('id');
     // Werte: private, business
 
-    $table->string('first_name');
-    $table->string('last_name');
+    $table->string('first_name')->after('customer_type');
+    $table->string('last_name')->after('first_name');
+    // Hinweis: bestehendes 'name'-Feld wird nach Datenmigration entfernt
 
-    $table->string('email')->unique();
-    $table->string('phone')->nullable();
-
-    $table->string('company_name')->nullable();
-    $table->string('vat_id')->nullable();
-
-    $table->timestamps();
+    $table->string('phone')->nullable()->after('email_verified_at');
+    $table->string('company_name')->nullable()->after('phone');
+    $table->string('vat_id')->nullable()->after('company_name');
 
     $table->index('customer_type');
 });
+
+// Datenmigration: name -> first_name + last_name
+// Danach: $table->dropColumn('name');
 ```
 
 ---
@@ -184,7 +190,7 @@ Schema::create('customer_addresses', function (Blueprint $table) {
         ->cascadeOnDelete();
 
     $table->string('address_type');
-    // Werte: private, business, billing, shipping
+    // Werte: billing, shipping
 
     $table->string('company_name')->nullable();
 
@@ -209,81 +215,47 @@ Schema::create('customer_addresses', function (Blueprint $table) {
 
 ---
 
-## Migration: `orders`
+## Migration: `orders` anpassen
 
 ```php
-Schema::create('orders', function (Blueprint $table) {
-    $table->id();
+Schema::table('orders', function (Blueprint $table) {
+    $table->string('order_number')->unique()->after('customer_id');
 
-    $table->foreignId('customer_id')
-        ->nullable()
-        ->constrained()
-        ->nullOnDelete();
+    $table->string('currency', 3)->default('EUR')->after('total_amount');
+    // Hinweis: total_amount bleibt als decimal; ggf. aufteilen in total_net + total_gross
 
-    $table->string('order_number')->unique();
+    // Billing-Adress-Snapshot
+    $table->string('billing_company_name')->nullable();
+    $table->string('billing_first_name');
+    $table->string('billing_last_name');
+    $table->string('billing_street');
+    $table->string('billing_house_number');
+    $table->string('billing_address_extra')->nullable();
+    $table->string('billing_zip');
+    $table->string('billing_city');
+    $table->string('billing_country_code', 2)->default('DE');
 
-    $table->string('status')->default('pending');
-    // pending, paid, shipped, cancelled, completed
-
-    $table->unsignedInteger('total_net')->default(0);
-    $table->unsignedInteger('total_gross')->default(0);
-
-    $table->string('currency', 3)->default('EUR');
-
-    $table->timestamps();
-
-    $table->index('status');
+    // Shipping-Adress-Snapshot
+    $table->string('shipping_company_name')->nullable();
+    $table->string('shipping_first_name');
+    $table->string('shipping_last_name');
+    $table->string('shipping_street');
+    $table->string('shipping_house_number');
+    $table->string('shipping_address_extra')->nullable();
+    $table->string('shipping_zip');
+    $table->string('shipping_city');
+    $table->string('shipping_country_code', 2)->default('DE');
 });
 ```
 
-Hinweis: Geldbeträge werden hier als Integer in Cent gespeichert.
-
-Beispiel:
-
-```text
-19,99 € => 1999
-```
-
----
-
-## Migration: `order_addresses`
-
-```php
-Schema::create('order_addresses', function (Blueprint $table) {
-    $table->id();
-
-    $table->foreignId('order_id')
-        ->constrained()
-        ->cascadeOnDelete();
-
-    $table->string('address_type');
-    // Werte: billing, shipping
-
-    $table->string('company_name')->nullable();
-
-    $table->string('first_name');
-    $table->string('last_name');
-
-    $table->string('street');
-    $table->string('house_number');
-    $table->string('address_extra')->nullable();
-
-    $table->string('zip');
-    $table->string('city');
-    $table->string('country_code', 2)->default('DE');
-
-    $table->timestamps();
-
-    $table->index(['order_id', 'address_type']);
-});
-```
+Hinweis zu Geldbeträgen: Die bestehende `total_amount`-Spalte ist `numeric` (decimal). Dieses Format bleibt erhalten — keine Integer-Cent-Umrechnung.
 
 ---
 
 ## Model: `Customer`
 
 ```php
-class Customer extends Model
+class Customer extends Authenticatable
 {
     protected $fillable = [
         'customer_type',
@@ -295,36 +267,36 @@ class Customer extends Model
         'vat_id',
     ];
 
-    public function addresses()
+    public function addresses(): HasMany
     {
         return $this->hasMany(CustomerAddress::class);
     }
 
-    public function orders()
+    public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
     }
 
-    public function billingAddresses()
+    public function billingAddresses(): HasMany
     {
         return $this->hasMany(CustomerAddress::class)
             ->where('address_type', 'billing');
     }
 
-    public function shippingAddresses()
+    public function shippingAddresses(): HasMany
     {
         return $this->hasMany(CustomerAddress::class)
             ->where('address_type', 'shipping');
     }
 
-    public function defaultBillingAddress()
+    public function defaultBillingAddress(): HasOne
     {
         return $this->hasOne(CustomerAddress::class)
             ->where('address_type', 'billing')
             ->where('is_default', true);
     }
 
-    public function defaultShippingAddress()
+    public function defaultShippingAddress(): HasOne
     {
         return $this->hasOne(CustomerAddress::class)
             ->where('address_type', 'shipping')
@@ -359,7 +331,7 @@ class CustomerAddress extends Model
         'is_default' => 'boolean',
     ];
 
-    public function customer()
+    public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
@@ -377,226 +349,86 @@ class Order extends Model
         'customer_id',
         'order_number',
         'status',
-        'total_net',
-        'total_gross',
+        'total_amount',
         'currency',
+        'billing_company_name',
+        'billing_first_name',
+        'billing_last_name',
+        'billing_street',
+        'billing_house_number',
+        'billing_address_extra',
+        'billing_zip',
+        'billing_city',
+        'billing_country_code',
+        'shipping_company_name',
+        'shipping_first_name',
+        'shipping_last_name',
+        'shipping_street',
+        'shipping_house_number',
+        'shipping_address_extra',
+        'shipping_zip',
+        'shipping_city',
+        'shipping_country_code',
     ];
 
-    public function customer()
+    public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
-
-    public function addresses()
-    {
-        return $this->hasMany(OrderAddress::class);
-    }
-
-    public function billingAddress()
-    {
-        return $this->hasOne(OrderAddress::class)
-            ->where('address_type', 'billing');
-    }
-
-    public function shippingAddress()
-    {
-        return $this->hasOne(OrderAddress::class)
-            ->where('address_type', 'shipping');
-    }
 }
 ```
 
 ---
 
-## Model: `OrderAddress`
+## Beispiel: Adress-Snapshot beim Erstellen einer Bestellung
 
 ```php
-class OrderAddress extends Model
-{
-    protected $fillable = [
-        'order_id',
-        'address_type',
-        'company_name',
-        'first_name',
-        'last_name',
-        'street',
-        'house_number',
-        'address_extra',
-        'zip',
-        'city',
-        'country_code',
-    ];
-
-    public function order()
-    {
-        return $this->belongsTo(Order::class);
-    }
-}
-```
-
----
-
-## Beispiel: Kunde mit Rechnungs- und Lieferadresse anlegen
-
-```php
-$customer = Customer::create([
-    'customer_type' => 'business',
-    'first_name' => 'Max',
-    'last_name' => 'Mustermann',
-    'email' => 'max@example.com',
-    'phone' => '+49123456789',
-    'company_name' => 'Muster GmbH',
-    'vat_id' => 'DE123456789',
-]);
-
-$customer->addresses()->create([
-    'address_type' => 'billing',
-    'company_name' => 'Muster GmbH',
-    'first_name' => 'Max',
-    'last_name' => 'Mustermann',
-    'street' => 'Musterstraße',
-    'house_number' => '12',
-    'zip' => '12345',
-    'city' => 'Musterstadt',
-    'country_code' => 'DE',
-    'is_default' => true,
-]);
-
-$customer->addresses()->create([
-    'address_type' => 'shipping',
-    'company_name' => 'Muster GmbH Lager',
-    'first_name' => 'Max',
-    'last_name' => 'Mustermann',
-    'street' => 'Lagerstraße',
-    'house_number' => '4',
-    'zip' => '12345',
-    'city' => 'Musterstadt',
-    'country_code' => 'DE',
-    'is_default' => true,
-]);
-```
-
----
-
-## Beispiel: Bestellung mit Adress-Snapshot erstellen
-
-```php
-$billingAddress = $customer->defaultBillingAddress;
-$shippingAddress = $customer->defaultShippingAddress;
+$billing = $customer->defaultBillingAddress;
+$shipping = $customer->defaultShippingAddress;
 
 $order = Order::create([
-    'customer_id' => $customer->id,
+    'customer_id'  => $customer->id,
     'order_number' => 'ORD-' . now()->format('YmdHis'),
-    'status' => 'pending',
-    'total_net' => 1680,
-    'total_gross' => 1999,
-    'currency' => 'EUR',
-]);
+    'status'       => 'pending',
+    'total_amount' => 19.99,
+    'currency'     => 'EUR',
 
-$order->addresses()->create([
-    'address_type' => 'billing',
-    'company_name' => $billingAddress->company_name,
-    'first_name' => $billingAddress->first_name,
-    'last_name' => $billingAddress->last_name,
-    'street' => $billingAddress->street,
-    'house_number' => $billingAddress->house_number,
-    'address_extra' => $billingAddress->address_extra,
-    'zip' => $billingAddress->zip,
-    'city' => $billingAddress->city,
-    'country_code' => $billingAddress->country_code,
-]);
+    'billing_company_name'   => $billing->company_name,
+    'billing_first_name'     => $billing->first_name,
+    'billing_last_name'      => $billing->last_name,
+    'billing_street'         => $billing->street,
+    'billing_house_number'   => $billing->house_number,
+    'billing_address_extra'  => $billing->address_extra,
+    'billing_zip'            => $billing->zip,
+    'billing_city'           => $billing->city,
+    'billing_country_code'   => $billing->country_code,
 
-$order->addresses()->create([
-    'address_type' => 'shipping',
-    'company_name' => $shippingAddress->company_name,
-    'first_name' => $shippingAddress->first_name,
-    'last_name' => $shippingAddress->last_name,
-    'street' => $shippingAddress->street,
-    'house_number' => $shippingAddress->house_number,
-    'address_extra' => $shippingAddress->address_extra,
-    'zip' => $shippingAddress->zip,
-    'city' => $shippingAddress->city,
-    'country_code' => $shippingAddress->country_code,
+    'shipping_company_name'  => $shipping->company_name,
+    'shipping_first_name'    => $shipping->first_name,
+    'shipping_last_name'     => $shipping->last_name,
+    'shipping_street'        => $shipping->street,
+    'shipping_house_number'  => $shipping->house_number,
+    'shipping_address_extra' => $shipping->address_extra,
+    'shipping_zip'           => $shipping->zip,
+    'shipping_city'          => $shipping->city,
+    'shipping_country_code'  => $shipping->country_code,
 ]);
 ```
 
 ---
 
-## Alternative: Gleiche Adresse für Rechnung und Lieferung
+## Optional: Default-Adresse erzwingen
 
-Wenn Rechnungs- und Lieferadresse identisch sind, kann trotzdem in `order_addresses` zweimal gespeichert werden:
-
-```text
-billing
-shipping
-```
-
-Vorteil:
-
-- Rechnungsadresse bleibt eindeutig
-- Lieferadresse bleibt eindeutig
-- spätere Logik ist einfacher
-- PDFs, Rechnungen und Versanddaten brauchen keine Sonderfälle
-
----
-
-## Enum-Alternative für Adresstypen
-
-Wenn du PHP 8.1+ nutzt, kannst du Enums verwenden.
+Wenn pro Kunde nur eine Default-Adresse pro Typ erlaubt sein soll:
 
 ```php
-enum AddressType: string
-{
-    case Private = 'private';
-    case Business = 'business';
-    case Billing = 'billing';
-    case Shipping = 'shipping';
+if ($request->boolean('is_default')) {
+    $customer->addresses()
+        ->where('address_type', $request->address_type)
+        ->update(['is_default' => false]);
 }
-```
 
-Dann im Model casten:
-
-```php
-protected $casts = [
-    'address_type' => AddressType::class,
-    'is_default' => 'boolean',
-];
-```
-
----
-
-## Validierung für Customer
-
-```php
-$request->validate([
-    'customer_type' => ['required', 'in:private,business'],
-    'first_name' => ['required', 'string', 'max:255'],
-    'last_name' => ['required', 'string', 'max:255'],
-    'email' => ['required', 'email', 'max:255', 'unique:customers,email'],
-    'phone' => ['nullable', 'string', 'max:255'],
-    'company_name' => ['nullable', 'string', 'max:255'],
-    'vat_id' => ['nullable', 'string', 'max:255'],
-]);
-```
-
----
-
-## Validierung für Address
-
-```php
-$request->validate([
-    'address_type' => ['required', 'in:private,business,billing,shipping'],
-    'company_name' => ['nullable', 'string', 'max:255'],
-    'first_name' => ['required', 'string', 'max:255'],
-    'last_name' => ['required', 'string', 'max:255'],
-    'street' => ['required', 'string', 'max:255'],
-    'house_number' => ['required', 'string', 'max:50'],
-    'address_extra' => ['nullable', 'string', 'max:255'],
-    'zip' => ['required', 'string', 'max:20'],
-    'city' => ['required', 'string', 'max:255'],
-    'country_code' => ['required', 'string', 'size:2'],
-    'is_default' => ['boolean'],
-]);
+$customer->addresses()->create($request->validated());
 ```
 
 ---
@@ -605,104 +437,30 @@ $request->validate([
 
 ### 1. Kundendaten bleiben Stammdaten
 
-In `customers` gehören nur Daten, die den Kunden selbst beschreiben.
+In `customers` gehören nur Daten, die den Kunden selbst beschreiben — kein Adressfelder direkt.
 
-Beispiele:
+### 2. Nur `billing` und `shipping` als Adresstypen
 
-- Name
-- E-Mail
-- Telefonnummer
-- Kundentyp
-- Firma
-- USt-ID
+`customer_addresses.address_type` kennt nur zwei Werte: `billing` und `shipping`.
 
-### 2. Adressen gehören in eigene Tabelle
+### 3. Bestellungen speichern Adressen als Snapshot
 
-Adressen können sich ändern, mehrfach existieren oder unterschiedliche Rollen haben.
+Adressfelder werden beim Erstellen einer Bestellung aus `customer_addresses` kopiert und direkt in `orders` gespeichert. Kein Join auf Kundenadressen für Bestelldetails nötig.
 
-### 3. Bestellungen brauchen eigene Adresskopien
+### 4. Geldbeträge als Decimal
 
-Eine Bestellung darf nicht von späteren Profiländerungen abhängig sein.
-
-### 4. Rechnungs- und Lieferadresse nicht nur referenzieren
-
-Nicht empfohlen:
-
-```text
-orders.billing_address_id
-orders.shipping_address_id
-```
-
-Problem:
-
-Wenn die referenzierte Adresse später geändert oder gelöscht wird, verändert sich indirekt die Bestellung.
-
-Besser:
-
-```text
-order_addresses
-```
-
-als Snapshot.
-
----
-
-## Optional: Default-Adresse erzwingen
-
-Wenn pro Kunde nur eine Default-Rechnungsadresse erlaubt sein soll, muss das auf Applikationsebene geprüft werden.
-
-Beispiel:
-
-```php
-if ($request->boolean('is_default')) {
-    $customer->addresses()
-        ->where('address_type', $request->address_type)
-        ->update(['is_default' => false]);
-}
-```
-
-Danach die neue Adresse speichern.
-
----
-
-## Empfehlung für den Start
-
-Für eine kleine Shop-Implementation reicht dieses Modell:
-
-```text
-customers
-customer_addresses
-orders
-order_addresses
-```
-
-Nicht direkt am Anfang nötig:
-
-- separate `companies`-Tabelle
-- separate `countries`-Tabelle
-- komplexe Adresshistorie
-- polymorphe Adressen
-- eigene Tabellen für Privat- und Firmenkunden
-
-Diese Dinge können später ergänzt werden, wenn der Shop wächst.
+`total_amount` bleibt `decimal` — passend zur bestehenden Struktur. Keine Integer-Cent-Umrechnung.
 
 ---
 
 ## Zusammenfassung
 
-Empfohlene Struktur:
-
 ```text
 Customer
-hasMany CustomerAddress
+  hasMany CustomerAddress (address_type: billing | shipping)
+  hasMany Order
 
 Order
-belongsTo Customer
-hasMany OrderAddress
+  belongsTo Customer
+  // Adress-Snapshot direkt als Spalten (billing_* und shipping_*)
 ```
-
-`customers` speichert den Kunden.
-
-`customer_addresses` speichert aktuelle Kundenadressen.
-
-`order_addresses` speichert eingefrorene Rechnungs- und Lieferadressen pro Bestellung.

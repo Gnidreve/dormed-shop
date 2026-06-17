@@ -14,7 +14,6 @@
     type Product = {
         id: number;
         name: string;
-        slug: string;
         description: string | null;
         price: string;
         manufacturer: { id: number; name: string } | null;
@@ -125,7 +124,7 @@
                 <!-- Product number -->
                 <p class="text-sm text-gray-500">
                     <span class="font-semibold text-gray-700">Produktnummer:</span>
-                    {product.slug}
+                    #{product.id}
                 </p>
             </div>
         </div>
