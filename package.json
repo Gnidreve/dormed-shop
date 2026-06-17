@@ -43,7 +43,7 @@
         "d3-scale": "^4.0.2",
         "d3-shape": "^3.2.0",
         "laravel-vite-plugin": "^3.0.0",
-        "layerchart": "^1.0.13",
+        "layerchart": "^2.0.0-next.65",
         "lucide-svelte": "^0.468.0",
         "svelte": "^5.16.0",
         "svelte-sonner": "^0.3.28",

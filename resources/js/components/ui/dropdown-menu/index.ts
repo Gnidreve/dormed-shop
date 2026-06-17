@@ -1,4 +1,5 @@
 export { default as DropdownMenu } from './DropdownMenu.svelte';
+export { default as DropdownMenuCheckboxItem } from './DropdownMenuCheckboxItem.svelte';
 export { default as DropdownMenuContent } from './DropdownMenuContent.svelte';
 export { default as DropdownMenuGroup } from './DropdownMenuGroup.svelte';
 export { default as DropdownMenuItem } from './DropdownMenuItem.svelte';

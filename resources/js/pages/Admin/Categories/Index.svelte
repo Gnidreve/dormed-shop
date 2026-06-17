@@ -14,6 +14,7 @@
         type PaginationState,
         type RowSelectionState,
         type SortingState,
+        type VisibilityState,
         getCoreRowModel,
         getFilteredRowModel,
         getPaginationRowModel,
@@ -29,6 +30,13 @@
         createSvelteTable,
         renderComponent,
     } from '@/components/ui/data-table';
+    import {
+        DropdownMenu,
+        DropdownMenuCheckboxItem,
+        DropdownMenuContent,
+        DropdownMenuTrigger,
+    } from '@/components/ui/dropdown-menu';
+    import ChevronDown from 'lucide-svelte/icons/chevron-down';
 
     type Category = {
         id: number;
@@ -81,6 +89,7 @@
     let columnFilters = $state<ColumnFiltersState>([]);
     let rowSelection = $state<RowSelectionState>({});
     let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 15 });
+    let columnVisibility = $state<VisibilityState>({});
 
     const table = createSvelteTable({
         get data() {
@@ -103,6 +112,9 @@
         onPaginationChange: (u) => {
             pagination = typeof u === 'function' ? u(pagination) : u;
         },
+        onColumnVisibilityChange: (u) => {
+            columnVisibility = typeof u === 'function' ? u(columnVisibility) : u;
+        },
         state: {
             get sorting() {
                 return sorting;
@@ -115,6 +127,9 @@
             },
             get pagination() {
                 return pagination;
+            },
+            get columnVisibility() {
+                return columnVisibility;
             },
         },
     });
@@ -138,6 +153,25 @@
                 table.getColumn('name')?.setFilterValue(e.currentTarget.value)}
             class="max-w-sm"
         />
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                {#snippet children(props)}
+                    <Button {...props} variant="outline" class="ms-auto">
+                        Spalten <ChevronDown class="ml-2 size-4" />
+                    </Button>
+                {/snippet}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                {#each table.getAllColumns().filter((c) => c.getCanHide()) as column (column.id)}
+                    <DropdownMenuCheckboxItem
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(v) => column.toggleVisibility(v)}
+                    >
+                        {typeof column.columnDef.header === 'string' ? column.columnDef.header : column.id}
+                    </DropdownMenuCheckboxItem>
+                {/each}
+            </DropdownMenuContent>
+        </DropdownMenu>
     </div>
 
     <div class="rounded-md border">

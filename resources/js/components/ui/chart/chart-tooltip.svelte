@@ -2,7 +2,8 @@
 	import { cn, type WithElementRef, type WithoutChildren } from "@/lib/utils.js";
 	import type { HTMLAttributes } from "svelte/elements";
 	import { getPayloadConfigFromPayload, useChart, type TooltipPayload } from "./chart-utils.js";
-	import { getChartContext, Tooltip as TooltipPrimitive } from "layerchart";
+	import { getChartContext } from "layerchart/dist/contexts/chart.js";
+	import { Tooltip as TooltipPrimitive } from "layerchart";
 	import type { Snippet } from "svelte";
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -106,7 +107,7 @@
 	<div
 		bind:this={ref}
 		class={cn(
-			"border-border/50 bg-background grid min-w-[9rem] items-start gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs shadow-xl",
+			"border-border/50 bg-background grid min-w-36 items-start gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs shadow-xl",
 			className
 		)}
 		{...restProps}

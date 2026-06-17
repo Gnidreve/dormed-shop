@@ -1,5 +1,7 @@
 # dormed-shop — Agent Context
 
+> **Datenbankschema:** [`database/SCHEMA.md`](database/SCHEMA.md) — vollständige Tabellenstruktur, Spalten, Indizes und Fremdschlüssel. Muss bei jeder Schemaänderung aktualisiert werden. Immer lesen bevor Migrationen oder Modelle erstellt werden.
+
 Ablösung für Shopware. Medical equipment online shop für dormed 24 (Medizintechnik). Gebaut mit Laravel 13 + Inertia v3 + Svelte 5.
 
 ## Was diese App ist

@@ -8,6 +8,7 @@
     import Building2 from 'lucide-svelte/icons/building-2';
     import ShoppingCart from 'lucide-svelte/icons/shopping-cart';
     import Settings from 'lucide-svelte/icons/settings';
+    import Users from 'lucide-svelte/icons/users';
     import type { Snippet } from 'svelte';
     import AppLogo from '@/components/AppLogo.svelte';
     import NavFooter from '@/components/NavFooter.svelte';
@@ -51,6 +52,11 @@
             title: 'Hersteller',
             href: '/admin/manufacturers',
             icon: Building2,
+        },
+        {
+            title: 'Kunden',
+            href: '/admin/customers',
+            icon: Users,
         },
         {
             title: 'Bestellungen',

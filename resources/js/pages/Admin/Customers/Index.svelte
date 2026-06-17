@@ -2,7 +2,7 @@
     export const layout = {
         breadcrumbs: [
             { title: 'Dashboard', href: '/admin' },
-            { title: 'Produkte', href: '/admin/products' },
+            { title: 'Kunden', href: '/admin/customers' },
         ],
     };
 </script>
@@ -25,7 +25,11 @@
     import { Checkbox } from '@/components/ui/checkbox';
     import { Input } from '@/components/ui/input';
     import * as Table from '@/components/ui/table';
-    import { FlexRender, createSvelteTable, renderComponent } from '@/components/ui/data-table';
+    import {
+        FlexRender,
+        createSvelteTable,
+        renderComponent,
+    } from '@/components/ui/data-table';
     import {
         DropdownMenu,
         DropdownMenuCheckboxItem,
@@ -34,33 +38,34 @@
     } from '@/components/ui/dropdown-menu';
     import ChevronDown from 'lucide-svelte/icons/chevron-down';
 
-    type Product = {
+    type Customer = {
         id: number;
         name: string;
-        slug: string;
-        price: string;
-        manufacturer: { id: number; name: string } | null;
+        email: string;
+        email_verified_at: string | null;
+        created_at: string;
     };
 
     type Paginator = {
-        data: Product[];
+        data: Customer[];
         total: number;
         current_page: number;
         last_page: number;
     };
 
-    let { products }: { products: Paginator } = $props();
+    let { customers }: { customers: Paginator } = $props();
 
-    const fmt = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' });
-
-    const columns: ColumnDef<Product>[] = [
+    const columns: ColumnDef<Customer>[] = [
         {
             id: 'select',
             header: ({ table }) =>
                 renderComponent(Checkbox, {
                     checked: table.getIsAllPageRowsSelected(),
-                    indeterminate: table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected(),
-                    onCheckedChange: (v) => table.toggleAllPageRowsSelected(!!v),
+                    indeterminate:
+                        table.getIsSomePageRowsSelected() &&
+                        !table.getIsAllPageRowsSelected(),
+                    onCheckedChange: (v) =>
+                        table.toggleAllPageRowsSelected(!!v),
                     'aria-label': 'Alle auswählen',
                 }),
             cell: ({ row }) =>
@@ -72,19 +77,21 @@
             enableSorting: false,
             enableHiding: false,
         },
+        { accessorKey: 'name', header: 'Name' },
+        { accessorKey: 'email', header: 'E-Mail' },
         {
-            accessorKey: 'name',
-            header: 'Name',
-        },
-{
-            id: 'manufacturer',
-            header: 'Hersteller',
-            accessorFn: (row) => row.manufacturer?.name ?? '—',
+            accessorKey: 'email_verified_at',
+            header: 'Verifiziert',
+            cell: ({ row }) =>
+                row.original.email_verified_at
+                    ? new Date(row.original.email_verified_at).toLocaleDateString('de-DE')
+                    : '—',
         },
         {
-            accessorKey: 'price',
-            header: 'Preis',
-            cell: ({ row }) => fmt.format(Number(row.original.price)),
+            accessorKey: 'created_at',
+            header: 'Registriert',
+            cell: ({ row }) =>
+                new Date(row.original.created_at).toLocaleDateString('de-DE'),
         },
     ];
 
@@ -95,40 +102,63 @@
     let columnVisibility = $state<VisibilityState>({});
 
     const table = createSvelteTable({
-        get data() { return products.data; },
+        get data() {
+            return customers.data;
+        },
         columns,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
-        onSortingChange: (u) => { sorting = typeof u === 'function' ? u(sorting) : u; },
-        onColumnFiltersChange: (u) => { columnFilters = typeof u === 'function' ? u(columnFilters) : u; },
-        onRowSelectionChange: (u) => { rowSelection = typeof u === 'function' ? u(rowSelection) : u; },
-        onPaginationChange: (u) => { pagination = typeof u === 'function' ? u(pagination) : u; },
-        onColumnVisibilityChange: (u) => { columnVisibility = typeof u === 'function' ? u(columnVisibility) : u; },
+        onSortingChange: (u) => {
+            sorting = typeof u === 'function' ? u(sorting) : u;
+        },
+        onColumnFiltersChange: (u) => {
+            columnFilters = typeof u === 'function' ? u(columnFilters) : u;
+        },
+        onRowSelectionChange: (u) => {
+            rowSelection = typeof u === 'function' ? u(rowSelection) : u;
+        },
+        onPaginationChange: (u) => {
+            pagination = typeof u === 'function' ? u(pagination) : u;
+        },
+        onColumnVisibilityChange: (u) => {
+            columnVisibility = typeof u === 'function' ? u(columnVisibility) : u;
+        },
         state: {
-            get sorting() { return sorting; },
-            get columnFilters() { return columnFilters; },
-            get rowSelection() { return rowSelection; },
-            get pagination() { return pagination; },
-            get columnVisibility() { return columnVisibility; },
+            get sorting() {
+                return sorting;
+            },
+            get columnFilters() {
+                return columnFilters;
+            },
+            get rowSelection() {
+                return rowSelection;
+            },
+            get pagination() {
+                return pagination;
+            },
+            get columnVisibility() {
+                return columnVisibility;
+            },
         },
     });
 </script>
 
-<AppHead title="Produkte — Admin" />
+<AppHead title="Kunden — Admin" />
 
 <div class="flex h-full flex-1 flex-col gap-4 p-4">
     <div class="flex items-center justify-between">
-        <h1 class="text-xl font-semibold">Produkte</h1>
-        <span class="text-sm text-muted-foreground">{products.total} gesamt</span>
+        <h1 class="text-xl font-semibold">Kunden</h1>
+        <span class="text-sm text-muted-foreground">{customers.total} gesamt</span>
     </div>
 
     <div class="flex items-center gap-2">
         <Input
-            placeholder="Name filtern…"
+            placeholder="Name oder E-Mail filtern…"
             value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
-            oninput={(e) => table.getColumn('name')?.setFilterValue(e.currentTarget.value)}
+            oninput={(e) =>
+                table.getColumn('name')?.setFilterValue(e.currentTarget.value)}
             class="max-w-sm"
         />
         {#if Object.keys(rowSelection).length > 0}
@@ -165,7 +195,10 @@
                         {#each headerGroup.headers as header (header.id)}
                             <Table.Head class="has-[[role=checkbox]]:ps-3">
                                 {#if !header.isPlaceholder}
-                                    <FlexRender content={header.column.columnDef.header} context={header.getContext()} />
+                                    <FlexRender
+                                        content={header.column.columnDef.header}
+                                        context={header.getContext()}
+                                    />
                                 {/if}
                             </Table.Head>
                         {/each}
@@ -177,14 +210,20 @@
                     <Table.Row data-state={row.getIsSelected() && 'selected'}>
                         {#each row.getVisibleCells() as cell (cell.id)}
                             <Table.Cell class="has-[[role=checkbox]]:ps-3">
-                                <FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
+                                <FlexRender
+                                    content={cell.column.columnDef.cell}
+                                    context={cell.getContext()}
+                                />
                             </Table.Cell>
                         {/each}
                     </Table.Row>
                 {:else}
                     <Table.Row>
-                        <Table.Cell colspan={columns.length} class="h-24 text-center text-muted-foreground">
-                            Keine Produkte vorhanden.
+                        <Table.Cell
+                            colspan={columns.length}
+                            class="h-24 text-center text-muted-foreground"
+                        >
+                            Keine Kunden vorhanden.
                         </Table.Cell>
                     </Table.Row>
                 {/each}
@@ -192,15 +231,28 @@
         </Table.Root>
     </div>
 
-    <div class="flex items-center justify-end gap-2">
+    <div class="flex items-center justify-between">
         <span class="text-sm text-muted-foreground">
-            Seite {table.getState().pagination.pageIndex + 1} von {table.getPageCount()}
+            {#if Object.keys(rowSelection).length > 0}
+                {Object.keys(rowSelection).length} ausgewählt
+            {/if}
         </span>
-        <Button variant="outline" size="sm" onclick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
-            Zurück
-        </Button>
-        <Button variant="outline" size="sm" onclick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-            Weiter
-        </Button>
+        <div class="flex items-center gap-2">
+            <span class="text-sm text-muted-foreground">
+                Seite {table.getState().pagination.pageIndex + 1} von {table.getPageCount()}
+            </span>
+            <Button
+                variant="outline"
+                size="sm"
+                onclick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}>Zurück</Button
+            >
+            <Button
+                variant="outline"
+                size="sm"
+                onclick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}>Weiter</Button
+            >
+        </div>
     </div>
 </div>

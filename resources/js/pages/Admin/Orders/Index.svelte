@@ -14,6 +14,7 @@
         type PaginationState,
         type RowSelectionState,
         type SortingState,
+        type VisibilityState,
         getCoreRowModel,
         getFilteredRowModel,
         getPaginationRowModel,
@@ -25,6 +26,13 @@
     import { Input } from '@/components/ui/input';
     import * as Table from '@/components/ui/table';
     import { FlexRender, createSvelteTable, renderComponent } from '@/components/ui/data-table';
+    import {
+        DropdownMenu,
+        DropdownMenuCheckboxItem,
+        DropdownMenuContent,
+        DropdownMenuTrigger,
+    } from '@/components/ui/dropdown-menu';
+    import ChevronDown from 'lucide-svelte/icons/chevron-down';
 
     type Order = {
         id: number;
@@ -102,6 +110,7 @@
     let columnFilters = $state<ColumnFiltersState>([]);
     let rowSelection = $state<RowSelectionState>({});
     let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 15 });
+    let columnVisibility = $state<VisibilityState>({});
 
     const table = createSvelteTable({
         get data() { return orders.data; },
@@ -114,11 +123,13 @@
         onColumnFiltersChange: (u) => { columnFilters = typeof u === 'function' ? u(columnFilters) : u; },
         onRowSelectionChange: (u) => { rowSelection = typeof u === 'function' ? u(rowSelection) : u; },
         onPaginationChange: (u) => { pagination = typeof u === 'function' ? u(pagination) : u; },
+        onColumnVisibilityChange: (u) => { columnVisibility = typeof u === 'function' ? u(columnVisibility) : u; },
         state: {
             get sorting() { return sorting; },
             get columnFilters() { return columnFilters; },
             get rowSelection() { return rowSelection; },
             get pagination() { return pagination; },
+            get columnVisibility() { return columnVisibility; },
         },
     });
 </script>
@@ -141,6 +152,25 @@
         {#if Object.keys(rowSelection).length > 0}
             <span class="text-sm text-muted-foreground">{Object.keys(rowSelection).length} ausgewählt</span>
         {/if}
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                {#snippet children(props)}
+                    <Button {...props} variant="outline" class="ms-auto">
+                        Spalten <ChevronDown class="ml-2 size-4" />
+                    </Button>
+                {/snippet}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                {#each table.getAllColumns().filter((c) => c.getCanHide()) as column (column.id)}
+                    <DropdownMenuCheckboxItem
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(v) => column.toggleVisibility(v)}
+                    >
+                        {typeof column.columnDef.header === 'string' ? column.columnDef.header : column.id}
+                    </DropdownMenuCheckboxItem>
+                {/each}
+            </DropdownMenuContent>
+        </DropdownMenu>
     </div>
 
     <div class="rounded-md border">

@@ -15,7 +15,7 @@ if (isSvelteCheck) {
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.ts'],
+            input: ['resources/app.css', 'resources/js/app.ts'],
             refresh: true,
             fonts: [
                 bunny('Instrument Sans', {

@@ -23,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        view()->addLocation(resource_path());
+
         $this->configureDefaults();
     }
 
