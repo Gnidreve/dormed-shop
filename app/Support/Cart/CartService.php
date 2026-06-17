@@ -1,0 +1,218 @@
+<?php
+
+namespace App\Support\Cart;
+
+use App\Contracts\CartStore;
+use App\Models\Product;
+use Illuminate\Support\Collection;
+
+class CartService
+{
+    public function __construct(
+        private readonly CartStore $store,
+    ) {}
+
+    public function cart(): array
+    {
+        $state = $this->state();
+        $items = $this->items($state['items']);
+
+        if ($items->isEmpty() && $state['items'] !== []) {
+            $state['items'] = [];
+            $this->persist($state);
+        }
+
+        $shippingMethods = $this->shippingMethods($state['shipping_method']);
+        $paymentMethods = $this->paymentMethods($state['payment_method']);
+        $selectedShipping = collect($shippingMethods)->firstWhere('selected', true);
+        $selectedPayment = collect($paymentMethods)->firstWhere('selected', true);
+
+        $subtotalCents = $items->sum('line_total_cents');
+        $shippingCents = (int) ($selectedShipping['price_cents'] ?? 0);
+        $totalCents = $subtotalCents + $shippingCents;
+        $vatRate = (int) config('shop.cart.vat_rate', 19);
+        $netTotalCents = (int) round($totalCents / (1 + ($vatRate / 100)));
+        $vatAmountCents = $totalCents - $netTotalCents;
+
+        return [
+            'items' => $items->values()->all(),
+            'count' => $items->sum('quantity'),
+            'is_empty' => $items->isEmpty(),
+            'vat_rate' => $vatRate,
+            'shipping_methods' => $shippingMethods,
+            'payment_methods' => $paymentMethods,
+            'selected_shipping_method' => $selectedShipping,
+            'selected_payment_method' => $selectedPayment,
+            'subtotal' => $this->formatAmount($subtotalCents),
+            'shipping_total' => $this->formatAmount($shippingCents),
+            'total' => $this->formatAmount($totalCents),
+            'net_total' => $this->formatAmount($netTotalCents),
+            'vat_amount' => $this->formatAmount($vatAmountCents),
+        ];
+    }
+
+    public function add(Product $product, int $quantity): void
+    {
+        $state = $this->state();
+        $productId = (string) $product->getKey();
+        $state['items'][$productId] = min(99, ($state['items'][$productId] ?? 0) + $quantity);
+
+        $this->persist($state);
+    }
+
+    public function updateQuantity(Product $product, int $quantity): void
+    {
+        $state = $this->state();
+        $state['items'][(string) $product->getKey()] = min(99, max(1, $quantity));
+
+        $this->persist($state);
+    }
+
+    public function remove(Product $product): void
+    {
+        $state = $this->state();
+        unset($state['items'][(string) $product->getKey()]);
+
+        $this->persist($state);
+    }
+
+    public function setShippingMethod(string $shippingMethod): void
+    {
+        $state = $this->state();
+        $state['shipping_method'] = $shippingMethod;
+
+        $this->persist($state);
+    }
+
+    public function setPaymentMethod(string $paymentMethod): void
+    {
+        $state = $this->state();
+        $state['payment_method'] = $paymentMethod;
+
+        $this->persist($state);
+    }
+
+    private function items(array $rawItems): Collection
+    {
+        $productIds = array_map('intval', array_keys($rawItems));
+
+        if ($productIds === []) {
+            return collect();
+        }
+
+        $products = Product::query()
+            ->whereKey($productIds)
+            ->orderBy('name')
+            ->get()
+            ->keyBy(fn (Product $product) => (string) $product->getKey());
+
+        return collect($rawItems)
+            ->map(function (int $quantity, string $productId) use ($products): ?array {
+                /** @var Product|null $product */
+                $product = $products->get($productId);
+
+                if (! $product) {
+                    return null;
+                }
+
+                $unitPriceCents = $this->amountToCents($product->price);
+                $lineTotalCents = $unitPriceCents * $quantity;
+
+                return [
+                    'product_id' => $product->id,
+                    'name' => $product->name,
+                    'description' => $product->description,
+                    'product_number' => (string) $product->id,
+                    'quantity' => $quantity,
+                    'unit_price' => $this->formatAmount($unitPriceCents),
+                    'line_total' => $this->formatAmount($lineTotalCents),
+                    'line_total_cents' => $lineTotalCents,
+                    'product_url' => route('products.show', $product),
+                ];
+            })
+            ->filter();
+    }
+
+    private function shippingMethods(string $selectedId): array
+    {
+        return collect(config('shop.cart.shipping_methods', []))
+            ->values()
+            ->map(function (array $method, int $index) use ($selectedId): array {
+                $methodId = (string) $method['id'];
+                $priceCents = $this->amountToCents($method['price']);
+
+                return [
+                    'id' => $methodId,
+                    'label' => $method['label'],
+                    'description' => $method['description'] ?? null,
+                    'price' => $this->formatAmount($priceCents),
+                    'price_cents' => $priceCents,
+                    'selected' => $methodId === $selectedId || ($selectedId === '' && $index === 0),
+                ];
+            })
+            ->all();
+    }
+
+    private function paymentMethods(string $selectedId): array
+    {
+        return collect(config('shop.cart.payment_methods', []))
+            ->values()
+            ->map(function (array $method, int $index) use ($selectedId): array {
+                $methodId = (string) $method['id'];
+
+                return [
+                    'id' => $methodId,
+                    'label' => $method['label'],
+                    'description' => $method['description'] ?? null,
+                    'selected' => $methodId === $selectedId || ($selectedId === '' && $index === 0),
+                ];
+            })
+            ->all();
+    }
+
+    private function state(): array
+    {
+        $rawState = $this->store->get();
+        $shippingMethodIds = collect(config('shop.cart.shipping_methods', []))->pluck('id')->map(fn ($id) => (string) $id)->all();
+        $paymentMethodIds = collect(config('shop.cart.payment_methods', []))->pluck('id')->map(fn ($id) => (string) $id)->all();
+
+        return [
+            'items' => collect($rawState['items'] ?? [])
+                ->mapWithKeys(function (mixed $quantity, mixed $productId): array {
+                    $normalizedProductId = (int) $productId;
+                    $normalizedQuantity = (int) $quantity;
+
+                    if ($normalizedProductId < 1 || $normalizedQuantity < 1) {
+                        return [];
+                    }
+
+                    return [(string) $normalizedProductId => min(99, $normalizedQuantity)];
+                })
+                ->all(),
+            'shipping_method' => in_array(($rawState['shipping_method'] ?? null), $shippingMethodIds, true)
+                ? (string) $rawState['shipping_method']
+                : (string) ($shippingMethodIds[0] ?? ''),
+            'payment_method' => in_array(($rawState['payment_method'] ?? null), $paymentMethodIds, true)
+                ? (string) $rawState['payment_method']
+                : (string) ($paymentMethodIds[0] ?? ''),
+        ];
+    }
+
+    private function persist(array $state): void
+    {
+        $this->store->put($state);
+    }
+
+    private function amountToCents(string|int|float|null $amount): int
+    {
+        $normalized = str_replace(',', '.', (string) $amount);
+        [$whole, $fraction] = array_pad(explode('.', $normalized, 2), 2, '0');
+
+        return ((int) $whole * 100) + (int) str_pad(substr($fraction, 0, 2), 2, '0');
+    }
+
+    private function formatAmount(int $cents): string
+    {
+        return number_format($cents / 100, 2, '.', '');
+    }
+}

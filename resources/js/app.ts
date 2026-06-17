@@ -11,6 +11,12 @@ createInertiaApp({
     layout: (name) => {
         switch (true) {
             case name === 'Welcome':
+            case name === 'VersandUndZahlung':
+            case name === 'Zahlung':
+            case name === 'Widerrufsbelehrung':
+            case name === 'Impressum':
+            case name === 'AGB':
+            case name === 'Datenschutz':
             case name.startsWith('Checkout/'):
             case name.startsWith('Products/'):
                 return null;

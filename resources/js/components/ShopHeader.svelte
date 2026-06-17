@@ -26,10 +26,10 @@
     import { logout } from '@/routes';
     import { edit as editProfile } from '@/routes/profile';
     import { toUrl } from '@/lib/utils';
-    import type { Customer } from '@/types';
+    import type { Cart, Customer } from '@/types';
 
     const navItems = [
-        { label: 'Home', href: '/' },
+        { label: 'Startseite', href: '/' },
         { label: 'Alle Produkte', href: '/products' },
         { label: 'Ultraschallsysteme', href: '/ultraschallsysteme' },
         { label: 'Zubehör', href: '/zubehoer' },
@@ -37,17 +37,15 @@
         { label: 'Hilfe & Kontakt', href: '/hilfe' },
     ] as const;
 
-    let {
-        cartTotal = 0,
-        cartCount = 0,
-    }: {
-        cartTotal?: number;
-        cartCount?: number;
-    } = $props();
-
     const auth = $derived(page.props.auth);
+    const cart = $derived(page.props.cart as Cart);
 
-    type SearchResult = { id: number; name: string; slug: string; price: string };
+    type SearchResult = {
+        id: number;
+        name: string;
+        slug: string;
+        price: string;
+    };
 
     let query = $state('');
     let results = $state<SearchResult[]>([]);
@@ -180,7 +178,9 @@
                                 {#each results as product (product.id)}
                                     <li class="border-b last:border-b-0">
                                         <Link
-                                            href={ProductController.show.url({ slug: product.slug })}
+                                            href={ProductController.show.url({
+                                                slug: product.slug,
+                                            })}
                                             class="flex items-center gap-3 px-4 py-2.5 hover:bg-accent"
                                             onclick={() => (isOpen = false)}
                                         >
@@ -335,7 +335,7 @@
                     </DropdownMenuContent>
                 </DropdownMenu>
 
-                <CartSheet {cartTotal} {cartCount} />
+                <CartSheet {cart} />
             </div>
         </div>
     </div>

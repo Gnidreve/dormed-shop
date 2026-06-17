@@ -26,6 +26,7 @@
     import { Input } from '@/components/ui/input';
     import * as Table from '@/components/ui/table';
     import { FlexRender, createSvelteTable, renderComponent } from '@/components/ui/data-table';
+    import ProductActions from './ProductActions.svelte';
     import {
         DropdownMenu,
         DropdownMenuCheckboxItem,
@@ -37,7 +38,6 @@
     type Product = {
         id: number;
         name: string;
-        slug: string;
         price: string;
         manufacturer: { id: number; name: string } | null;
     };
@@ -85,6 +85,13 @@
             accessorKey: 'price',
             header: 'Preis',
             cell: ({ row }) => fmt.format(Number(row.original.price)),
+        },
+        {
+            id: 'actions',
+            header: '',
+            cell: ({ row }) => renderComponent(ProductActions, { product: row.original }),
+            enableSorting: false,
+            enableHiding: false,
         },
     ];
 

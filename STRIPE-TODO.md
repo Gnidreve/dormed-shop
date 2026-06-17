@@ -1,0 +1,17 @@
+- [ ] `stripe/stripe-php` in `composer.json` installieren
+- [ ] `@stripe/stripe-js` im Frontend installieren
+- [ ] `.env` auf `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` und `VITE_STRIPE_PUBLISHABLE_KEY` umstellen
+- [ ] Stripe-Konfiguration in `config/services.php` anlegen
+- [ ] serverseitigen `CheckoutController` für Stripe-Checkout erstellen
+- [ ] Warenkorb serverseitig validieren und Preise aus der Datenbank berechnen
+- [ ] echte Zahlungsart `stripe` oder `card` im Checkout ergänzen
+- [ ] Button in `resources/js/pages/Checkout/Confirm.svelte` an echten Submit anbinden
+- [ ] Route zum Erstellen einer Stripe Checkout Session oder eines Payment Intents anlegen
+- [ ] Webhook-Route für Stripe-Ereignisse anlegen
+- [ ] Webhook-Verarbeitung für erfolgreiche und fehlgeschlagene Zahlungen implementieren
+- [ ] `orders` um `order_number`, `currency`, `payment_provider`, `payment_status` und Stripe-IDs erweitern
+- [ ] Billing- und Shipping-Snapshots für Bestellungen speichern
+- [ ] `order_items` für persistierte Bestellpositionen anlegen
+- [ ] `database/SCHEMA.md` nach den Migrationen aktualisieren
+- [ ] Admin-Orderansicht um Payment-Metadaten erweitern
+- [ ] Feature-Tests für Checkout, Webhooks und Statusübergänge ergänzen

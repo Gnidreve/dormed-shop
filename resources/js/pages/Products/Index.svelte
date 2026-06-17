@@ -1,4 +1,5 @@
 <script lang="ts">
+    import AppFooter from '@/components/AppFooter.svelte';
     import AppHead from '@/components/AppHead.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
     import { Link } from '@inertiajs/svelte';
@@ -128,4 +129,6 @@
             {/if}
         {/if}
     </main>
+
+    <AppFooter />
 </div>

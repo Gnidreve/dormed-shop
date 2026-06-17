@@ -5,6 +5,7 @@
     import Phone from 'lucide-svelte/icons/phone';
     import ShieldCheck from 'lucide-svelte/icons/shield-check';
     import Truck from 'lucide-svelte/icons/truck';
+    import AppFooter from '@/components/AppFooter.svelte';
     import AppHead from '@/components/AppHead.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
 
@@ -104,4 +105,6 @@
             </div>
         </div>
     </div>
+
+    <AppFooter />
 </div>

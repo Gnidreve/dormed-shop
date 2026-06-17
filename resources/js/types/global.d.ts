@@ -1,4 +1,5 @@
 import type { Auth } from '@/types/auth';
+import type { Cart } from '@/types/cart';
 
 // Extend ImportMeta interface for Vite...
 declare module 'vite/client' {
@@ -21,6 +22,7 @@ declare module '@inertiajs/core' {
         sharedPageProps: {
             name: string;
             auth: Auth;
+            cart: Cart;
             sidebarOpen: boolean;
             [key: string]: unknown;
         };

@@ -1,9 +1,10 @@
 <script lang="ts">
-    import { Link } from '@inertiajs/svelte';
+    import { Link, router } from '@inertiajs/svelte';
     import ChevronRight from 'lucide-svelte/icons/chevron-right';
     import Minus from 'lucide-svelte/icons/minus';
     import Plus from 'lucide-svelte/icons/plus';
     import ShoppingCart from 'lucide-svelte/icons/shopping-cart';
+    import AppFooter from '@/components/AppFooter.svelte';
     import AppHead from '@/components/AppHead.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
     import { Button } from '@/components/ui/button';
@@ -29,6 +30,20 @@
             style: 'currency',
             currency: 'EUR',
         }).format(Number(value));
+    }
+
+    function addToCart() {
+        router.post(
+            '/cart/items',
+            {
+                product_id: product.id,
+                quantity,
+            },
+            {
+                preserveScroll: true,
+                preserveState: true,
+            },
+        );
     }
 </script>
 
@@ -115,7 +130,10 @@
                         </button>
                     </div>
 
-                    <Button class="flex-1 bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90">
+                    <Button
+                        class="flex-1 bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90"
+                        onclick={addToCart}
+                    >
                         <ShoppingCart class="size-4" />
                         In den Warenkorb
                     </Button>
@@ -178,4 +196,6 @@
             </div>
         </div>
     </main>
+
+    <AppFooter />
 </div>

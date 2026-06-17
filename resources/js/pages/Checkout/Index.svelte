@@ -1,6 +1,5 @@
 <script lang="ts">
     import { Link, router } from '@inertiajs/svelte';
-    import Check from 'lucide-svelte/icons/check';
     import ChevronRight from 'lucide-svelte/icons/chevron-right';
     import Minus from 'lucide-svelte/icons/minus';
     import Plus from 'lucide-svelte/icons/plus';
@@ -8,33 +7,38 @@
     import AppHead from '@/components/AppHead.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
     import { Button } from '@/components/ui/button';
-    import { Input } from '@/components/ui/input';
-    import cartData from '@/data/cart.json';
+    import type { Cart } from '@/types';
 
-    type CartItem = (typeof cartData.items)[number] & { quantity: number };
+    let { cart }: { cart: Cart } = $props();
 
-    let items = $state<CartItem[]>(cartData.items.map((i) => ({ ...i })));
-    let couponCode = $state('');
-    let productNumberInput = $state('');
-    const selectedShipping = $derived(
-        cartData.shippingMethods.find((m) => m.selected) ?? cartData.shippingMethods[0],
-    );
-
-    function formatPrice(value: number): string {
+    function formatPrice(value: number | string): string {
         return new Intl.NumberFormat('de-DE', {
             style: 'currency',
             currency: 'EUR',
-        }).format(value);
+        }).format(Number(value));
     }
 
-    const subtotal = $derived(items.reduce((s, i) => s + i.unitPrice * i.quantity, 0));
-    const shippingCost = $derived(selectedShipping?.price ?? 0);
-    const total = $derived(subtotal + shippingCost);
-    const vatAmount = $derived(total - total / (1 + cartData.vatRate / 100));
-    const netTotal = $derived(total - vatAmount);
+    function updateQuantity(productId: number, quantity: number) {
+        router.patch(
+            `/cart/items/${productId}`,
+            { quantity },
+            { preserveScroll: true, preserveState: true },
+        );
+    }
 
-    function removeItem(id: number) {
-        items = items.filter((i) => i.id !== id);
+    function removeItem(productId: number) {
+        router.delete(`/cart/items/${productId}`, {
+            preserveScroll: true,
+            preserveState: true,
+        });
+    }
+
+    function updateShipping(shippingMethod: string) {
+        router.patch(
+            '/cart/shipping',
+            { shipping_method: shippingMethod },
+            { preserveScroll: true, preserveState: true },
+        );
     }
 </script>
 
@@ -46,7 +50,7 @@
     <div class="mx-auto max-w-7xl px-4 py-8 lg:px-8">
         <h1 class="mb-6 text-3xl font-bold text-gray-900">Warenkorb</h1>
 
-        {#if items.length === 0}
+        {#if cart.is_empty}
             <div class="rounded-lg border bg-white px-8 py-16 text-center text-gray-500">
                 Ihr Warenkorb ist leer.
                 <Link href="/" class="mt-3 block text-[#1a6bbf] hover:underline">
@@ -55,7 +59,6 @@
             </div>
         {:else}
             <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
-                <!-- Left: Cart table -->
                 <div class="flex-1">
                     <div class="overflow-hidden rounded-lg border bg-white">
                         <table class="w-full text-sm">
@@ -77,84 +80,57 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y">
-                                {#each items as item (item.id)}
-                                    <tr class="group">
-                                        <!-- Product -->
+                                {#each cart.items as item (item.product_id)}
+                                    <tr>
                                         <td class="px-5 py-4">
                                             <div class="flex items-center gap-3">
                                                 <div
                                                     class="flex size-14 shrink-0 items-center justify-center rounded border bg-gray-50"
                                                 >
-                                                    {#if item.imageUrl}
-                                                        <img
-                                                            src={item.imageUrl}
-                                                            alt={item.name}
-                                                            class="h-full w-full object-contain p-1"
-                                                        />
-                                                    {:else}
-                                                        <div
-                                                            class="size-8 rounded bg-gray-200"
-                                                        ></div>
-                                                    {/if}
+                                                    <div class="size-8 rounded bg-gray-200"></div>
                                                 </div>
                                                 <div>
-                                                    <p class="font-semibold text-gray-900">
+                                                    <Link
+                                                        href={item.product_url}
+                                                        class="font-semibold text-gray-900 hover:text-[#1a6bbf]"
+                                                    >
                                                         {item.name}
-                                                    </p>
+                                                    </Link>
                                                     <p class="text-xs text-[#1a6bbf]">
-                                                        Produkt-Nr.: {item.sku}
-                                                    </p>
-                                                    <p class="text-xs text-gray-400">
-                                                        Lieferzeitraum: {item.deliveryFrom} – {item.deliveryTo}
+                                                        Produkt-Nr.: {item.product_number}
                                                     </p>
                                                 </div>
                                             </div>
                                         </td>
-                                        <!-- Quantity -->
                                         <td class="px-4 py-4">
-                                            <div
-                                                class="mx-auto flex w-fit items-center rounded border"
-                                            >
+                                            <div class="mx-auto flex w-fit items-center rounded border">
                                                 <button
                                                     class="flex size-8 items-center justify-center text-gray-500 hover:bg-gray-50 disabled:opacity-40"
-                                                    onclick={() =>
-                                                        (item.quantity = Math.max(
-                                                            1,
-                                                            item.quantity - 1,
-                                                        ))}
+                                                    onclick={() => updateQuantity(item.product_id, item.quantity - 1)}
                                                     disabled={item.quantity <= 1}
                                                 >
                                                     <Minus class="size-3.5" />
                                                 </button>
-                                                <span
-                                                    class="w-10 text-center text-sm font-medium"
-                                                >
+                                                <span class="w-10 text-center text-sm font-medium">
                                                     {item.quantity}
                                                 </span>
                                                 <button
                                                     class="flex size-8 items-center justify-center text-gray-500 hover:bg-gray-50"
-                                                    onclick={() => item.quantity++}
+                                                    onclick={() => updateQuantity(item.product_id, item.quantity + 1)}
                                                 >
                                                     <Plus class="size-3.5" />
                                                 </button>
                                             </div>
                                         </td>
-                                        <!-- Unit price -->
-                                        <td
-                                            class="px-4 py-4 text-right text-sm text-gray-700"
-                                        >
-                                            {formatPrice(item.unitPrice)}*
+                                        <td class="px-4 py-4 text-right text-sm text-gray-700">
+                                            {formatPrice(item.unit_price)}*
                                         </td>
-                                        <!-- Line total -->
-                                        <td
-                                            class="px-5 py-4 text-right text-sm font-semibold text-gray-900"
-                                        >
-                                            {formatPrice(item.unitPrice * item.quantity)}*
+                                        <td class="px-5 py-4 text-right text-sm font-semibold text-gray-900">
+                                            {formatPrice(item.line_total)}*
                                         </td>
-                                        <!-- Remove -->
                                         <td class="pr-3">
                                             <button
-                                                onclick={() => removeItem(item.id)}
+                                                onclick={() => removeItem(item.product_id)}
                                                 class="rounded border p-1.5 text-gray-400 hover:border-gray-300 hover:text-gray-600"
                                                 aria-label="Entfernen"
                                             >
@@ -166,34 +142,43 @@
                             </tbody>
                         </table>
 
-                        <!-- Quick add + shipping info -->
-                        <div
-                            class="flex flex-wrap items-center gap-4 border-t px-5 py-3"
-                        >
-                            <div class="flex overflow-hidden rounded border">
-                                <Input
-                                    bind:value={productNumberInput}
-                                    placeholder="Produktnummer eingeben"
-                                    class="w-48 rounded-none border-0 focus-visible:ring-0"
-                                />
-                                <button
-                                    class="flex items-center justify-center border-l px-3 text-gray-500 hover:bg-gray-50"
-                                    aria-label="Hinzufügen"
-                                >
-                                    <Check class="size-4" />
-                                </button>
-                            </div>
-                            <button
+                        <div class="flex flex-col gap-3 border-t px-5 py-4">
+                            <p class="text-sm font-semibold text-gray-900">Versandart</p>
+                            {#each cart.shipping_methods as method (method.id)}
+                                <label class="flex cursor-pointer items-start gap-3">
+                                    <input
+                                        type="radio"
+                                        name="shipping"
+                                        value={method.id}
+                                        checked={method.selected}
+                                        onchange={() => updateShipping(method.id)}
+                                        class="mt-0.5 accent-[#0d1f44]"
+                                    />
+                                    <span class="text-sm">
+                                        <span class="font-semibold text-gray-900">
+                                            {method.label}
+                                        </span>
+                                        <span class="text-gray-500">
+                                            {' '}- {formatPrice(method.price ?? 0)}*
+                                        </span>
+                                        {#if method.description}
+                                            <br />
+                                            <span class="text-gray-500">{method.description}</span>
+                                        {/if}
+                                    </span>
+                                </label>
+                            {/each}
+                            <Link
+                                href="/checkout/confirm"
                                 class="flex items-center gap-1 text-sm font-semibold text-[#1a3a5c] hover:underline"
                             >
-                                Versanddetails öffnen
+                                Versand und Zahlung prüfen
                                 <ChevronRight class="size-4" />
-                            </button>
+                            </Link>
                         </div>
                     </div>
                 </div>
 
-                <!-- Right: Summary -->
                 <div class="w-full lg:w-80 xl:w-88">
                     <div class="rounded-lg border bg-white p-5">
                         <h2 class="mb-4 text-xl font-bold text-gray-900">
@@ -203,50 +188,25 @@
                         <div class="flex flex-col gap-2 text-sm">
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Zwischensumme</span>
-                                <span class="font-medium">{formatPrice(subtotal)}*</span>
+                                <span class="font-medium">{formatPrice(cart.subtotal)}*</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Versandkosten</span>
-                                <span class="font-medium"
-                                    >{formatPrice(shippingCost)}*</span
-                                >
+                                <span class="font-medium">{formatPrice(cart.shipping_total)}*</span>
                             </div>
                             <div class="my-2 border-t pt-2">
                                 <div class="flex justify-between">
-                                    <span class="font-bold text-gray-900"
-                                        >Gesamtsumme</span
-                                    >
-                                    <span class="font-bold text-gray-900"
-                                        >{formatPrice(total)}*</span
-                                    >
+                                    <span class="font-bold text-gray-900">Gesamtsumme</span>
+                                    <span class="font-bold text-gray-900">{formatPrice(cart.total)}*</span>
                                 </div>
                             </div>
                             <div class="flex justify-between text-gray-500">
                                 <span>Gesamtnettosumme</span>
-                                <span>{formatPrice(netTotal)}</span>
+                                <span>{formatPrice(cart.net_total)}</span>
                             </div>
                             <div class="flex justify-between text-gray-500">
-                                <span>zzgl. {cartData.vatRate} % MwSt.</span>
-                                <span>{formatPrice(vatAmount)}</span>
-                            </div>
-                        </div>
-
-                        <div class="mt-5 border-t pt-4">
-                            <p class="mb-1.5 text-sm font-medium text-gray-700">
-                                Gutscheincode
-                            </p>
-                            <div class="flex overflow-hidden rounded border">
-                                <Input
-                                    bind:value={couponCode}
-                                    placeholder="Gutscheincode eingeben ..."
-                                    class="rounded-none border-0 focus-visible:ring-0"
-                                />
-                                <button
-                                    class="flex items-center justify-center border-l px-3 text-gray-500 hover:bg-gray-50"
-                                    aria-label="Einlösen"
-                                >
-                                    <Check class="size-4" />
-                                </button>
+                                <span>zzgl. {cart.vat_rate} % MwSt.</span>
+                                <span>{formatPrice(cart.vat_amount)}</span>
                             </div>
                         </div>
 
