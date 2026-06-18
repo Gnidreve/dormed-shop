@@ -28,10 +28,23 @@ class ProductController extends Controller
 
     public function show(Product $product): Response
     {
-        $product->load('manufacturer');
+        $product->load(['manufacturer', 'ratings']);
+        $product->loadAvg('ratings', 'stars');
 
         return Inertia::render('Products/Show', [
             'product' => $product,
+            'ratings' => $product->ratings->map(fn ($rating) => [
+                'id' => $rating->id,
+                'stars' => $rating->stars,
+                'content' => $rating->content,
+                'created_at' => $rating->created_at?->format('d.m.Y'),
+            ])->values(),
+            'ratingSummary' => [
+                'average' => $product->ratings_avg_stars !== null
+                    ? number_format((float) $product->ratings_avg_stars, 1, ',', '.')
+                    : null,
+                'count' => $product->ratings->count(),
+            ],
         ]);
     }
 

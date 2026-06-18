@@ -16,6 +16,7 @@ Engine: **SQLite** (Entwicklung) — Produktionsumgebung: MySQL/MariaDB-kompatib
 | `manufacturers`       | Hersteller (FK von `products`)             |
 | `categories`          | Produktkategorien                          |
 | `orders`              | Bestellungen (FK zu `customers`)           |
+| `ratings`             | Produktbewertungen (FK zu `products`)      |
 | `settings`            | Key-Value-Konfiguration                    |
 | `passkeys`            | WebAuthn-Passkeys (FK zu `customers`)      |
 | `sessions`            | Laravel-Session-Store                      |
@@ -119,6 +120,24 @@ Shop-Kunden. Fortify-Auth, Passkeys, optionale 2FA.
 
 ---
 
+## ratings
+
+Öffentliche Produktbewertungen ohne Login.
+
+| Spalte       | Typ      | Nullable | Default | Hinweis                     |
+|--------------|----------|----------|---------|-----------------------------|
+| `id`         | integer  | NO       | —       | PK, autoincrement           |
+| `product_id` | integer  | NO       | —       | FK → `products.id` CASCADE  |
+| `stars`      | tinyint  | NO       | —       | Wertebereich 1–5            |
+| `content`    | text     | NO       | —       | Bewertungstext              |
+| `created_at` | datetime | YES      | —       |                             |
+| `updated_at` | datetime | YES      | —       |                             |
+
+Indexe:
+- `ratings_product_id_created_at_index` auf (`product_id`, `created_at`)
+
+---
+
 ## settings
 
 Key-Value-Store für Systemkonfiguration (SMTP, Shop-Name, etc.).
@@ -184,4 +203,5 @@ Diese Tabellen werden von Laravel verwaltet und sollten nicht manuell geändert 
 |------------|-----------------|------------------------|-----------|
 | `products` | `manufacturer_id` | `manufacturers.id`   | CASCADE   |
 | `orders`   | `customer_id`   | `customers.id`         | CASCADE   |
+| `ratings`  | `product_id`    | `products.id`          | CASCADE   |
 | `passkeys` | `customer_id`   | `customers.id`         | CASCADE   |

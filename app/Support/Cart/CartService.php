@@ -55,7 +55,14 @@ class CartService
     {
         $state = $this->state();
         $productId = (string) $product->getKey();
-        $state['items'][$productId] = min(99, ($state['items'][$productId] ?? 0) + $quantity);
+        $existingItem = $state['items'][$productId] ?? [];
+
+        $state['items'][$productId] = [
+            'quantity' => min(99, ((int) ($existingItem['quantity'] ?? 0)) + $quantity),
+            'unit_price' => (string) ($existingItem['unit_price'] ?? $product->price),
+            'name' => (string) ($existingItem['name'] ?? $product->name),
+            'product_number' => (string) ($existingItem['product_number'] ?? $product->id),
+        ];
 
         $this->persist($state);
     }
@@ -63,7 +70,15 @@ class CartService
     public function updateQuantity(Product $product, int $quantity): void
     {
         $state = $this->state();
-        $state['items'][(string) $product->getKey()] = min(99, max(1, $quantity));
+        $productId = (string) $product->getKey();
+
+        if (! isset($state['items'][$productId])) {
+            $this->add($product, $quantity);
+
+            return;
+        }
+
+        $state['items'][$productId]['quantity'] = min(99, max(1, $quantity));
 
         $this->persist($state);
     }
@@ -92,6 +107,15 @@ class CartService
         $this->persist($state);
     }
 
+    public function clear(): void
+    {
+        $this->persist([
+            'items' => [],
+            'shipping_method' => (string) collect(config('shop.cart.shipping_methods', []))->pluck('id')->first(),
+            'payment_method' => (string) collect(config('shop.cart.payment_methods', []))->pluck('id')->first(),
+        ]);
+    }
+
     private function items(array $rawItems): Collection
     {
         $productIds = array_map('intval', array_keys($rawItems));
@@ -107,27 +131,29 @@ class CartService
             ->keyBy(fn (Product $product) => (string) $product->getKey());
 
         return collect($rawItems)
-            ->map(function (int $quantity, string $productId) use ($products): ?array {
+            ->map(function (array $item, string $productId) use ($products): ?array {
                 /** @var Product|null $product */
                 $product = $products->get($productId);
+                $quantity = (int) ($item['quantity'] ?? 0);
 
-                if (! $product) {
+                if ($quantity < 1) {
                     return null;
                 }
 
-                $unitPriceCents = $this->amountToCents($product->price);
+                $unitPriceCents = $this->amountToCents($item['unit_price'] ?? $product?->price ?? 0);
                 $lineTotalCents = $unitPriceCents * $quantity;
 
                 return [
-                    'product_id' => $product->id,
-                    'name' => $product->name,
-                    'description' => $product->description,
-                    'product_number' => (string) $product->id,
+                    'product_id' => (int) $productId,
+                    'name' => (string) ($item['name'] ?? $product?->name ?? 'Produkt nicht verfügbar'),
+                    'description' => $product?->description,
+                    'product_number' => (string) ($item['product_number'] ?? $productId),
                     'quantity' => $quantity,
                     'unit_price' => $this->formatAmount($unitPriceCents),
                     'line_total' => $this->formatAmount($lineTotalCents),
                     'line_total_cents' => $lineTotalCents,
-                    'product_url' => route('products.show', $product),
+                    'product_url' => $product ? route('products.show', $product) : route('products.index'),
+                    'is_available' => $product !== null,
                 ];
             })
             ->filter();
@@ -178,15 +204,22 @@ class CartService
 
         return [
             'items' => collect($rawState['items'] ?? [])
-                ->mapWithKeys(function (mixed $quantity, mixed $productId): array {
+                ->mapWithKeys(function (mixed $item, mixed $productId): array {
                     $normalizedProductId = (int) $productId;
-                    $normalizedQuantity = (int) $quantity;
+                    $normalizedQuantity = (int) data_get($item, 'quantity', is_array($item) ? null : $item);
 
                     if ($normalizedProductId < 1 || $normalizedQuantity < 1) {
                         return [];
                     }
 
-                    return [(string) $normalizedProductId => min(99, $normalizedQuantity)];
+                    return [
+                        (string) $normalizedProductId => [
+                            'quantity' => min(99, $normalizedQuantity),
+                            'unit_price' => (string) data_get($item, 'unit_price', '0.00'),
+                            'name' => (string) data_get($item, 'name', ''),
+                            'product_number' => (string) data_get($item, 'product_number', $normalizedProductId),
+                        ],
+                    ];
                 })
                 ->all(),
             'shipping_method' => in_array(($rawState['shipping_method'] ?? null), $shippingMethodIds, true)

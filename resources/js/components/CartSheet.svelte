@@ -5,6 +5,7 @@
     import Plus from 'lucide-svelte/icons/plus';
     import ShoppingCart from 'lucide-svelte/icons/shopping-cart';
     import X from 'lucide-svelte/icons/x';
+    import cartRoutes from '@/routes/cart';
     import { Button } from '@/components/ui/button';
     import {
         Sheet,
@@ -13,29 +14,23 @@
         SheetTitle,
         SheetTrigger,
     } from '@/components/ui/sheet';
+    import { formatPrice } from '@/lib/currency';
     import type { Cart } from '@/types';
 
     let { cart }: { cart: Cart } = $props();
-
-    function formatPrice(value: number | string): string {
-        return new Intl.NumberFormat('de-DE', {
-            style: 'currency',
-            currency: 'EUR',
-        }).format(Number(value));
-    }
 
     const formattedTotal = $derived(formatPrice(cart.total));
 
     function updateQuantity(productId: number, quantity: number) {
         router.patch(
-            `/cart/items/${productId}`,
+            cartRoutes.items.update.url(productId),
             { quantity },
             { preserveScroll: true, preserveState: true },
         );
     }
 
     function removeItem(productId: number) {
-        router.delete(`/cart/items/${productId}`, {
+        router.delete(cartRoutes.items.destroy.url(productId), {
             preserveScroll: true,
             preserveState: true,
         });
@@ -180,7 +175,7 @@
                     >
                         {#snippet children(btnProps)}
                             <Link
-                                href="/warenkorb"
+                                href={cartRoutes.index.url()}
                                 class={btnProps.class}
                                 onclick={closeProps.onClick as () => void}
                             >
@@ -192,7 +187,7 @@
             </SheetClose>
             <div class="mt-3 text-center">
                 <Link
-                    href="/warenkorb"
+                    href={cartRoutes.index.url()}
                     class="text-sm font-semibold text-[#1a3a5c] hover:underline"
                 >
                     Warenkorb anzeigen

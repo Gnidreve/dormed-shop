@@ -1,15 +1,22 @@
 <script lang="ts">
-    import { Link, router } from '@inertiajs/svelte';
+    import { Form, Link, router } from '@inertiajs/svelte';
     import ChevronRight from 'lucide-svelte/icons/chevron-right';
     import Minus from 'lucide-svelte/icons/minus';
     import Plus from 'lucide-svelte/icons/plus';
+    import Star from 'lucide-svelte/icons/star';
     import ShoppingCart from 'lucide-svelte/icons/shopping-cart';
     import AppFooter from '@/components/AppFooter.svelte';
     import AppHead from '@/components/AppHead.svelte';
+    import InputError from '@/components/InputError.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
+    import cartRoutes from '@/routes/cart';
+    import ratingsRoutes from '@/routes/ratings';
     import { Button } from '@/components/ui/button';
+    import { Label } from '@/components/ui/label';
+    import { Textarea } from '@/components/ui/textarea';
     import { Separator } from '@/components/ui/separator';
     import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
+    import { formatPrice } from '@/lib/currency';
     import { cn } from '@/lib/utils';
 
     type Product = {
@@ -20,21 +27,39 @@
         manufacturer: { id: number; name: string } | null;
     };
 
-    let { product }: { product: Product } = $props();
+    type Rating = {
+        id: number;
+        stars: number;
+        content: string;
+        created_at: string | null;
+    };
+
+    type RatingSummary = {
+        average: string | null;
+        count: number;
+    };
+
+    let {
+        product,
+        ratings,
+        ratingSummary,
+    }: {
+        product: Product;
+        ratings: Rating[];
+        ratingSummary: RatingSummary;
+    } = $props();
 
     let quantity = $state(1);
     let activeTab = $state<'beschreibung' | 'bewertungen'>('beschreibung');
+    let ratingStars = $state(5);
 
-    function formatPrice(value: number | string): string {
-        return new Intl.NumberFormat('de-DE', {
-            style: 'currency',
-            currency: 'EUR',
-        }).format(Number(value));
+    function starLabel(stars: number): string {
+        return `${stars} Stern${stars === 1 ? '' : 'e'}`;
     }
 
     function addToCart() {
         router.post(
-            '/cart/items',
+            cartRoutes.items.store.url(),
             {
                 product_id: product.id,
                 quantity,
@@ -170,7 +195,7 @@
                     )}
                     onclick={() => (activeTab = 'bewertungen')}
                 >
-                    Bewertungen
+                    Bewertungen {ratingSummary.count > 0 ? `(${ratingSummary.count})` : ''}
                 </button>
             </div>
 
@@ -191,7 +216,127 @@
                         {/if}
                     </div>
                 {:else}
-                    <p class="text-sm text-gray-400">Noch keine Bewertungen vorhanden.</p>
+                    <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_24rem]">
+                        <div class="space-y-6">
+                            <div class="rounded-xl border border-gray-200 bg-white p-6">
+                                <div class="flex flex-wrap items-end justify-between gap-4">
+                                    <div>
+                                        <p class="text-sm font-semibold uppercase tracking-wide text-[#1a6bbf]">
+                                            Kundenbewertungen
+                                        </p>
+                                        <div class="mt-2 flex items-end gap-3">
+                                            <span class="text-3xl font-bold text-gray-900">
+                                                {ratingSummary.average ?? '–'}
+                                            </span>
+                                            <span class="pb-1 text-sm text-gray-500">
+                                                von 5 bei {ratingSummary.count} Bewertung{ratingSummary.count === 1 ? '' : 'en'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1 text-[#f59e0b]">
+                                        {#each Array.from({ length: 5 }, (_, index) => index + 1) as star}
+                                            <Star
+                                                class={cn(
+                                                    'size-5',
+                                                    ratingSummary.average !== null && star <= Math.round(Number(ratingSummary.average.replace(',', '.')))
+                                                        ? 'fill-current'
+                                                        : 'text-gray-300',
+                                                )}
+                                            />
+                                        {/each}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {#if ratings.length > 0}
+                                <div class="space-y-4">
+                                    {#each ratings as rating}
+                                        <article class="rounded-xl border border-gray-200 bg-white p-6">
+                                            <div class="mb-3 flex items-center justify-between gap-4">
+                                                <div class="flex items-center gap-1 text-[#f59e0b]">
+                                                    {#each Array.from({ length: 5 }, (_, index) => index + 1) as star}
+                                                        <Star
+                                                            class={cn(
+                                                                'size-4',
+                                                                star <= rating.stars ? 'fill-current' : 'text-gray-300',
+                                                            )}
+                                                        />
+                                                    {/each}
+                                                </div>
+                                                {#if rating.created_at}
+                                                    <span class="text-sm text-gray-500">{rating.created_at}</span>
+                                                {/if}
+                                            </div>
+                                            <p class="text-sm leading-6 text-gray-700">{rating.content}</p>
+                                        </article>
+                                    {/each}
+                                </div>
+                            {:else}
+                                <div class="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-6 text-sm text-gray-500">
+                                    Noch keine Bewertungen vorhanden.
+                                </div>
+                            {/if}
+                        </div>
+
+                        <div class="rounded-xl border border-gray-200 bg-white p-6">
+                            <h2 class="text-lg font-bold text-gray-900">Bewertung abgeben</h2>
+                            <p class="mt-2 text-sm text-gray-500">
+                                Ohne Login. Später kann die Moderation oder Verknüpfung zu Kunden ergänzt werden.
+                            </p>
+
+                            <Form
+                                {...ratingsRoutes.store.form(product.id)}
+                                resetOnSuccess={['content']}
+                                class="mt-6 space-y-5"
+                            >
+                                {#snippet children({ errors, processing })}
+                                    <input type="hidden" name="stars" value={ratingStars} />
+
+                                    <div class="grid gap-2">
+                                        <Label for="rating-stars">Sterne</Label>
+                                        <div id="rating-stars" class="star-wrapper">
+                                            {#each [1, 2, 3, 4, 5] as star}
+                                                <button
+                                                    type="button"
+                                                    class={cn(
+                                                        `star-button s${star}`,
+                                                        star <= ratingStars && 'active',
+                                                    )}
+                                                    onclick={() => (ratingStars = star)}
+                                                    aria-label={starLabel(star)}
+                                                    aria-pressed={star === ratingStars}
+                                                >
+                                                    <Star class="size-12" />
+                                                </button>
+                                            {/each}
+                                        </div>
+                                        <p class="text-sm text-gray-500">{starLabel(ratingStars)}</p>
+                                        <InputError message={errors.stars} />
+                                    </div>
+
+                                    <div class="grid gap-2">
+                                        <Label for="content">Bewertung</Label>
+                                        <Textarea
+                                            id="content"
+                                            name="content"
+                                            rows={5}
+                                            required
+                                            placeholder="Wie zufrieden sind Sie mit dem Produkt?"
+                                        />
+                                        <InputError message={errors.content} />
+                                    </div>
+
+                                    <Button
+                                        type="submit"
+                                        class="w-full bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90"
+                                        disabled={processing}
+                                    >
+                                        Bewertung senden
+                                    </Button>
+                                {/snippet}
+                            </Form>
+                        </div>
+                    </div>
                 {/if}
             </div>
         </div>
@@ -199,3 +344,30 @@
 
     <AppFooter />
 </div>
+
+<style>
+    .star-wrapper {
+        display: inline-flex;
+        direction: rtl;
+    }
+
+    .star-button {
+        margin: 4px;
+        color: #d1d5db;
+        text-decoration: none;
+        transition: all 0.5s;
+    }
+
+    .star-button:hover {
+        color: gold;
+        transform: scale(1.3);
+    }
+
+    .star-button:hover ~ .star-button {
+        color: gold;
+    }
+
+    .star-button.active {
+        color: gold;
+    }
+</style>

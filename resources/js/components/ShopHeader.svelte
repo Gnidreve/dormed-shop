@@ -26,6 +26,7 @@
     import { logout } from '@/routes';
     import { edit as editProfile } from '@/routes/profile';
     import { toUrl } from '@/lib/utils';
+    import { formatPrice } from '@/lib/currency';
     import type { Cart, Customer } from '@/types';
 
     const navItems = [
@@ -43,7 +44,6 @@
     type SearchResult = {
         id: number;
         name: string;
-        slug: string;
         price: string;
     };
 
@@ -54,13 +54,6 @@
     let isLoading = $state(false);
     let debounceTimer: ReturnType<typeof setTimeout>;
     let searchContainerEl: HTMLDivElement;
-
-    function formatPrice(value: number | string): string {
-        return new Intl.NumberFormat('de-DE', {
-            style: 'currency',
-            currency: 'EUR',
-        }).format(Number(value));
-    }
 
     $effect(() => {
         const q = query;
@@ -178,9 +171,7 @@
                                 {#each results as product (product.id)}
                                     <li class="border-b last:border-b-0">
                                         <Link
-                                            href={ProductController.show.url({
-                                                slug: product.slug,
-                                            })}
+                                            href={ProductController.show.url(product.id)}
                                             class="flex items-center gap-3 px-4 py-2.5 hover:bg-accent"
                                             onclick={() => (isOpen = false)}
                                         >

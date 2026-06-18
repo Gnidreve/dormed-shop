@@ -21,8 +21,8 @@
                         </a>
                     </li>
                     <li>
-                        <a href="/widerrufsbelehrung" class="text-sm text-[#1a6bbf] hover:underline">
-                            Widerrufsbelehrung
+                        <a href="/zahlung" class="text-sm text-[#1a6bbf] hover:underline">
+                            Zahlung
                         </a>
                     </li>
                 </ul>
@@ -40,6 +40,9 @@
                     </li>
                     <li>
                         <a href="/datenschutz" class="text-sm text-[#1a6bbf] hover:underline">Datenschutz</a>
+                    </li>
+                    <li>
+                        <a href="/widerrufsbelehrung" class="text-sm text-[#1a6bbf] hover:underline">Widerrufsbelehrung</a>
                     </li>
                 </ul>
             </div>

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Category;
 use App\Models\Customer;
 use App\Models\Manufacturer;
 use App\Models\Order;
@@ -30,9 +31,18 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
+        // One category for now
+        $category = Category::create([
+            'name' => 'Medizintechnik',
+            'slug' => 'medizintechnik',
+            'description' => null,
+        ]);
+
         // Manufacturers & Products
         $manufacturers = Manufacturer::factory(5)->create();
-        $products = Product::factory(20)->recycle($manufacturers)->create();
+        $products = Product::factory(20)->recycle($manufacturers)->create([
+            'category_id' => $category->id,
+        ]);
 
         // Orders
         Order::factory(15)->recycle($customers)->create();

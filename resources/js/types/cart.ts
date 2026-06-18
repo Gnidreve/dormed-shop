@@ -7,6 +7,7 @@ export type CartItem = {
     unit_price: string;
     line_total: string;
     product_url: string;
+    is_available: boolean;
 };
 
 export type CartMethod = {

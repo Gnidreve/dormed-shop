@@ -6,6 +6,10 @@
     import { Button } from '@/components/ui/button';
     import { Checkbox } from '@/components/ui/checkbox';
     import { Separator } from '@/components/ui/separator';
+    import cartRoutes from '@/routes/cart';
+    import checkout from '@/routes/checkout';
+    import { login } from '@/routes';
+    import { formatPrice } from '@/lib/currency';
     import type { Cart, Customer } from '@/types';
 
     let { cart }: { cart: Cart } = $props();
@@ -15,16 +19,9 @@
     const auth = $derived(page.props.auth);
     const customer = $derived(auth.user as Customer | undefined);
 
-    function formatPrice(value: number | string): string {
-        return new Intl.NumberFormat('de-DE', {
-            style: 'currency',
-            currency: 'EUR',
-        }).format(Number(value));
-    }
-
     function updatePayment(paymentMethod: string) {
         router.patch(
-            '/checkout/payment',
+            checkout.payment.update.url(),
             { payment_method: paymentMethod },
             { preserveScroll: true, preserveState: true },
         );
@@ -32,9 +29,17 @@
 
     function updateShipping(shippingMethod: string) {
         router.patch(
-            '/cart/shipping',
+            cartRoutes.shipping.update.url(),
             { shipping_method: shippingMethod },
             { preserveScroll: true, preserveState: true },
+        );
+    }
+
+    function submitOrder() {
+        router.post(
+            checkout.submit.url(),
+            { agreed_to_terms: agreedToTerms },
+            { preserveScroll: true },
         );
     }
 </script>
@@ -46,7 +51,7 @@
 <main class="min-h-screen bg-gray-50">
     <div class="mx-auto max-w-7xl px-4 py-8 lg:px-8">
         <Link
-            href="/checkout"
+            href={checkout.index.url()}
             class="mb-6 inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800"
         >
             <ChevronLeft class="size-4" />
@@ -143,9 +148,7 @@
                                         <span class="font-semibold text-gray-900">
                                             {method.label}
                                         </span>
-                                        <span class="text-gray-500">
-                                            {' '}- {formatPrice(method.price ?? 0)}
-                                        </span>
+                                        <span class="text-gray-500"> - {formatPrice(method.price ?? 0)}</span>
                                         {#if method.description}
                                             <br />
                                             <span class="text-gray-500">{method.description}</span>
@@ -168,7 +171,7 @@
                                     Anzahl
                                 </th>
                                 <th class="px-4 py-3 text-right font-semibold text-gray-700">
-                                    inkl. MwSt.
+                                    MwSt.-Anteil
                                 </th>
                                 <th class="px-5 py-3 text-right font-semibold text-gray-700">
                                     Summe
@@ -248,16 +251,32 @@
                         </div>
                     </div>
 
-                    <Button
-                        class="mt-6 w-full bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90 disabled:opacity-50"
-                        disabled
-                    >
-                        Stripe-Checkout folgt
-                    </Button>
-
-                    <p class="mt-3 text-sm text-gray-500">
-                        Der Bestellabschluss wird im nächsten Schritt an Stripe angebunden.
-                    </p>
+                    {#if customer}
+                        <Button
+                            class="mt-6 w-full bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90 disabled:opacity-50"
+                            disabled={!agreedToTerms || cart.is_empty}
+                            onclick={submitOrder}
+                        >
+                            Zahlungspflichtig bestellen
+                        </Button>
+                        <p class="mt-3 text-sm text-gray-500">
+                            Die Bestellung wird angelegt; Stripe wird danach als Zahlungsflow ergänzt.
+                        </p>
+                    {:else}
+                        <Button asChild class="mt-6 w-full bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90">
+                            {#snippet children(props)}
+                                <Link
+                                    href={login.url({ query: { redirect: checkout.confirm.url() } })}
+                                    class={props.class}
+                                >
+                                    Zum Login
+                                </Link>
+                            {/snippet}
+                        </Button>
+                        <p class="mt-3 text-sm text-gray-500">
+                            Für den Bestellabschluss ist aktuell ein Kundenkonto erforderlich.
+                        </p>
+                    {/if}
                 </div>
 
                 <p class="mt-3 text-center text-xs text-gray-400">

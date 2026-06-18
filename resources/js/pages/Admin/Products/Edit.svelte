@@ -23,24 +23,32 @@
         description: string | null;
         price: string;
         manufacturer_id: number | null;
+        category_id: number | null;
     };
 
     type Manufacturer = { id: number; name: string };
+    type Category = { id: number; name: string };
 
     let {
         product,
         manufacturers,
-    }: { product: Product; manufacturers: Manufacturer[] } = $props();
+        categories,
+    }: { product: Product; manufacturers: Manufacturer[]; categories: Category[] } = $props();
 
     const form = useForm({
         name: product.name,
         description: product.description ?? '',
         price: product.price,
         manufacturer_id: product.manufacturer_id ? String(product.manufacturer_id) : '',
+        category_id: product.category_id ? String(product.category_id) : '',
     });
 
     const selectedManufacturerLabel = $derived(
         manufacturers.find((m) => String(m.id) === form.manufacturer_id)?.name ?? 'Hersteller wählen',
+    );
+
+    const selectedCategoryLabel = $derived(
+        categories.find((c) => String(c.id) === form.category_id)?.name ?? 'Kategorie wählen',
     );
 
     function submit(e: SubmitEvent) {
@@ -85,11 +93,25 @@
         </div>
 
         <div class="flex flex-col gap-2">
+            <Label>Kategorie</Label>
+            <Select.Root type="single" bind:value={form.category_id}>
+                <Select.Trigger class="w-full">
+                    {selectedCategoryLabel}
+                </Select.Trigger>
+                <Select.Content>
+                    {#each categories as c (c.id)}
+                        <Select.Item value={String(c.id)}>{c.name}</Select.Item>
+                    {/each}
+                </Select.Content>
+            </Select.Root>
+            {#if form.errors.category_id}
+                <p class="text-sm text-destructive">{form.errors.category_id}</p>
+            {/if}
+        </div>
+
+        <div class="flex flex-col gap-2">
             <Label>Hersteller</Label>
-            <Select.Root
-                type="single"
-                bind:value={form.manufacturer_id}
-            >
+            <Select.Root type="single" bind:value={form.manufacturer_id}>
                 <Select.Trigger class="w-full">
                     {selectedManufacturerLabel}
                 </Select.Trigger>

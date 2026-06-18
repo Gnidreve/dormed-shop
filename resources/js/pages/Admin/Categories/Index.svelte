@@ -43,6 +43,7 @@
         name: string;
         slug: string;
         description: string | null;
+        products_count: number;
     };
 
     type Paginator = {
@@ -82,6 +83,10 @@
             accessorKey: 'description',
             header: 'Beschreibung',
             cell: ({ row }) => row.original.description ?? '—',
+        },
+        {
+            accessorKey: 'products_count',
+            header: 'Produkte',
         },
     ];
 

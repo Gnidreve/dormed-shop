@@ -28,6 +28,7 @@
     import { curveNatural } from 'd3-shape';
     import { cubicInOut } from 'svelte/easing';
     import * as AdminLoginController from '@/actions/App/Http/Controllers/Admin/LoginController';
+    import { formatPrice } from '@/lib/currency';
 
     const admin = $derived((page.props.auth as any).admin);
 
@@ -93,11 +94,6 @@
         revenue: { label: 'Umsatz', color: 'var(--chart-2)' },
     } satisfies ChartConfig;
 
-    const fmtCurrency = new Intl.NumberFormat('de-DE', {
-        style: 'currency',
-        currency: 'EUR',
-        maximumFractionDigits: 0,
-    });
 </script>
 
 <AppHead title="Admin Dashboard" />
@@ -266,7 +262,7 @@
                                     }),
                             },
                             yAxis: {
-                                format: (v: number) => fmtCurrency.format(v),
+                                format: (v: number) => formatPrice(v),
                             },
                         }}
                     >

@@ -34,6 +34,7 @@
         DropdownMenuTrigger,
     } from '@/components/ui/dropdown-menu';
     import ChevronDown from 'lucide-svelte/icons/chevron-down';
+    import { formatPrice } from '@/lib/currency';
 
     type Product = {
         id: number;
@@ -50,8 +51,6 @@
     };
 
     let { products }: { products: Paginator } = $props();
-
-    const fmt = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' });
 
     const columns: ColumnDef<Product>[] = [
         {
@@ -84,7 +83,7 @@
         {
             accessorKey: 'price',
             header: 'Preis',
-            cell: ({ row }) => fmt.format(Number(row.original.price)),
+            cell: ({ row }) => formatPrice(row.original.price),
         },
         {
             id: 'actions',

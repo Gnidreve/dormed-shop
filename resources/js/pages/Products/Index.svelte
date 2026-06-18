@@ -3,6 +3,7 @@
     import AppHead from '@/components/AppHead.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
     import { Link } from '@inertiajs/svelte';
+    import { formatPrice } from '@/lib/currency';
     import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
 
     type Product = {
@@ -23,13 +24,6 @@
     };
 
     let { products, query }: { products: Paginator; query: string } = $props();
-
-    function formatPrice(value: number | string): string {
-        return new Intl.NumberFormat('de-DE', {
-            style: 'currency',
-            currency: 'EUR',
-        }).format(Number(value));
-    }
 </script>
 
 <AppHead title={query ? `Suchergebnisse für „${query}"` : 'Produkte'} />

@@ -12,7 +12,7 @@ class CategoryController extends Controller
     public function index(): Response
     {
         return Inertia::render('Admin/Categories/Index', [
-            'categories' => Category::latest()->paginate(20),
+            'categories' => Category::withCount('products')->latest()->paginate(20),
         ]);
     }
 }

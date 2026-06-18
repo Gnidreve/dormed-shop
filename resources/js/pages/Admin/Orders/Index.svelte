@@ -33,6 +33,7 @@
         DropdownMenuTrigger,
     } from '@/components/ui/dropdown-menu';
     import ChevronDown from 'lucide-svelte/icons/chevron-down';
+    import { formatPrice } from '@/lib/currency';
 
     type Order = {
         id: number;
@@ -50,8 +51,6 @@
     };
 
     let { orders }: { orders: Paginator } = $props();
-
-    const fmt = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' });
 
     const statusLabels: Record<string, string> = {
         pending: 'Ausstehend',
@@ -97,7 +96,7 @@
         {
             accessorKey: 'total_amount',
             header: 'Gesamt',
-            cell: ({ row }) => fmt.format(Number(row.original.total_amount)),
+            cell: ({ row }) => formatPrice(row.original.total_amount),
         },
         {
             accessorKey: 'created_at',

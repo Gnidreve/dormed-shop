@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateProductRequest;
+use App\Models\Category;
 use App\Models\Manufacturer;
 use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
@@ -22,8 +23,9 @@ class ProductController extends Controller
     public function edit(Product $product): Response
     {
         return Inertia::render('Admin/Products/Edit', [
-            'product' => $product->load('manufacturer'),
+            'product' => $product->load('manufacturer', 'category'),
             'manufacturers' => Manufacturer::orderBy('name')->get(['id', 'name']),
+            'categories' => Category::orderBy('name')->get(['id', 'name']),
         ]);
     }
 
