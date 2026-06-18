@@ -9,6 +9,9 @@
     import User from 'lucide-svelte/icons/user';
     import CartSheet from '@/components/CartSheet.svelte';
     import UserPlus from 'lucide-svelte/icons/user-plus';
+    import * as Dialog from '@/components/ui/dialog';
+    import * as Table from '@/components/ui/table';
+    import customerRoutes from '@/routes/customer';
     import X from 'lucide-svelte/icons/x';
     import { Button } from '@/components/ui/button';
     import { Input } from '@/components/ui/input';
@@ -106,6 +109,36 @@
     const allResultsUrl = $derived(
         ProductController.index.url({ query: { q: query } }),
     );
+
+    type Order = {
+        id: number;
+        status: string;
+        total_amount: string;
+        created_at: string;
+    };
+
+    const statusLabels: Record<string, string> = {
+        pending: 'Ausstehend',
+        processing: 'In Bearbeitung',
+        completed: 'Abgeschlossen',
+        cancelled: 'Storniert',
+    };
+
+    let ordersOpen = $state(false);
+    let orders = $state<Order[]>([]);
+    let ordersLoading = $state(false);
+
+    async function openOrders() {
+        ordersOpen = true;
+        if (orders.length > 0) { return; }
+        ordersLoading = true;
+        const res = await fetch(customerRoutes.orders.url(), {
+            headers: { Accept: 'application/json' },
+            credentials: 'same-origin',
+        });
+        orders = await res.json();
+        ordersLoading = false;
+    }
 </script>
 
 <svelte:window onclick={handleClickOutside} onkeydown={handleKeydown} />
@@ -238,18 +271,12 @@
                             </DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuGroup>
-                                <DropdownMenuItem asChild>
-                                    {#snippet children(props)}
-                                        <Link
-                                            class={props.class}
-                                            href={toUrl(editProfile())}
-                                            prefetch
-                                            onclick={props.onClick}
-                                        >
-                                            <Package class="mr-2 size-4" />
-                                            Bestellungen
-                                        </Link>
-                                    {/snippet}
+                                <DropdownMenuItem
+                                    onclick={() => openOrders()}
+                                    class="cursor-pointer"
+                                >
+                                    <Package class="mr-2 size-4" />
+                                    Bestellungen
                                 </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
                                     {#snippet children(props)}
@@ -347,3 +374,55 @@
         </div>
     </div>
 </header>
+
+<Dialog.Root bind:open={ordersOpen}>
+    <Dialog.Content class="max-w-2xl">
+        <Dialog.Title>Meine Bestellungen</Dialog.Title>
+        <Dialog.Description class="sr-only">Übersicht Ihrer Bestellungen</Dialog.Description>
+
+        {#if ordersLoading}
+            <div class="space-y-2 py-4">
+                {#each Array(3) as _}
+                    <div class="h-10 animate-pulse rounded bg-muted"></div>
+                {/each}
+            </div>
+        {:else if orders.length === 0}
+            <p class="py-8 text-center text-sm text-muted-foreground">
+                Noch keine Bestellungen vorhanden.
+            </p>
+        {:else}
+            <Table.Root>
+                <Table.Header>
+                    <Table.Row>
+                        <Table.Head>Nr.</Table.Head>
+                        <Table.Head>Datum</Table.Head>
+                        <Table.Head>Status</Table.Head>
+                        <Table.Head class="text-right">Gesamt</Table.Head>
+                    </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                    {#each orders as order (order.id)}
+                        <Table.Row>
+                            <Table.Cell class="font-medium">#{order.id}</Table.Cell>
+                            <Table.Cell>
+                                {new Date(order.created_at).toLocaleDateString('de-DE')}
+                            </Table.Cell>
+                            <Table.Cell>
+                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
+                                    {order.status === 'completed' ? 'bg-green-100 text-green-700' :
+                                     order.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                                     order.status === 'processing' ? 'bg-blue-100 text-blue-700' :
+                                     'bg-yellow-100 text-yellow-700'}">
+                                    {statusLabels[order.status] ?? order.status}
+                                </span>
+                            </Table.Cell>
+                            <Table.Cell class="text-right font-semibold">
+                                {formatPrice(order.total_amount)}
+                            </Table.Cell>
+                        </Table.Row>
+                    {/each}
+                </Table.Body>
+            </Table.Root>
+        {/if}
+    </Dialog.Content>
+</Dialog.Root>

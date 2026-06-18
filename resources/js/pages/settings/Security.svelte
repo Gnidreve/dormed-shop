@@ -53,7 +53,8 @@
     />
 
     <Form
-        {...SecurityController.update.form()}
+        action={SecurityController.update.url()}
+        method="put"
         class="space-y-6"
         options={{ preserveScroll: true }}
         resetOnSuccess

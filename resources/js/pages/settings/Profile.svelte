@@ -39,7 +39,8 @@
     />
 
     <Form
-        {...ProfileController.update.form()}
+        action={ProfileController.update.url()}
+        method="patch"
         class="space-y-6"
         options={{ preserveScroll: true }}
     >

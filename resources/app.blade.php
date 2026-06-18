@@ -6,7 +6,6 @@
 
         <link rel="icon" href="/favicon.avif" sizes="any">
         <link rel="icon" href="/favicon.avif" type="image/avif">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
         @fonts
 
