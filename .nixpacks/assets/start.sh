@@ -18,12 +18,13 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
-# Fix SQLite permissions after migrations (php-fpm needs write access)
+# Fix SQLite permissions after migrations
 chown -R www-data:www-data /app/database
 chmod 664 /app/database/database.sqlite
 
-# Build nginx config from Nixpacks template
-node /assets/scripts/prestart.mjs /assets/nginx.template.conf /etc/nginx.conf
+# Generate nginx config (envsubst only replaces $PORT, leaves nginx vars untouched)
+PORT="${PORT:-80}"
+envsubst '$PORT' < /assets/nginx.conf.template > /etc/nginx.conf
 
 # Start supervisor (manages nginx, php-fpm, queue worker)
 supervisord -c /assets/supervisord.conf -n
