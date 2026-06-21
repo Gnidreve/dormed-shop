@@ -1,7 +1,6 @@
 <script module lang="ts">
     export const layout = {
         title: 'Admin Login',
-        description: 'Zugang nur für Administratoren',
     };
 </script>
 

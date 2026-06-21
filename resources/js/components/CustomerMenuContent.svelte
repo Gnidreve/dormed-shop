@@ -8,7 +8,6 @@
         DropdownMenuLabel,
         DropdownMenuSeparator,
     } from '@/components/ui/dropdown-menu';
-    import CustomerInfo from '@/components/CustomerInfo.svelte';
     import { toUrl } from '@/lib/utils';
     import { logout } from '@/routes';
     import { edit } from '@/routes/profile';
@@ -29,8 +28,9 @@
 </script>
 
 <DropdownMenuLabel class="p-0 font-normal">
-    <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-        <CustomerInfo {user} showEmail={true} />
+    <div class="grid px-1 py-1.5 text-left text-sm leading-tight">
+        <span class="truncate font-medium">{user.name}</span>
+        <span class="truncate text-xs text-muted-foreground">{user.email}</span>
     </div>
 </DropdownMenuLabel>
 <DropdownMenuSeparator />

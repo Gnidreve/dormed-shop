@@ -41,6 +41,9 @@
     <SheetTrigger asChild>
         {#snippet children(props)}
             <Button variant="ghost" class="gap-2 px-3" onclick={props.onclick}>
+                <span class="text-sm font-medium text-[#1a3a5c]">
+                    {formattedTotal}*
+                </span>
                 <div class="relative">
                     <ShoppingCart class="size-5" />
                     {#if cart.count > 0}
@@ -51,9 +54,6 @@
                         </span>
                     {/if}
                 </div>
-                <span class="text-sm font-medium text-[#1a3a5c]">
-                    {formattedTotal}*
-                </span>
             </Button>
         {/snippet}
     </SheetTrigger>
