@@ -16,7 +16,7 @@ Route::post('/cart/items', [CartController::class, 'store'])->name('cart.items.s
 Route::patch('/cart/items/{product}', [CartController::class, 'update'])->name('cart.items.update');
 Route::delete('/cart/items/{product}', [CartController::class, 'destroy'])->name('cart.items.destroy');
 Route::patch('/cart/shipping', [CartController::class, 'updateShipping'])->name('cart.shipping.update');
-Route::get('/checkout/confirm', [CheckoutController::class, 'confirm'])->name('checkout.confirm');
+Route::get('/checkout/confirm', [CheckoutController::class, 'confirm'])->middleware('auth')->name('checkout.confirm');
 Route::patch('/checkout/payment', [CheckoutController::class, 'updatePayment'])->name('checkout.payment.update');
 Route::post('/checkout/submit', [CheckoutController::class, 'submit'])->middleware('auth')->name('checkout.submit');
 Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');

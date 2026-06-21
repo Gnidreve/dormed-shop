@@ -2,10 +2,12 @@
     import { Link, router } from '@inertiajs/svelte';
     import Minus from 'lucide-svelte/icons/minus';
     import Plus from 'lucide-svelte/icons/plus';
+    import ShoppingCart from 'lucide-svelte/icons/shopping-cart';
     import X from 'lucide-svelte/icons/x';
     import AppHead from '@/components/AppHead.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
     import { Button } from '@/components/ui/button';
+    import * as Empty from '@/components/ui/empty';
     import cartRoutes from '@/routes/cart';
     import checkout from '@/routes/checkout';
     import { formatPrice } from '@/lib/currency';
@@ -49,11 +51,27 @@
             <div class="flex-1">
                 <div class="overflow-hidden rounded-lg border bg-white">
                     {#if cart.is_empty}
-                        <div class="px-8 py-16 text-center text-gray-500">
-                            Ihr Warenkorb ist leer.
-                            <Link href="/" class="mt-3 block text-[#1a6bbf] hover:underline">
-                                Weiter einkaufen
-                            </Link>
+                        <div class="py-16">
+                            <Empty.Root>
+                                <Empty.Header>
+                                    <Empty.Media variant="icon">
+                                        <ShoppingCart />
+                                    </Empty.Media>
+                                    <Empty.Title>Ihr Warenkorb ist leer</Empty.Title>
+                                    <Empty.Description>
+                                        Noch keine Produkte hinzugefügt.
+                                    </Empty.Description>
+                                </Empty.Header>
+                                <Empty.Content>
+                                    <Button asChild>
+                                        {#snippet children(props)}
+                                            <Link href="/products" class={props.class}>
+                                                Weiter einkaufen
+                                            </Link>
+                                        {/snippet}
+                                    </Button>
+                                </Empty.Content>
+                            </Empty.Root>
                         </div>
                     {:else}
                         <table class="w-full text-sm">
