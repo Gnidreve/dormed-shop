@@ -2,7 +2,7 @@
 NIXPACKS_PHP_VERSION = "8.4"
 
 [phases.setup]
-nixPkgs = ["python311Packages.supervisor"]
+aptPkgs = ["curl", "wget", "supervisor"]
 
 [phases.install]
 cmds = [
