@@ -11,6 +11,9 @@ cmds = [
 
 [phases.build]
 cmds = [
+    "mkdir -p /app/database && touch /app/database/database.sqlite",
+    "php artisan package:discover --ansi",
+    "php artisan wayfinder:generate --with-form",
     "npm install",
     "npm run build",
     "mkdir -p /etc/supervisor/conf.d",
