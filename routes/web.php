@@ -9,6 +9,7 @@ Route::inertia('/agb', 'AGB')->name('agb');
 Route::inertia('/datenschutz', 'Datenschutz')->name('datenschutz');
 Route::inertia('/zahlung', 'Zahlung')->name('zahlung');
 Route::inertia('/widerrufsbelehrung', 'Widerrufsbelehrung')->name('widerrufsbelehrung');
+Route::inertia('/kontakt', 'Kontakt')->name('kontakt');
 
 require __DIR__.'/admin.php';
 require __DIR__.'/products.php';

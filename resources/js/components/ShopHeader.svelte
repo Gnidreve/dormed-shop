@@ -41,7 +41,7 @@
         { label: 'Alle Produkte', href: '/products' },
     ];
 
-    const staticNavEnd = [{ label: 'Kontakt', href: '/hilfe' }];
+    const staticNavEnd = [{ label: 'Kontakt', href: '/kontakt' }];
 
     const auth = $derived(page.props.auth);
     const cart = $derived(page.props.cart as Cart);
@@ -254,6 +254,8 @@
 
             <!-- Actions -->
             <div class="flex shrink-0 items-center gap-1">
+                <CartSheet {cart} />
+
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         {#snippet children(props)}
@@ -358,8 +360,6 @@
                         {/if}
                     </DropdownMenuContent>
                 </DropdownMenu>
-
-                <CartSheet {cart} />
             </div>
         </div>
     </div>

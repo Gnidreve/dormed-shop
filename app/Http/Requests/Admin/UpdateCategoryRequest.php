@@ -11,7 +11,7 @@ class UpdateCategoryRequest extends FormRequest
     private const RESERVED_SLUGS = [
         'admin', 'products', 'checkout', 'warenkorb', 'customer',
         'settings', 'stripe', 'versand', 'impressum', 'agb',
-        'datenschutz', 'zahlung', 'widerrufsbelehrung', 'hilfe',
+        'datenschutz', 'zahlung', 'widerrufsbelehrung', 'hilfe', 'kontakt',
     ];
 
     public function authorize(): bool
