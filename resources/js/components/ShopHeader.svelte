@@ -32,14 +32,16 @@
     import { formatPrice } from '@/lib/currency';
     import type { Cart, Customer } from '@/types';
 
-    const navItems = [
+    type NavCategory = { id: number; name: string; slug: string };
+
+    const navCategories = $derived(page.props.navCategories as NavCategory[]);
+
+    const staticNavStart = [
         { label: 'Startseite', href: '/' },
         { label: 'Alle Produkte', href: '/products' },
-        { label: 'Ultraschallsysteme', href: '/ultraschallsysteme' },
-        { label: 'Zubehör', href: '/zubehoer' },
-        { label: 'Verbrauchsartikel', href: '/verbrauchsartikel' },
-        { label: 'Hilfe & Kontakt', href: '/hilfe' },
-    ] as const;
+    ];
+
+    const staticNavEnd = [{ label: 'Kontakt', href: '/hilfe' }];
 
     const auth = $derived(page.props.auth);
     const cart = $derived(page.props.cart as Cart);
@@ -130,7 +132,9 @@
 
     async function openOrders() {
         ordersOpen = true;
-        if (orders.length > 0) { return; }
+        if (orders.length > 0) {
+            return;
+        }
         ordersLoading = true;
         const res = await fetch(customerRoutes.orders.url(), {
             headers: { Accept: 'application/json' },
@@ -204,7 +208,9 @@
                                 {#each results as product (product.id)}
                                     <li class="border-b last:border-b-0">
                                         <Link
-                                            href={ProductController.show.url(product.id)}
+                                            href={ProductController.show.url(
+                                                product.id,
+                                            )}
                                             class="flex items-center gap-3 px-4 py-2.5 hover:bg-accent"
                                             onclick={() => (isOpen = false)}
                                         >
@@ -362,7 +368,23 @@
     <div class="border-t">
         <div class="mx-auto max-w-7xl px-4 lg:px-8">
             <nav class="flex items-center justify-center">
-                {#each navItems as item (item.label)}
+                {#each staticNavStart as item (item.label)}
+                    <Link
+                        href={item.href}
+                        class="border-b-2 border-transparent px-4 py-3 text-sm font-medium text-gray-600 transition-colors hover:border-[#1a6bbf] hover:text-[#1a3a5c]"
+                    >
+                        {item.label}
+                    </Link>
+                {/each}
+                {#each navCategories as cat (cat.id)}
+                    <Link
+                        href={`/${cat.slug}`}
+                        class="border-b-2 border-transparent px-4 py-3 text-sm font-medium text-gray-600 transition-colors hover:border-[#1a6bbf] hover:text-[#1a3a5c]"
+                    >
+                        {cat.name}
+                    </Link>
+                {/each}
+                {#each staticNavEnd as item (item.label)}
                     <Link
                         href={item.href}
                         class="border-b-2 border-transparent px-4 py-3 text-sm font-medium text-gray-600 transition-colors hover:border-[#1a6bbf] hover:text-[#1a3a5c]"
@@ -378,7 +400,9 @@
 <Dialog.Root bind:open={ordersOpen}>
     <Dialog.Content class="max-w-2xl">
         <Dialog.Title>Meine Bestellungen</Dialog.Title>
-        <Dialog.Description class="sr-only">Übersicht Ihrer Bestellungen</Dialog.Description>
+        <Dialog.Description class="sr-only"
+            >Übersicht Ihrer Bestellungen</Dialog.Description
+        >
 
         {#if ordersLoading}
             <div class="space-y-2 py-4">
@@ -403,16 +427,25 @@
                 <Table.Body>
                     {#each orders as order (order.id)}
                         <Table.Row>
-                            <Table.Cell class="font-medium">#{order.id}</Table.Cell>
+                            <Table.Cell class="font-medium"
+                                >#{order.id}</Table.Cell
+                            >
                             <Table.Cell>
-                                {new Date(order.created_at).toLocaleDateString('de-DE')}
+                                {new Date(order.created_at).toLocaleDateString(
+                                    'de-DE',
+                                )}
                             </Table.Cell>
                             <Table.Cell>
-                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
-                                    {order.status === 'completed' ? 'bg-green-100 text-green-700' :
-                                     order.status === 'cancelled' ? 'bg-red-100 text-red-700' :
-                                     order.status === 'processing' ? 'bg-blue-100 text-blue-700' :
-                                     'bg-yellow-100 text-yellow-700'}">
+                                <span
+                                    class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
+                                    {order.status === 'completed'
+                                        ? 'bg-green-100 text-green-700'
+                                        : order.status === 'cancelled'
+                                          ? 'bg-red-100 text-red-700'
+                                          : order.status === 'processing'
+                                            ? 'bg-blue-100 text-blue-700'
+                                            : 'bg-yellow-100 text-yellow-700'}"
+                                >
                                     {statusLabels[order.status] ?? order.status}
                                 </span>
                             </Table.Cell>

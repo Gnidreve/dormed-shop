@@ -1,18 +1,26 @@
 <script lang="ts">
+    import { router } from '@inertiajs/svelte';
     import Ellipsis from 'lucide-svelte/icons/ellipsis';
     import ExternalLink from 'lucide-svelte/icons/external-link';
     import Pencil from 'lucide-svelte/icons/pencil';
+    import Trash2 from 'lucide-svelte/icons/trash-2';
     import { Button } from '@/components/ui/button';
     import {
         DropdownMenu,
         DropdownMenuContent,
         DropdownMenuItem,
+        DropdownMenuSeparator,
         DropdownMenuTrigger,
     } from '@/components/ui/dropdown-menu';
     import * as AdminProductController from '@/actions/App/Http/Controllers/Admin/ProductController';
     import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
 
     let { product }: { product: { id: number; name: string } } = $props();
+
+    function destroy() {
+        if (!confirm(`Produkt „${product.name}" wirklich löschen?`)) return;
+        router.delete(AdminProductController.destroy.url(product.id));
+    }
 </script>
 
 <DropdownMenu>
@@ -55,6 +63,11 @@
                     Bearbeiten
                 </a>
             {/snippet}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onclick={destroy} class="text-destructive focus:text-destructive">
+            <Trash2 class="mr-2 size-4" />
+            Löschen
         </DropdownMenuItem>
     </DropdownMenuContent>
 </DropdownMenu>

@@ -285,7 +285,8 @@
                             </p>
 
                             <Form
-                                {...ratingsRoutes.store.form(product.id)}
+                                action={ratingsRoutes.store.url(product.id)}
+                                method="post"
                                 resetOnSuccess={['content']}
                                 class="mt-6 space-y-5"
                             >

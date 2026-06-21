@@ -21,17 +21,8 @@
     <div class="w-full max-w-sm">
         <div class="flex flex-col gap-8">
             <div class="flex flex-col items-center gap-4">
-                <Link
-                    href={home()}
-                    class="flex flex-col items-center gap-2 font-medium"
-                >
-                    <div
-                        class="mb-1 flex h-9 w-9 items-center justify-center rounded-md"
-                    >
-                        <AppLogoIcon
-                            class="size-9 fill-current text-(--foreground) dark:text-white"
-                        />
-                    </div>
+                <Link href={home()} class="mb-1">
+                    <AppLogoIcon class="h-20 w-auto" />
                     <span class="sr-only">{title}</span>
                 </Link>
                 <div class="space-y-2 text-center">

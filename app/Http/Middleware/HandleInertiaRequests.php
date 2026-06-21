@@ -2,8 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Category;
 use App\Support\Cart\CartService;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -47,6 +49,10 @@ class HandleInertiaRequests extends Middleware
             ],
             'cart' => $cart,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'navCategories' => Inertia::always(
+                fn () => Category::orderBy('name')->get(['id', 'name', 'slug']),
+            ),
+            'stripeKey' => config('services.stripe.publishable_key'),
         ];
     }
 }

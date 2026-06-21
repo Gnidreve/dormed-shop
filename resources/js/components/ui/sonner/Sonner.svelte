@@ -8,6 +8,6 @@
     theme="light"
     class="toaster group"
     position="bottom-right"
-    style="--normal-bg: var(--popover); --normal-text: var(--popover-foreground); --normal-border: var(--border);"
+    style="--normal-bg: var(--popover); --normal-text: var(--popover-foreground); --normal-border: var(--border); --width: 250px;"
     {...restProps}
 />

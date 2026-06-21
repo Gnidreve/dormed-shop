@@ -3,7 +3,12 @@
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CustomerOrderController;
+use App\Http\Controllers\StripeWebhookController;
 use Illuminate\Support\Facades\Route;
+
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])
+    ->middleware('throttle:60,1')
+    ->name('stripe.webhook');
 
 Route::get('/warenkorb', [CartController::class, 'index'])->name('cart.index');
 Route::get('/checkout', [CartController::class, 'index'])->name('checkout.index');

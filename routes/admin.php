@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LoginController;
 use App\Http\Controllers\Admin\ManufacturerController;
 use App\Http\Controllers\Admin\OrderController;
@@ -19,14 +20,23 @@ Route::post('/admin/logout', [LoginController::class, 'logout'])
     ->name('admin.logout');
 
 Route::middleware('ensure.admin')->prefix('admin')->name('admin.')->group(function () {
-    Route::inertia('/', 'Admin/Dashboard')->name('dashboard');
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
     Route::get('/products/{product}/edit', [AdminProductController::class, 'edit'])->name('products.edit');
     Route::put('/products/{product}', [AdminProductController::class, 'update'])->name('products.update');
+    Route::delete('/products/{product}', [AdminProductController::class, 'destroy'])->name('products.destroy');
     Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+    Route::get('/categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
+    Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+    Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
     Route::get('/manufacturers', [ManufacturerController::class, 'index'])->name('manufacturers.index');
+    Route::get('/manufacturers/{manufacturer}/edit', [ManufacturerController::class, 'edit'])->name('manufacturers.edit');
+    Route::put('/manufacturers/{manufacturer}', [ManufacturerController::class, 'update'])->name('manufacturers.update');
+    Route::delete('/manufacturers/{manufacturer}', [ManufacturerController::class, 'destroy'])->name('manufacturers.destroy');
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
+    Route::get('/settings/stripe/check', [SettingController::class, 'checkStripe'])->name('settings.stripe.check');
+    Route::get('/settings/mail/check', [SettingController::class, 'checkMail'])->name('settings.mail.check');
 });

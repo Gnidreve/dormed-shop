@@ -7,8 +7,9 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['customer_id', 'status', 'total_amount'])]
+#[Fillable(['customer_id', 'status', 'total_amount', 'shipping_amount', 'stripe_checkout_session_id', 'stripe_payment_intent_id'])]
 class Order extends Model
 {
     /** @use HasFactory<OrderFactory> */
@@ -18,11 +19,17 @@ class Order extends Model
     {
         return [
             'total_amount' => 'decimal:2',
+            'shipping_amount' => 'decimal:2',
         ];
     }
 
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
     }
 }

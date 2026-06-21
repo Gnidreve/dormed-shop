@@ -30,6 +30,7 @@
         createSvelteTable,
         renderComponent,
     } from '@/components/ui/data-table';
+    import ManufacturerActions from './ManufacturerActions.svelte';
     import {
         DropdownMenu,
         DropdownMenuCheckboxItem,
@@ -86,6 +87,13 @@
             accessorKey: 'contact_email',
             header: 'Kontakt',
             cell: ({ row }) => row.original.contact_email ?? '—',
+        },
+        {
+            id: 'actions',
+            header: '',
+            cell: ({ row }) => renderComponent(ManufacturerActions, { manufacturer: row.original }),
+            enableSorting: false,
+            enableHiding: false,
         },
     ];
 

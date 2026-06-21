@@ -16,8 +16,6 @@
         SidebarMenuItem,
         useSidebar,
     } from '@/components/ui/sidebar';
-    import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-    import { getInitials } from '@/lib/initials';
     import * as AdminLoginController from '@/actions/App/Http/Controllers/Admin/LoginController';
 
     const admin = $derived((page.props.auth as any).admin);
@@ -41,11 +39,6 @@
                             aria-expanded={props['aria-expanded']}
                             data-state={props['data-state']}
                         >
-                            <Avatar class="h-8 w-8 overflow-hidden rounded-lg">
-                                <AvatarFallback class="rounded-lg text-black dark:text-white">
-                                    {getInitials(admin.name)}
-                                </AvatarFallback>
-                            </Avatar>
                             <div class="grid flex-1 text-left text-sm leading-tight">
                                 <span class="truncate font-medium">{admin.name}</span>
                                 <span class="truncate text-xs text-muted-foreground">{admin.email}</span>
@@ -61,16 +54,9 @@
                     sideOffset={4}
                 >
                     <DropdownMenuLabel class="p-0 font-normal">
-                        <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                            <Avatar class="h-8 w-8 overflow-hidden rounded-lg">
-                                <AvatarFallback class="rounded-lg text-black dark:text-white">
-                                    {getInitials(admin.name)}
-                                </AvatarFallback>
-                            </Avatar>
-                            <div class="grid flex-1 text-left text-sm leading-tight">
-                                <span class="truncate font-medium">{admin.name}</span>
-                                <span class="truncate text-xs text-muted-foreground">{admin.email}</span>
-                            </div>
+                        <div class="px-2 py-1.5 text-left text-sm">
+                            <span class="block font-medium">{admin.name}</span>
+                            <span class="block text-xs text-muted-foreground">{admin.email}</span>
                         </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />

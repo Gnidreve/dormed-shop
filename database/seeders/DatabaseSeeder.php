@@ -31,20 +31,45 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
-        // One category for now
-        $category = Category::create([
-            'name' => 'Medizintechnik',
-            'slug' => 'medizintechnik',
-            'description' => null,
-        ]);
+        // Categories
+        $categories = collect([
+            ['name' => 'Ultraschallsysteme', 'slug' => 'ultraschallsysteme', 'description' => null],
+            ['name' => 'Zubehör', 'slug' => 'zubehoer', 'description' => null],
+            ['name' => 'Verbrauchsartikel', 'slug' => 'verbrauchsartikel', 'description' => null],
+        ])->map(fn (array $data) => Category::create($data));
 
         // Manufacturers & Products
         $manufacturers = Manufacturer::factory(5)->create();
-        $products = Product::factory(20)->recycle($manufacturers)->create([
-            'category_id' => $category->id,
-        ]);
+        Product::factory(30)->recycle($manufacturers)->make()->each(function ($product) use ($categories) {
+            $product->category_id = $categories->random()->id;
+            $product->save();
+        });
 
-        // Orders
-        Order::factory(15)->recycle($customers)->create();
+        // Orders: 7 Tage, Variation zwischen Volumentagen und Hochwerttagen
+        $scenarios = [
+            ['daysAgo' => 6, 'count' => 9,  'min' => 12,   'max' => 55],    // Volumentag
+            ['daysAgo' => 5, 'count' => 3,  'min' => 650,  'max' => 1800],  // Hochwerttag
+            ['daysAgo' => 4, 'count' => 14, 'min' => 8,    'max' => 40],    // Starker Volumentag
+            ['daysAgo' => 3, 'count' => 2,  'min' => 900,  'max' => 2400],  // Sehr hohe Einzelbestellungen
+            ['daysAgo' => 2, 'count' => 7,  'min' => 25,   'max' => 90],    // Gemischter Tag
+            ['daysAgo' => 1, 'count' => 4,  'min' => 400,  'max' => 1200],  // Hochwerttag
+            ['daysAgo' => 0, 'count' => 11, 'min' => 15,   'max' => 65],    // Volumentag (heute)
+        ];
+
+        foreach ($scenarios as $scenario) {
+            for ($i = 0; $i < $scenario['count']; $i++) {
+                $date = now()
+                    ->subDays($scenario['daysAgo'])
+                    ->setHour(random_int(7, 21))
+                    ->setMinute(random_int(0, 59))
+                    ->setSecond(random_int(0, 59));
+
+                Order::factory()->recycle($customers)->create([
+                    'total_amount' => fake()->randomFloat(2, $scenario['min'], $scenario['max']),
+                    'created_at' => $date,
+                    'updated_at' => $date,
+                ]);
+            }
+        }
     }
 }

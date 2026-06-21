@@ -30,6 +30,7 @@
         createSvelteTable,
         renderComponent,
     } from '@/components/ui/data-table';
+    import CategoryActions from './CategoryActions.svelte';
     import {
         DropdownMenu,
         DropdownMenuCheckboxItem,
@@ -87,6 +88,13 @@
         {
             accessorKey: 'products_count',
             header: 'Produkte',
+        },
+        {
+            id: 'actions',
+            header: '',
+            cell: ({ row }) => renderComponent(CategoryActions, { category: row.original }),
+            enableSorting: false,
+            enableHiding: false,
         },
     ];
 

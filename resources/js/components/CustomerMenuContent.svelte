@@ -1,7 +1,7 @@
 <script lang="ts">
     import { Link, router } from '@inertiajs/svelte';
     import LogOut from 'lucide-svelte/icons/log-out';
-    import Settings from 'lucide-svelte/icons/settings';
+    import User from 'lucide-svelte/icons/user';
     import {
         DropdownMenuGroup,
         DropdownMenuItem,
@@ -43,8 +43,8 @@
                 prefetch
                 onclick={props.onClick}
             >
-                <Settings class="mr-2 h-4 w-4" />
-                Settings
+                <User class="mr-2 h-4 w-4" />
+                Mein Profil
             </Link>
         {/snippet}
     </DropdownMenuItem>

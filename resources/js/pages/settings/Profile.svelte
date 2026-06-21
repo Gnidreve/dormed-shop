@@ -15,7 +15,6 @@
     import { Form, page } from '@inertiajs/svelte';
     import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
     import AppHead from '@/components/AppHead.svelte';
-    import DeleteCustomer from '@/components/DeleteCustomer.svelte';
     import Heading from '@/components/Heading.svelte';
     import InputError from '@/components/InputError.svelte';
     import TextLink from '@/components/TextLink.svelte';
@@ -102,5 +101,3 @@
         {/snippet}
     </Form>
 </div>
-
-<DeleteCustomer />
