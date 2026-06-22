@@ -1,0 +1,56 @@
+# ============================================
+# Production Dockerfile für dormed-shop
+# Multi-stage: Build → FPM+Nginx Runtime
+# ============================================
+
+# ---- Build Stage ----
+FROM serversideup/php:8.4-cli AS build
+
+WORKDIR /build
+
+# System deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git unzip ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+# Composer auth (optional, falls private packages)
+COPY composer.json composer.lock ./
+
+# PHP dependencies (ohne Dev)
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress
+
+# Node dependencies & Build
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+
+COPY . .
+RUN npm run build
+
+# ---- Production Stage ----
+FROM serversideup/php:8.4-fpm-nginx AS production
+
+USER root
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+# System deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl && \
+    rm -rf /var/lib/apt/lists/*
+
+USER sandbox
+
+# Artefakte aus Build kopieren
+COPY --from=build --chown=sandbox:sandbox /build /var/www/html
+
+# Laravel-spezifische Ordnerstruktur
+WORKDIR /var/www/html
+
+# Standard-Coolify-Environment
+ENV APP_ENV=production \
+    APP_DEBUG=false \
+    LOG_LEVEL=warning
+
+EXPOSE 8080
