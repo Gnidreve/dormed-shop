@@ -373,7 +373,14 @@
 
                     {#if customer}
                         {#if isPayPal && paypal_client_id}
-                            <div class="mt-6">
+                            <!-- Kauf auf Rechnung (vorläufig ohne Funktion) -->
+                            <Button
+                                class="mt-6 w-full bg-white text-[#0d1f44] ring-1 ring-[#0d1f44] hover:bg-gray-50"
+                                disabled={!agreedToTerms || cart.is_empty || !addressComplete}
+                            >
+                                Kauf auf Rechnung
+                            </Button>
+                            <div class="mt-3">
                                 <PayPalButton
                                     total={Number(cart.total)}
                                     clientId={paypal_client_id ?? ''}
