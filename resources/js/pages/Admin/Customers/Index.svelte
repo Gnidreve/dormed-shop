@@ -34,6 +34,7 @@
         DropdownMenuTrigger,
     } from '@/components/ui/dropdown-menu';
     import ChevronDown from 'lucide-svelte/icons/chevron-down';
+    import TableCellLink from '@/components/TableCellLink.svelte';
 
     type Customer = {
         id: number;
@@ -74,7 +75,16 @@
             enableSorting: false,
             enableHiding: false,
         },
-        { accessorKey: 'name', header: 'Name' },
+        {
+            accessorKey: 'name',
+            header: 'Name',
+            cell: ({ row }) =>
+                renderComponent(TableCellLink, {
+                    href: `/admin/customers/${row.original.id}`,
+                    label: row.original.name,
+                }),
+            enableSorting: true,
+        },
         { accessorKey: 'email', header: 'E-Mail' },
         {
             accessorKey: 'email_verified_at',

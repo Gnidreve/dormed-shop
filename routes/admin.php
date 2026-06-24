@@ -26,6 +26,7 @@ Route::middleware('ensure.admin')->prefix('admin')->name('admin.')->group(functi
     Route::put('/products/{product}', [AdminProductController::class, 'update'])->name('products.update');
     Route::delete('/products/{product}', [AdminProductController::class, 'destroy'])->name('products.destroy');
     Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
+    Route::get('/customers/{customer}', [AdminCustomerController::class, 'show'])->name('customers.show');
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
     Route::get('/categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
     Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
@@ -35,6 +36,7 @@ Route::middleware('ensure.admin')->prefix('admin')->name('admin.')->group(functi
     Route::put('/manufacturers/{manufacturer}', [ManufacturerController::class, 'update'])->name('manufacturers.update');
     Route::delete('/manufacturers/{manufacturer}', [ManufacturerController::class, 'destroy'])->name('manufacturers.destroy');
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
     Route::get('/settings/stripe/check', [SettingController::class, 'checkStripe'])->name('settings.stripe.check');

@@ -30,6 +30,7 @@
         DropdownMenuTrigger,
     } from '@/components/ui/dropdown-menu';
     import ChevronDown from 'lucide-svelte/icons/chevron-down';
+    import TableCellLink from '@/components/TableCellLink.svelte';
     import { formatPrice } from '@/lib/currency';
 
     type Order = {
@@ -78,7 +79,11 @@
         {
             accessorKey: 'id',
             header: '#',
-            cell: ({ row }) => `#${row.original.id}`,
+            cell: ({ row }) =>
+                renderComponent(TableCellLink, {
+                    href: `/admin/orders/${row.original.id}`,
+                    label: `#${row.original.id}`,
+                }),
         },
         {
             id: 'customer',

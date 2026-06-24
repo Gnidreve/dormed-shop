@@ -15,4 +15,15 @@ class CustomerController extends Controller
             'customers' => Customer::latest()->paginate(20),
         ]);
     }
+
+
+    public function show(Customer $customer): Response
+    {
+        $customer->load(['addresses', 'orders' => fn ($q) => $q->with('items')->latest()->limit(10)]);
+
+        return Inertia::render('Admin/Customers/Show', [
+            'customer' => $customer,
+        ]);
+    }
+
 }

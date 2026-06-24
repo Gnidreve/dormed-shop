@@ -15,4 +15,15 @@ class OrderController extends Controller
             'orders' => Order::with('customer')->latest()->paginate(20),
         ]);
     }
+
+
+    public function show(Order $order): Response
+    {
+        $order->load(['customer', 'items', 'payments']);
+
+        return Inertia::render('Admin/Orders/Show', [
+            'order' => $order,
+        ]);
+    }
+
 }
