@@ -44,4 +44,5 @@ Route::middleware('ensure.admin')->prefix('admin')->name('admin.')->group(functi
     Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
     Route::get('/settings/stripe/check', [SettingController::class, 'checkStripe'])->name('settings.stripe.check');
     Route::get('/settings/mail/check', [SettingController::class, 'checkMail'])->name('settings.mail.check');
+    Route::get('/settings/paypal/check', [SettingController::class, 'checkPayPal'])->name('settings.paypal.check');
 });

@@ -4,6 +4,7 @@ namespace App\Support\Cart;
 
 use App\Contracts\CartStore;
 use App\Models\Product;
+use App\Models\Setting;
 use Illuminate\Support\Collection;
 
 class CartService
@@ -230,8 +231,10 @@ class CartService
         $methods = [];
         $index = 0;
 
+        $activeProvider = Setting::get('payment.provider') ?? 'stripe';
+
         foreach (config('shop.cart.providers', []) as $provider => $config) {
-            if (! ($config['enabled'] ?? false)) {
+            if ($provider !== $activeProvider) {
                 continue;
             }
 

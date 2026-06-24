@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Srmklive\PayPal\Services\PayPal;
@@ -18,11 +19,40 @@ class PayPalService
     private function client(): PayPal
     {
         if ($this->client === null) {
-            $this->client = new PayPal(config('paypal'));
+            $this->client = new PayPal($this->buildConfig());
             $this->authenticate();
         }
 
         return $this->client;
+    }
+
+    private function buildConfig(): array
+    {
+        $mode = Setting::get('paypal.mode') ?? config('paypal.mode', 'sandbox');
+
+        return [
+            'mode' => $mode,
+            'sandbox' => [
+                'client_id' => Setting::get('paypal.sandbox.client_id') ?? env('PAYPAL_SANDBOX_CLIENT_ID', ''),
+                'client_secret' => Setting::get('paypal.sandbox.client_secret') ?? env('PAYPAL_SANDBOX_CLIENT_SECRET', ''),
+                'app_id' => 'APP-80W284485P519543T',
+                'merchant_id' => Setting::get('paypal.sandbox.merchant_id') ?? env('PAYPAL_SANDBOX_MERCHANT_ID', ''),
+            ],
+            'live' => [
+                'client_id' => Setting::get('paypal.live.client_id') ?? env('PAYPAL_LIVE_CLIENT_ID', ''),
+                'client_secret' => Setting::get('paypal.live.client_secret') ?? env('PAYPAL_LIVE_CLIENT_SECRET', ''),
+                'app_id' => Setting::get('paypal.live.app_id') ?? env('PAYPAL_LIVE_APP_ID', ''),
+                'merchant_id' => Setting::get('paypal.live.merchant_id') ?? env('PAYPAL_LIVE_MERCHANT_ID', ''),
+            ],
+            'payment_action' => config('paypal.payment_action', 'Sale'),
+            'currency' => config('paypal.currency', 'EUR'),
+            'notify_url' => config('paypal.notify_url', ''),
+            'locale' => config('paypal.locale', 'de_DE'),
+            'validate_ssl' => config('paypal.validate_ssl', true),
+            'timeout' => config('paypal.timeout', 30),
+            'connect_timeout' => config('paypal.connect_timeout', 10),
+            'max_retries' => config('paypal.max_retries', 2),
+        ];
     }
 
     /**
@@ -150,7 +180,7 @@ class PayPalService
      */
     public function verifyWebhook(Request $request): bool
     {
-        $webhookId = config('paypal.webhook_id', env('PAYPAL_WEBHOOK_ID'));
+        $webhookId = Setting::get('paypal.webhook_id') ?? env('PAYPAL_WEBHOOK_ID');
 
         if (blank($webhookId)) {
             Log::warning('PayPal webhook verification skipped: no webhook ID configured');

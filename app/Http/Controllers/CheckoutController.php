@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Cart\UpdateCartPaymentMethodRequest;
 use App\Http\Requests\Checkout\PlaceOrderRequest;
 use App\Models\Order;
+use App\Models\Setting;
 use App\Support\Cart\CartService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -56,10 +57,10 @@ class CheckoutController extends Controller
         $paypalClientId = null;
 
         if (($selectedPayment['id'] ?? '') === 'paypal') {
-            $mode = config('paypal.mode', 'sandbox');
+            $mode = Setting::get('paypal.mode') ?? 'sandbox';
             $paypalClientId = $mode === 'live'
-                ? config('paypal.live.client_id')
-                : config('paypal.sandbox.client_id');
+                ? Setting::get('paypal.live.client_id')
+                : Setting::get('paypal.sandbox.client_id');
         }
 
         return Inertia::render('Checkout/Confirm', [

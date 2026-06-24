@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Message;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -20,6 +21,9 @@ class SettingController extends Controller
         'stripe.secret_key',
         'stripe.webhook_secret',
         'mail.smtp_password',
+        'paypal.sandbox.client_secret',
+        'paypal.live.client_secret',
+        'paypal.webhook_id',
     ];
 
     public function showGeneral(): Response
@@ -52,10 +56,9 @@ class SettingController extends Controller
             'hasSensitive' => collect(self::SENSITIVE_KEYS)
                 ->mapWithKeys(fn ($k) => [$k => Setting::get($k) !== null])
                 ->all(),
-            'webhookUrl' => route('stripe.webhook'),
+            'stripeWebhookUrl' => route('stripe.webhook'),
         ]);
     }
-
 
     public function index(): Response
     {
@@ -151,6 +154,38 @@ class SettingController extends Controller
         }
     }
 
+    public function checkPayPal(): JsonResponse
+    {
+        $mode = Setting::get('paypal.mode', 'sandbox') ?? 'sandbox';
+        $clientId = $mode === 'live'
+            ? Setting::get('paypal.live.client_id')
+            : Setting::get('paypal.sandbox.client_id');
+        $clientSecret = $mode === 'live'
+            ? Setting::get('paypal.live.client_secret')
+            : Setting::get('paypal.sandbox.client_secret');
+
+        if (! $clientId || ! $clientSecret) {
+            return response()->json(['message' => 'Client-ID oder Secret nicht konfiguriert.'], 422);
+        }
+
+        $baseUrl = $mode === 'live'
+            ? 'https://api-m.paypal.com'
+            : 'https://api-m.sandbox.paypal.com';
+
+        try {
+            $response = Http::withBasicAuth($clientId, $clientSecret)
+                ->asForm()
+                ->post("{$baseUrl}/v1/oauth2/token", ['grant_type' => 'client_credentials']);
+
+            if ($response->successful() && isset($response->json()['access_token'])) {
+                return response()->json(['message' => "Verbindung erfolgreich ({$mode})."]);
+            }
+
+            return response()->json(['message' => 'Authentifizierung fehlgeschlagen: '.($response->json()['error_description'] ?? 'Unbekannter Fehler')], 422);
+        } catch (\Throwable $e) {
+            return response()->json(['message' => 'Fehler: '.$e->getMessage()], 422);
+        }
+    }
 
     private function loadSettings(): array
     {
@@ -167,6 +202,16 @@ class SettingController extends Controller
             'stripe.publishable_key' => $raw->get('stripe.publishable_key', ''),
             'stripe.secret_key' => '',
             'stripe.webhook_secret' => '',
+            'payment.provider' => $raw->get('payment.provider', 'stripe'),
+            'paypal.mode' => $raw->get('paypal.mode', 'sandbox'),
+            'paypal.sandbox.client_id' => $raw->get('paypal.sandbox.client_id', ''),
+            'paypal.sandbox.merchant_id' => $raw->get('paypal.sandbox.merchant_id', ''),
+            'paypal.sandbox.client_secret' => '',
+            'paypal.live.client_id' => $raw->get('paypal.live.client_id', ''),
+            'paypal.live.app_id' => $raw->get('paypal.live.app_id', ''),
+            'paypal.live.merchant_id' => $raw->get('paypal.live.merchant_id', ''),
+            'paypal.live.client_secret' => '',
+            'paypal.webhook_id' => '',
         ];
 
         foreach (self::SENSITIVE_KEYS as $key) {
@@ -176,5 +221,4 @@ class SettingController extends Controller
 
         return $settings;
     }
-
 }
