@@ -113,7 +113,6 @@
             </h2>
             <p class="text-sm text-muted-foreground">{admin?.email}</p>
         </div>
-        <Button variant="outline" size="sm" onclick={logout}>Abmelden</Button>
     </div>
 
     <Card>

@@ -1,9 +1,6 @@
 <script module lang="ts">
     export const layout = {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/admin' },
-            { title: 'Produkte', href: '/admin/products' },
-        ],
+        breadcrumbs: [{ title: 'Produkte', href: '/admin/products' }],
     };
 </script>
 
@@ -137,11 +134,7 @@
             oninput={(e) => table.getColumn('name')?.setFilterValue(e.currentTarget.value)}
             class="max-w-sm"
         />
-        {#if Object.keys(rowSelection).length > 0}
-            <span class="text-sm text-muted-foreground">
-                {Object.keys(rowSelection).length} ausgewählt
-            </span>
-        {/if}
+
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 {#snippet children(props)}
@@ -198,15 +191,21 @@
         </Table.Root>
     </div>
 
-    <div class="flex items-center justify-end gap-2">
+    <div class="flex items-center justify-between gap-2">
         <span class="text-sm text-muted-foreground">
-            Seite {table.getState().pagination.pageIndex + 1} von {table.getPageCount()}
+            {#if Object.keys(rowSelection).length > 0}
+                {Object.keys(rowSelection).length} ausgewählt
+            {/if}
         </span>
-        <Button variant="outline" size="sm" onclick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
-            Zurück
-        </Button>
-        <Button variant="outline" size="sm" onclick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-            Weiter
-        </Button>
+        <div class="flex items-center gap-2">
+            <span class="text-sm text-muted-foreground">
+                Seite {table.getState().pagination.pageIndex + 1} von {table.getPageCount()}
+            </span>
+            <Button variant="outline" size="sm" onclick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+                Zurück
+            </Button>
+            <Button variant="outline" size="sm" onclick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+                Weiter
+            </Button>
+        </div>
     </div>
-</div>

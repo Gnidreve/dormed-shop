@@ -1,10 +1,6 @@
 <script module lang="ts">
     export const layout = {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/admin' },
-            { title: 'Produkte', href: '/admin/products' },
-            { title: 'Bearbeiten' },
-        ],
+        breadcrumbs: [{ title: 'Produkte', href: '/admin/products' }, { title: 'Bearbeiten' }],
     };
 </script>
 

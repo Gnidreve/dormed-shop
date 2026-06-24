@@ -1,9 +1,6 @@
 <script module lang="ts">
     export const layout = {
-        breadcrumbs: [
-            { title: 'Dashboard', href: '/admin' },
-            { title: 'Kunden', href: '/admin/customers' },
-        ],
+        breadcrumbs: [{ title: 'Kunden', href: '/admin/customers' }],
     };
 </script>
 
@@ -161,11 +158,7 @@
                 table.getColumn('name')?.setFilterValue(e.currentTarget.value)}
             class="max-w-sm"
         />
-        {#if Object.keys(rowSelection).length > 0}
-            <span class="text-sm text-muted-foreground">
-                {Object.keys(rowSelection).length} ausgewählt
-            </span>
-        {/if}
+
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 {#snippet children(props)}
