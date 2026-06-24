@@ -8,7 +8,6 @@
     import { Button } from '@/components/ui/button';
     import { Checkbox } from '@/components/ui/checkbox';
     import { Separator } from '@/components/ui/separator';
-    import cartRoutes from '@/routes/cart';
     import checkout from '@/routes/checkout';
     import { login } from '@/routes';
     import { formatPrice } from '@/lib/currency';
@@ -44,14 +43,6 @@
         shippingAddress.zip !== '' &&
         shippingAddress.city !== '',
     );
-
-    function updateShipping(shippingMethod: string) {
-        router.patch(
-            cartRoutes.shipping.update.url(),
-            { shipping_method: shippingMethod },
-            { preserveScroll: true, preserveState: true },
-        );
-    }
 
     function updatePayment(paymentMethod: string) {
         router.patch(
@@ -259,37 +250,7 @@
                     {/if}
                 </div>
 
-                <!-- Versandart -->
-                <div class="rounded-lg border bg-white p-5">
-                    <h2 class="mb-2 font-bold text-gray-900">Versandart</h2>
-                    <Separator class="mb-4" />
-                    <div class="flex flex-col gap-3">
-                        {#each cart.shipping_methods as method (method.id)}
-                            <label class="flex cursor-pointer items-start gap-3">
-                                <input
-                                    type="radio"
-                                    name="shipping"
-                                    value={method.id}
-                                    checked={method.selected}
-                                    onchange={() => updateShipping(method.id)}
-                                    class="mt-0.5 accent-[#0d1f44]"
-                                />
-                                <span class="text-sm">
-                                    <span class="font-semibold text-gray-900">
-                                        {method.label}
-                                    </span>
-                                    <span class="text-gray-500"> - {formatPrice(method.price ?? 0)}</span>
-                                    {#if method.description}
-                                        <br />
-                                        <span class="text-gray-500">{method.description}</span>
-                                    {/if}
-                                </span>
-                            </label>
-                        {/each}
-                    </div>
-                </div>
-
-                <!-- Zahlungsart -->
+<!-- Zahlungsart -->
                 <div class="rounded-lg border bg-white p-5">
                     <h2 class="mb-2 font-bold text-gray-900">Zahlungsart</h2>
                     <Separator class="mb-4" />
