@@ -10,11 +10,18 @@ use Srmklive\PayPal\Services\PayPal;
 
 class PayPalService
 {
-    private PayPal $client;
+    private ?PayPal $client = null;
 
-    public function __construct()
+    /**
+     * Get or create the PayPal API client (lazy init).
+     */
+    private function client(): PayPal
     {
-        $this->client = new PayPal(config('paypal'));
+        if ($this->client === null) {
+            $this->client = new PayPal(config('paypal'));
+        }
+
+        return $this->client;
     }
 
     /**
@@ -28,7 +35,7 @@ class PayPalService
      */
     public function createOrder(float $amount, string $currency = 'EUR'): array
     {
-        $this->client->setCurrency($currency);
+        $this->client()->setCurrency($currency);
 
         $data = [
             'intent' => 'CAPTURE',
@@ -50,7 +57,7 @@ class PayPalService
             ],
         ];
 
-        $response = $this->client->createOrder($data);
+        $response = $this->client()->createOrder($data);
 
         $this->logResponse('createOrder', $response);
 
@@ -67,7 +74,7 @@ class PayPalService
      */
     public function captureOrder(string $paypalOrderId): array
     {
-        $response = $this->client->capturePaymentOrder($paypalOrderId);
+        $response = $this->client()->capturePaymentOrder($paypalOrderId);
 
         $this->logResponse('captureOrder', $response);
 
@@ -88,7 +95,7 @@ class PayPalService
     {
         $invoiceId = 'REFUND-'.str()->random(12);
 
-        $response = $this->client->refundCapturedPayment(
+        $response = $this->client()->refundCapturedPayment(
             $captureId,
             $invoiceId,
             $amount,
@@ -126,11 +133,11 @@ class PayPalService
         ];
 
         try {
-            $this->client->setApiCredentials(config('paypal'));
-            $token = $this->client->getAccessToken();
-            $this->client->setAccessToken($token);
+            $this->client()->setApiCredentials(config('paypal'));
+            $token = $this->client()->getAccessToken();
+            $this->client()->setAccessToken($token);
 
-            $result = $this->client->verifyWebHook($payload, $headers, $webhookId);
+            $result = $this->client()->verifyWebHook($payload, $headers, $webhookId);
 
             return ($result['verification_status'] ?? '') === 'SUCCESS';
         } catch (\Throwable $e) {
@@ -152,7 +159,7 @@ class PayPalService
      */
     public function showOrderDetails(string $paypalOrderId): array
     {
-        return $this->client->showOrderDetails($paypalOrderId);
+        return $this->client()->showOrderDetails($paypalOrderId);
     }
 
     /**
@@ -160,7 +167,7 @@ class PayPalService
      */
     public function getCaptureIdFromOrder(array $orderResponse): ?string
     {
-        return $this->client->getCaptureIdFromOrder($orderResponse);
+        return $this->client()->getCaptureIdFromOrder($orderResponse);
     }
 
     /**
