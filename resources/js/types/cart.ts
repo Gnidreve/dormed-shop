@@ -12,6 +12,7 @@ export type CartItem = {
 
 export type CartMethod = {
     id: string;
+    provider: string;
     label: string;
     description: string | null;
     selected: boolean;

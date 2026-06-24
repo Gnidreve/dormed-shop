@@ -181,26 +181,37 @@ class CartService
 
     private function paymentMethods(string $selectedId): array
     {
-        return collect(config('shop.cart.payment_methods', []))
-            ->values()
-            ->map(function (array $method, int $index) use ($selectedId): array {
+        $methods = [];
+        $index = 0;
+
+        foreach (config('shop.cart.providers', []) as $provider => $config) {
+            if (! ($config['enabled'] ?? false)) {
+                continue;
+            }
+
+            foreach ($config['methods'] ?? [] as $method) {
                 $methodId = (string) $method['id'];
 
-                return [
+                $methods[] = [
                     'id' => $methodId,
+                    'provider' => $provider,
                     'label' => $method['label'],
                     'description' => $method['description'] ?? null,
                     'selected' => $methodId === $selectedId || ($selectedId === '' && $index === 0),
                 ];
-            })
-            ->all();
+
+                $index++;
+            }
+        }
+
+        return $methods;
     }
 
     private function state(): array
     {
         $rawState = $this->store->get();
         $shippingMethodIds = collect(config('shop.cart.shipping_methods', []))->pluck('id')->map(fn ($id) => (string) $id)->all();
-        $paymentMethodIds = collect(config('shop.cart.payment_methods', []))->pluck('id')->map(fn ($id) => (string) $id)->all();
+        $paymentMethodIds = collect($this->paymentMethods(''))->pluck('id')->map(fn ($id) => (string) $id)->all();
 
         return [
             'items' => collect($rawState['items'] ?? [])
