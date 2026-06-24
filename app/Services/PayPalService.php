@@ -19,9 +19,29 @@ class PayPalService
     {
         if ($this->client === null) {
             $this->client = new PayPal(config('paypal'));
+            $this->authenticate();
         }
 
         return $this->client;
+    }
+
+    /**
+     * Obtain an OAuth 2.0 access token from PayPal.
+     *
+     * The SDK stores the token internally and sets the Authorization header
+     * for all subsequent API calls on this client instance.
+     *
+     * @throws \Throwable
+     */
+    private function authenticate(): void
+    {
+        $token = $this->client->getAccessToken();
+
+        if (! isset($token['access_token'])) {
+            throw new \RuntimeException('PayPal authentication failed: ' . ($token['error']['message'] ?? 'No access token returned'));
+        }
+
+        $this->client->setAccessToken($token);
     }
 
     /**
