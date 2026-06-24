@@ -79,7 +79,7 @@
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi 2>/dev/null || true"
+            "@php artisan package:discover --ansi"
         ],
         "post-update-cmd": [
             "@php artisan install:features --ansi",
