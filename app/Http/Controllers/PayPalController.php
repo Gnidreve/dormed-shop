@@ -63,7 +63,7 @@ class PayPalController extends Controller
 
                 return response()->json([
                     'error' => 'PayPal-Order konnte nicht erstellt werden.',
-                    'debug' => \$response['error'] ?? 'Unbekannter Fehler',
+                    'debug' => $response['error'] ?? 'Unbekannter Fehler',
                 ], 500);
             }
 
