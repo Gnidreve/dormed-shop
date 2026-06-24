@@ -1,6 +1,7 @@
 <script lang="ts">
     import { Link, page, router } from '@inertiajs/svelte';
     import ChevronRight from 'lucide-svelte/icons/chevron-right';
+    import Menu from 'lucide-svelte/icons/menu';
     import LogOut from 'lucide-svelte/icons/log-out';
     import MapPin from 'lucide-svelte/icons/map-pin';
     import Package from 'lucide-svelte/icons/package';
@@ -10,6 +11,7 @@
     import CartSheet from '@/components/CartSheet.svelte';
     import UserPlus from 'lucide-svelte/icons/user-plus';
     import * as Dialog from '@/components/ui/dialog';
+    import {Sheet, SheetContent, SheetTitle, SheetTrigger} from '@/components/ui/sheet';
     import * as Table from '@/components/ui/table';
     import customerRoutes from '@/routes/customer';
     import X from 'lucide-svelte/icons/x';
@@ -158,8 +160,8 @@
                 <img src="/logo.svg" alt="dormed 24" class="h-10 w-auto" />
             </Link>
 
-            <!-- Search -->
-            <div bind:this={searchContainerEl} class="relative mx-8 flex-1">
+            <!-- Search (hidden on mobile) -->
+            <div bind:this={searchContainerEl} class="relative mx-8 hidden flex-1 md:block">
                 <div class="relative">
                     <Input
                         type="search"
@@ -254,6 +256,47 @@
 
             <!-- Actions -->
             <div class="flex shrink-0 items-center gap-1">
+                <!-- Mobile: burger menu -->
+                <Sheet>
+                    <SheetTrigger asChild>
+                        {#snippet children(props)}
+                            <Button variant="ghost" size="icon" class="md:hidden" onclick={props.onclick}>
+                                <Menu class="size-5" />
+                                <span class="sr-only">Menü</span>
+                            </Button>
+                        {/snippet}
+                    </SheetTrigger>
+                    <SheetContent side="left" class="w-72">
+                        <SheetTitle class="sr-only">Navigation</SheetTitle>
+                        <nav class="mt-6 flex flex-col gap-1">
+                            {#each staticNavStart as item (item.label)}
+                                <Link
+                                    href={item.href}
+                                    class="rounded-md px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-accent hover:text-[#1a3a5c]"
+                                >
+                                    {item.label}
+                                </Link>
+                            {/each}
+                            {#each navCategories as cat (cat.id)}
+                                <Link
+                                    href={`/${cat.slug}`}
+                                    class="rounded-md px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-accent hover:text-[#1a3a5c]"
+                                >
+                                    {cat.name}
+                                </Link>
+                            {/each}
+                            {#each staticNavEnd as item (item.label)}
+                                <Link
+                                    href={item.href}
+                                    class="rounded-md px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-accent hover:text-[#1a3a5c]"
+                                >
+                                    {item.label}
+                                </Link>
+                            {/each}
+                        </nav>
+                    </SheetContent>
+                </Sheet>
+
                 <CartSheet {cart} />
 
                 <DropdownMenu>
@@ -364,8 +407,8 @@
         </div>
     </div>
 
-    <!-- Nav row -->
-    <div class="border-t">
+    <!-- Nav row (hidden on mobile) -->
+    <div class="hidden border-t md:block">
         <div class="mx-auto max-w-7xl px-4 lg:px-8">
             <nav class="flex items-center justify-center">
                 {#each staticNavStart as item (item.label)}
