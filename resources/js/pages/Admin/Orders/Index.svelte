@@ -216,3 +216,5 @@
             <Button variant="outline" size="sm" onclick={() => table.nextPage()} disabled={!table.getCanNextPage()}>Weiter</Button>
         </div>
     </div>
+-e 
+</div>
