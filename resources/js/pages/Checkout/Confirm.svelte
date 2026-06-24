@@ -2,6 +2,7 @@
     import { Link, page, router } from '@inertiajs/svelte';
     import ChevronLeft from 'lucide-svelte/icons/chevron-left';
     import AppHead from '@/components/AppHead.svelte';
+    import AddressForm from '@/components/AddressForm.svelte';
     import PayPalButton from '@/components/PayPalButton.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
     import { Button } from '@/components/ui/button';
@@ -11,11 +12,21 @@
     import checkout from '@/routes/checkout';
     import { login } from '@/routes';
     import { formatPrice } from '@/lib/currency';
-    import type { Cart, Customer } from '@/types';
+    import type { AddressData, Cart, Customer } from '@/types';
 
     let { cart, paypal_client_id }: { cart: Cart; paypal_client_id?: string | null } = $props();
 
     let agreedToTerms = $state(false);
+    let billingSameAsShipping = $state(cart.billing_address === null);
+
+    // Local address state, initialized from cart
+    let shippingAddress = $state<AddressData>({ ...cart.shipping_address });
+    let billingAddress = $state<AddressData | null>(
+        cart.billing_address ? { ...cart.billing_address } : null,
+    );
+
+    let addressErrors = $state<Record<string, string>>({});
+    let isSavingAddress = $state(false);
 
     const auth = $derived(page.props.auth);
     const customer = $derived(auth.user as Customer | undefined);
@@ -24,6 +35,15 @@
     const selectedProvider = $derived(selectedPayment?.provider ?? null);
     const isPayPal = $derived(selectedProvider === 'paypal');
     const isStripe = $derived(selectedProvider === 'stripe');
+
+    const addressComplete = $derived(
+        shippingAddress.first_name !== '' &&
+        shippingAddress.last_name !== '' &&
+        shippingAddress.street !== '' &&
+        shippingAddress.house_number !== '' &&
+        shippingAddress.zip !== '' &&
+        shippingAddress.city !== '',
+    );
 
     function updateShipping(shippingMethod: string) {
         router.patch(
@@ -39,6 +59,79 @@
             { payment_method: paymentMethod },
             { preserveScroll: true, preserveState: true },
         );
+    }
+
+    function handleAddressUpdate(event: CustomEvent<{ prefix: string; key: string; value: string }>) {
+        const { prefix, key, value } = event.detail;
+
+        if (prefix === 'shipping') {
+            shippingAddress = { ...shippingAddress, [key]: value };
+        } else if (prefix === 'billing') {
+            billingAddress = { ...(billingAddress ?? defaultBillingAddress()), [key]: value };
+        }
+
+        // Clear error for this field
+        const errorKey = `${prefix}_address.${key}`;
+        if (addressErrors[errorKey]) {
+            const next = { ...addressErrors };
+            delete next[errorKey];
+            addressErrors = next;
+        }
+    }
+
+    function defaultBillingAddress(): AddressData {
+        return {
+            company: '', salutation: '', first_name: '', last_name: '',
+            street: '', house_number: '', address_line2: '',
+            zip: '', city: '', country: 'DE', phone: '',
+        };
+    }
+
+    function enableBillingAddress() {
+        billingSameAsShipping = false;
+        billingAddress = defaultBillingAddress();
+    }
+
+    function disableBillingAddress() {
+        billingSameAsShipping = true;
+        billingAddress = null;
+    }
+
+    async function saveAddress() {
+        isSavingAddress = true;
+        addressErrors = {};
+
+        const payload: Record<string, unknown> = {};
+
+        // Build shipping_address
+        payload.shipping_address = shippingAddress;
+        payload.billing_same_as_shipping = billingSameAsShipping;
+
+        if (!billingSameAsShipping && billingAddress) {
+            payload.billing_address = billingAddress;
+        }
+
+        try {
+            const resp = await fetch(checkout.address.update.url(), {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify(payload),
+            });
+
+            if (resp.status === 302) {
+                // Inertia redirect — reload errors from flash
+                router.reload({ only: ['errors'], preserveScroll: true });
+            } else if (!resp.ok) {
+                const body = await resp.json();
+                if (body.errors) {
+                    addressErrors = body.errors;
+                }
+            }
+        } catch {
+            addressErrors = { _form: 'Adresse konnte nicht gespeichert werden.' };
+        } finally {
+            isSavingAddress = false;
+        }
     }
 
     function submitOrder() {
@@ -70,6 +163,7 @@
 
         <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
             <div class="flex flex-1 flex-col gap-6">
+                <!-- AGB -->
                 <div class="rounded-lg border bg-white p-5">
                     <h2 class="mb-2 font-bold text-gray-900">
                         AGB und Widerrufsbelehrung
@@ -91,6 +185,7 @@
                     </label>
                 </div>
 
+                <!-- Kundendaten -->
                 <div class="rounded-lg border bg-white p-5">
                     <h2 class="mb-2 font-bold text-gray-900">Kundendaten</h2>
                     <Separator class="mb-4" />
@@ -103,11 +198,68 @@
                             Sie bestellen aktuell ohne gespeicherte Kundendaten.
                         </p>
                     {/if}
-                    <p class="mt-3 text-sm text-gray-500">
-                        Rechnungs- und Lieferadresse werden im Zahlungsprozess erfasst.
-                    </p>
                 </div>
 
+                <!-- Lieferadresse -->
+                <div class="rounded-lg border bg-white p-5">
+                    <div class="mb-2 flex items-center justify-between">
+                        <h2 class="font-bold text-gray-900">Lieferadresse</h2>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={isSavingAddress || !addressComplete}
+                            onclick={saveAddress}
+                        >
+                            {isSavingAddress ? 'Speichere...' : 'Adresse speichern'}
+                        </Button>
+                    </div>
+                    <Separator class="mb-4" />
+                    <div on:addressupdate={handleAddressUpdate}>
+                        <AddressForm
+                            data={shippingAddress}
+                            errors={addressErrors}
+                            prefix="shipping"
+                            legend=""
+                        />
+                    </div>
+                    {#if addressErrors._form}
+                        <p class="mt-2 text-sm text-red-500">{addressErrors._form}</p>
+                    {/if}
+                </div>
+
+                <!-- Rechnungsadresse -->
+                <div class="rounded-lg border bg-white p-5">
+                    <h2 class="mb-2 font-bold text-gray-900">Rechnungsadresse</h2>
+                    <Separator class="mb-4" />
+                    {#if billingSameAsShipping}
+                        <p class="text-sm text-gray-600">
+                            Identisch mit Lieferadresse.
+                        </p>
+                        <button
+                            onclick={enableBillingAddress}
+                            class="mt-2 text-sm text-[#1a6bbf] hover:underline"
+                        >
+                            Abweichende Rechnungsadresse eingeben
+                        </button>
+                    {:else}
+                        <div on:addressupdate={handleAddressUpdate}>
+                            <AddressForm
+                                data={billingAddress ?? defaultBillingAddress()}
+                                errors={addressErrors}
+                                prefix="billing"
+                                legend=""
+                            />
+                        </div>
+                        <button
+                            onclick={disableBillingAddress}
+                            class="mt-2 text-sm text-[#1a6bbf] hover:underline"
+                        >
+                            Wie Lieferadresse verwenden
+                        </button>
+                    {/if}
+                </div>
+
+                <!-- Versandart -->
                 <div class="rounded-lg border bg-white p-5">
                     <h2 class="mb-2 font-bold text-gray-900">Versandart</h2>
                     <Separator class="mb-4" />
@@ -137,6 +289,7 @@
                     </div>
                 </div>
 
+                <!-- Zahlungsart -->
                 <div class="rounded-lg border bg-white p-5">
                     <h2 class="mb-2 font-bold text-gray-900">Zahlungsart</h2>
                     <Separator class="mb-4" />
@@ -165,6 +318,7 @@
                     </div>
                 </div>
 
+                <!-- Produkttabelle -->
                 <div class="overflow-hidden rounded-lg border bg-white">
                     <table class="w-full text-sm">
                         <thead class="border-b bg-gray-50">
@@ -262,7 +416,7 @@
                                 <PayPalButton
                                     total={Number(cart.total)}
                                     clientId={paypal_client_id ?? ''}
-                                    disabled={!agreedToTerms}
+                                    disabled={!agreedToTerms || !addressComplete}
                                 />
                             </div>
                             <p class="mt-3 text-sm text-gray-500">
@@ -271,7 +425,7 @@
                         {:else if isStripe}
                             <Button
                                 class="mt-6 w-full bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90 disabled:opacity-50"
-                                disabled={!agreedToTerms || cart.is_empty}
+                                disabled={!agreedToTerms || cart.is_empty || !addressComplete}
                                 onclick={submitOrder}
                             >
                                 Zahlungspflichtig bestellen

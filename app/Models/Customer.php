@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Address;
 use App\Models\Order;
 use Database\Factories\CustomerFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -43,6 +44,11 @@ class Customer extends Authenticatable implements PasskeyUser
      *
      * @return array<string, string>
      */
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(Address::class);
+    }
+
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class)->latest();

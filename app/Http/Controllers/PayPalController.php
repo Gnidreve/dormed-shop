@@ -37,6 +37,8 @@ class PayPalController extends Controller
         }
 
         $shippingAmount = (float) ($cart['shipping_total'] ?? 0);
+        $shippingAddress = $this->cartService->getShippingAddress();
+        $billingAddress = $this->cartService->getBillingAddress();
 
         /** @var Order $order */
         $order = Order::query()->create([
@@ -44,6 +46,8 @@ class PayPalController extends Controller
             'status' => 'pending',
             'total_amount' => $cart['total'],
             'shipping_amount' => $shippingAmount,
+            'shipping_address' => $shippingAddress,
+            'billing_address' => $billingAddress,
         ]);
 
         foreach ($cart['items'] as $item) {
@@ -56,7 +60,10 @@ class PayPalController extends Controller
         }
 
         try {
-            $response = $this->payPalService->createOrder((float) $cart['total']);
+            $response = $this->payPalService->createOrder(
+                amount: (float) $cart['total'],
+                address: $shippingAddress,
+            );
 
             if (! isset($response['id'])) {
                 Log::error('PayPal createOrder failed', ['response' => $response]);

@@ -19,6 +19,20 @@ export type CartMethod = {
     price?: string;
 };
 
+export type AddressData = {
+    company: string;
+    salutation: string;
+    first_name: string;
+    last_name: string;
+    street: string;
+    house_number: string;
+    address_line2: string;
+    zip: string;
+    city: string;
+    country: string;
+    phone: string;
+};
+
 export type Cart = {
     items: CartItem[];
     count: number;
@@ -33,4 +47,6 @@ export type Cart = {
     total: string;
     net_total: string;
     vat_amount: string;
+    shipping_address: AddressData;
+    billing_address: AddressData | null;
 };

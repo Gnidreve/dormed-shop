@@ -8,6 +8,20 @@ use Illuminate\Support\Collection;
 
 class CartService
 {
+    public const DEFAULT_ADDRESS = [
+        'company' => '',
+        'salutation' => '',
+        'first_name' => '',
+        'last_name' => '',
+        'street' => '',
+        'house_number' => '',
+        'address_line2' => '',
+        'zip' => '',
+        'city' => '',
+        'country' => 'DE',
+        'phone' => '',
+    ];
+
     public function __construct(
         private readonly CartStore $store,
     ) {}
@@ -48,6 +62,8 @@ class CartService
             'total' => $this->formatAmount($totalCents),
             'net_total' => $this->formatAmount($netTotalCents),
             'vat_amount' => $this->formatAmount($vatAmountCents),
+            'shipping_address' => $this->getShippingAddress(),
+            'billing_address' => $this->getBillingAddress(),
         ];
     }
 
@@ -107,12 +123,42 @@ class CartService
         $this->persist($state);
     }
 
+    public function setShippingAddress(array $data): void
+    {
+        $state = $this->state();
+        $state['shipping_address'] = array_merge(self::DEFAULT_ADDRESS, $data);
+
+        $this->persist($state);
+    }
+
+    public function setBillingAddress(?array $data): void
+    {
+        $state = $this->state();
+        $state['billing_address'] = $data !== null
+            ? array_merge(self::DEFAULT_ADDRESS, $data)
+            : null;
+
+        $this->persist($state);
+    }
+
+    public function getShippingAddress(): array
+    {
+        return $this->state()['shipping_address'] ?? self::DEFAULT_ADDRESS;
+    }
+
+    public function getBillingAddress(): ?array
+    {
+        return $this->state()['billing_address']; // null = same as shipping
+    }
+
     public function clear(): void
     {
         $this->persist([
             'items' => [],
             'shipping_method' => (string) collect(config('shop.cart.shipping_methods', []))->pluck('id')->first(),
             'payment_method' => (string) collect(config('shop.cart.payment_methods', []))->pluck('id')->first(),
+            'shipping_address' => self::DEFAULT_ADDRESS,
+            'billing_address' => null,
         ]);
     }
 
@@ -207,6 +253,18 @@ class CartService
         return $methods;
     }
 
+    public function isAddressComplete(): bool
+    {
+        $a = $this->getShippingAddress();
+
+        return ! empty($a['first_name'])
+            && ! empty($a['last_name'])
+            && ! empty($a['street'])
+            && ! empty($a['house_number'])
+            && ! empty($a['zip'])
+            && ! empty($a['city']);
+    }
+
     private function state(): array
     {
         $rawState = $this->store->get();
@@ -239,6 +297,13 @@ class CartService
             'payment_method' => in_array(($rawState['payment_method'] ?? null), $paymentMethodIds, true)
                 ? (string) $rawState['payment_method']
                 : (string) ($paymentMethodIds[0] ?? ''),
+            'shipping_address' => array_merge(
+                self::DEFAULT_ADDRESS,
+                $rawState['shipping_address'] ?? []
+            ),
+            'billing_address' => isset($rawState['billing_address']) && is_array($rawState['billing_address'])
+                ? array_merge(self::DEFAULT_ADDRESS, $rawState['billing_address'])
+                : null,
         ];
     }
 

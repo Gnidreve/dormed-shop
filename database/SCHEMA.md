@@ -13,10 +13,12 @@ Engine: **SQLite** (Entwicklung) — Produktionsumgebung: MySQL/MariaDB-kompatib
 | `users`               | Admin-Nutzer (internes Panel)              |
 | `customers`           | Shop-Kunden (Frontend-Auth via Fortify)    |
 | `products`            | Produkte                                   |
+| `addresses`           | Adressen (Customer-Profil)                 |
 | `manufacturers`       | Hersteller (FK von `products`)             |
 | `categories`          | Produktkategorien                          |
 | `payments`            | PayPal-Transaktionen (FK zu `orders`)      |
 | `orders`              | Bestellungen (FK zu `customers`)           |
+| `order_items`         | Bestellpositionen                          |
 | `ratings`             | Produktbewertungen (FK zu `products`)      |
 | `settings`            | Key-Value-Konfiguration                    |
 | `passkeys`            | WebAuthn-Passkeys (FK zu `customers`)      |
@@ -66,6 +68,41 @@ Shop-Kunden. Fortify-Auth, Passkeys, optionale 2FA.
 | `created_at`                | datetime | YES      | —       |                   |
 | `updated_at`                | datetime | YES      | —       |                   |
 
+Relationen:
+- `1──N addresses` — Adressen im Customer-Profil
+- `1──N orders` — Bestellungen
+
+---
+
+## addresses
+
+Adressen, die von einem Customer gespeichert werden. Kein FK zu `orders` —
+Bestellungen speichern ihre Adressen als JSON-Snapshot (immutable).
+
+| Spalte          | Typ       | Nullable | Default     | Hinweis                           |
+|-----------------|-----------|----------|-------------|-----------------------------------|
+| `id`            | integer   | NO       | —           | PK, autoincrement                 |
+| `customer_id`   | integer   | NO       | —           | FK → `customers.id` CASCADE       |
+| `type`          | varchar   | NO       | `'both'`    | shipping / billing / both         |
+| `company`       | varchar   | YES      | —           | Firmenname (für B2B)              |
+| `salutation`    | varchar   | YES      | —           | Herr / Frau                       |
+| `first_name`    | varchar   | NO       | —           |                                   |
+| `last_name`     | varchar   | NO       | —           |                                   |
+| `street`        | varchar   | NO       | —           |                                   |
+| `house_number`  | varchar   | NO       | —           | Getrennt von Straße (z.B. "12a")  |
+| `address_line2` | varchar   | YES      | —           | c/o, Adresszusatz                 |
+| `zip`           | varchar   | NO       | —           |                                   |
+| `city`          | varchar   | NO       | —           |                                   |
+| `country`       | varchar   | NO       | `'DE'`      | ISO 3166-1 alpha-2                |
+| `phone`         | varchar   | YES      | —           |                                   |
+| `is_default`    | boolean   | NO       | `false`     | Standardadresse des Kunden        |
+| `created_at`    | datetime  | YES      | —           |                                   |
+| `updated_at`    | datetime  | YES      | —           |                                   |
+
+Indexe:
+- `addresses_customer_id_type_index` auf (`customer_id`, `type`)
+- `addresses_zip_index` auf (`zip`)
+
 ---
 
 ## manufacturers
@@ -111,6 +148,8 @@ Shop-Kunden. Fortify-Auth, Passkeys, optionale 2FA.
 
 ## orders
 
+Bestellungen mit JSON-Adress-Snapshots (immutable zum Zeitpunkt der Bestellung).
+
 | Spalte                      | Typ      | Nullable | Default     | Hinweis                            |
 |-----------------------------|----------|----------|-------------|-------------------------------------|
 | `id`                        | integer  | NO       | —           | PK, autoincrement                   |
@@ -120,8 +159,44 @@ Shop-Kunden. Fortify-Auth, Passkeys, optionale 2FA.
 | `stripe_payment_intent_id`  | varchar  | YES      | —           | Stripe Payment Intent               |
 | `total_amount`              | numeric  | NO       | —           | decimal(10,2)                       |
 | `shipping_amount`           | numeric  | NO       | `0.00`      | decimal(10,2), Versandkosten        |
+| `shipping_address`          | JSON     | YES      | —           | Snapshot der Lieferadresse          |
+| `billing_address`           | JSON     | YES      | —           | Snapshot der Rechnungsadresse       |
 | `created_at`                | datetime | YES      | —           |                                     |
 | `updated_at`                | datetime | YES      | —           |                                     |
+
+JSON-Struktur (shipping_address / billing_address):
+```json
+{
+    "company": "Firma GmbH",
+    "salutation": "Herr",
+    "first_name": "Max",
+    "last_name": "Mustermann",
+    "street": "Musterstraße",
+    "house_number": "12a",
+    "address_line2": "c/o Empfang",
+    "zip": "12345",
+    "city": "Musterstadt",
+    "country": "DE",
+    "phone": "+49 176 12345678"
+}
+```
+
+---
+
+## order_items
+
+Einzelne Positionen einer Bestellung.
+
+| Spalte          | Typ       | Nullable | Default | Hinweis                       |
+|-----------------|-----------|----------|---------|-------------------------------|
+| `id`            | integer   | NO       | —       | PK, autoincrement             |
+| `order_id`      | integer   | NO       | —       | FK → `orders.id` CASCADE      |
+| `product_id`    | integer   | YES      | —       | nullable (Produkt gelöscht)   |
+| `product_name`  | varchar   | NO       | —       |                               |
+| `unit_price`    | numeric   | NO       | —       | decimal(10,2)                 |
+| `quantity`      | integer   | NO       | —       |                               |
+| `created_at`    | datetime  | YES      | —       |                               |
+| `updated_at`    | datetime  | YES      | —       |                               |
 
 ---
 
@@ -198,6 +273,9 @@ WebAuthn-Passkeys, gehören zu einem `Customer`.
 | `created_at`    | datetime | YES      | —       |                               |
 | `updated_at`    | datetime | YES      | —       |                               |
 
+Indexe:
+- `passkeys_customer_id_index` auf (`customer_id`)
+
 ---
 
 ## sessions
@@ -213,29 +291,15 @@ WebAuthn-Passkeys, gehören zu einem `Customer`.
 
 ---
 
-## Infrastruktur-Tabellen (Laravel intern)
-
-Diese Tabellen werden von Laravel verwaltet und sollten nicht manuell geändert werden.
-
-| Tabelle                 | Zweck                          |
-|-------------------------|--------------------------------|
-| `cache`                 | Cache-Einträge (key/value/ttl) |
-| `cache_locks`           | Distributed Locks              |
-| `jobs`                  | Queue-Jobs                     |
-| `job_batches`           | Job-Batches                    |
-| `failed_jobs`           | Fehlgeschlagene Jobs           |
-| `password_reset_tokens` | Reset-Token (email/token/ttl)  |
-| `migrations`            | Migrationsstatus               |
-
----
-
 ## Fremdschlüssel-Übersicht
 
-| Tabelle    | Spalte              | Ziel                  | ON DELETE |
-|------------|---------------------|-----------------------|-----------|
-| `products` | `manufacturer_id`   | `manufacturers.id`    | CASCADE   |
-| `products` | `category_id`       | `categories.id`       | SET NULL  |
-| `orders`   | `customer_id`       | `customers.id`        | CASCADE   |
-| `payments` | `order_id`          | `orders.id`           | CASCADE   |
-| `ratings`  | `product_id`        | `products.id`         | CASCADE   |
-| `passkeys` | `customer_id`       | `customers.id`        | CASCADE   |
+| Tabelle       | Spalte              | Ziel                   | ON DELETE |
+|---------------|---------------------|------------------------|-----------|
+| `products`    | `manufacturer_id`   | `manufacturers.id`     | CASCADE   |
+| `products`    | `category_id`       | `categories.id`        | SET NULL  |
+| `addresses`   | `customer_id`       | `customers.id`         | CASCADE   |
+| `orders`      | `customer_id`       | `customers.id`         | CASCADE   |
+| `order_items` | `order_id`          | `orders.id`            | CASCADE   |
+| `payments`    | `order_id`          | `orders.id`            | CASCADE   |
+| `ratings`     | `product_id`        | `products.id`          | CASCADE   |
+| `passkeys`    | `customer_id`       | `customers.id`         | CASCADE   |

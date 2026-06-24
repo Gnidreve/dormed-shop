@@ -14,6 +14,32 @@ use Stripe\StripeClient;
 
 class CheckoutController extends Controller
 {
+    private const ADDRESS_FIELDS = [
+        'shipping_address.company',
+        'shipping_address.salutation',
+        'shipping_address.first_name',
+        'shipping_address.last_name',
+        'shipping_address.street',
+        'shipping_address.house_number',
+        'shipping_address.address_line2',
+        'shipping_address.zip',
+        'shipping_address.city',
+        'shipping_address.country',
+        'shipping_address.phone',
+        'billing_same_as_shipping',
+        'billing_address.company',
+        'billing_address.salutation',
+        'billing_address.first_name',
+        'billing_address.last_name',
+        'billing_address.street',
+        'billing_address.house_number',
+        'billing_address.address_line2',
+        'billing_address.zip',
+        'billing_address.city',
+        'billing_address.country',
+        'billing_address.phone',
+    ];
+
     public function __construct(
         private readonly CartService $cartService,
     ) {}
@@ -26,7 +52,6 @@ class CheckoutController extends Controller
             return to_route('checkout.index');
         }
 
-        // If PayPal is the selected payment method, pass the client ID
         $selectedPayment = $cart['selected_payment_method'] ?? [];
         $paypalClientId = null;
 
@@ -50,6 +75,49 @@ class CheckoutController extends Controller
         return back();
     }
 
+    public function updateAddress(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            // Shipping address
+            'shipping_address.company' => ['nullable', 'string', 'max:255'],
+            'shipping_address.salutation' => ['nullable', 'string', 'in:Herr,Frau'],
+            'shipping_address.first_name' => ['required', 'string', 'max:255'],
+            'shipping_address.last_name' => ['required', 'string', 'max:255'],
+            'shipping_address.street' => ['required', 'string', 'max:255'],
+            'shipping_address.house_number' => ['required', 'string', 'max:20'],
+            'shipping_address.address_line2' => ['nullable', 'string', 'max:255'],
+            'shipping_address.zip' => ['required', 'string', 'max:20'],
+            'shipping_address.city' => ['required', 'string', 'max:255'],
+            'shipping_address.country' => ['required', 'string', 'size:2'],
+            'shipping_address.phone' => ['nullable', 'string', 'max:50'],
+            // Billing
+            'billing_same_as_shipping' => ['boolean'],
+            'billing_address.company' => ['nullable', 'string', 'max:255'],
+            'billing_address.salutation' => ['nullable', 'string', 'in:Herr,Frau'],
+            'billing_address.first_name' => ['nullable', 'string', 'max:255'],
+            'billing_address.last_name' => ['nullable', 'string', 'max:255'],
+            'billing_address.street' => ['nullable', 'string', 'max:255'],
+            'billing_address.house_number' => ['nullable', 'string', 'max:20'],
+            'billing_address.address_line2' => ['nullable', 'string', 'max:255'],
+            'billing_address.zip' => ['nullable', 'string', 'max:20'],
+            'billing_address.city' => ['nullable', 'string', 'max:255'],
+            'billing_address.country' => ['nullable', 'string', 'size:2'],
+            'billing_address.phone' => ['nullable', 'string', 'max:50'],
+        ]);
+
+        // Save shipping address
+        $this->cartService->setShippingAddress($validated['shipping_address']);
+
+        // Save billing address (or null = same as shipping)
+        if (($validated['billing_same_as_shipping'] ?? true) === true) {
+            $this->cartService->setBillingAddress(null);
+        } else {
+            $this->cartService->setBillingAddress($validated['billing_address'] ?? []);
+        }
+
+        return back();
+    }
+
     public function submit(PlaceOrderRequest $request): mixed
     {
         $cart = $this->cartService->cart();
@@ -59,12 +127,16 @@ class CheckoutController extends Controller
         }
 
         $shippingAmount = (float) ($cart['shipping_total'] ?? 0);
+        $shippingAddress = $this->cartService->getShippingAddress();
+        $billingAddress = $this->cartService->getBillingAddress();
 
         $order = Order::query()->create([
             'customer_id' => $request->user()->id,
             'status' => 'pending',
             'total_amount' => $cart['total'],
             'shipping_amount' => $shippingAmount,
+            'shipping_address' => $shippingAddress,
+            'billing_address' => $billingAddress,
         ]);
 
         foreach ($cart['items'] as $item) {
@@ -162,6 +234,8 @@ class CheckoutController extends Controller
             'vat_amount' => number_format($vatAmountCents / 100, 2, '.', ''),
             'total' => number_format($totalCents / 100, 2, '.', ''),
             'customer_email' => $order->customer->email,
+            'shipping_address' => $order->shipping_address,
+            'billing_address' => $order->billing_address,
         ]);
     }
 }

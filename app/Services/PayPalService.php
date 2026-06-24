@@ -49,24 +49,39 @@ class PayPalService
      *
      * @param  float  $amount  Total amount in EUR (or configured currency)
      * @param  string  $currency  ISO 4217 currency code (default: EUR)
+     * @param  array|null  $address  Shipping address (from cart)
      * @return array{id: string, status: string, links: array, ...}
      *
      * @throws \Throwable
      */
-    public function createOrder(float $amount, string $currency = 'EUR'): array
+    public function createOrder(float $amount, string $currency = 'EUR', ?array $address = null): array
     {
         $this->client()->setCurrency($currency);
 
+        $purchaseUnit = [
+            'amount' => [
+                'currency_code' => $currency,
+                'value' => number_format($amount, 2, '.', ''),
+            ],
+        ];
+
+        // Add shipping address to purchase unit if available
+        if ($address && ! empty($address['first_name']) && ! empty($address['last_name'])) {
+            $purchaseUnit['shipping'] = [
+                'name' => ['full_name' => trim($address['first_name'].' '.$address['last_name'])],
+                'address' => [
+                    'address_line_1' => trim(($address['street'] ?? '').' '.($address['house_number'] ?? '')),
+                    'address_line_2' => $address['address_line2'] ?? '',
+                    'admin_area_2' => $address['city'] ?? '',
+                    'postal_code' => $address['zip'] ?? '',
+                    'country_code' => $address['country'] ?? 'DE',
+                ],
+            ];
+        }
+
         $data = [
             'intent' => 'CAPTURE',
-            'purchase_units' => [
-                [
-                    'amount' => [
-                        'currency_code' => $currency,
-                        'value' => number_format($amount, 2, '.', ''),
-                    ],
-                ],
-            ],
+            'purchase_units' => [$purchaseUnit],
             'application_context' => [
                 'brand_name' => 'dormed 24',
                 'locale' => 'de-DE',

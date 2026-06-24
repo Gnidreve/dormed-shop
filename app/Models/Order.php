@@ -21,6 +21,8 @@ class Order extends Model
         return [
             'total_amount' => 'decimal:2',
             'shipping_amount' => 'decimal:2',
+            'shipping_address' => 'array',
+            'billing_address' => 'array',
         ];
     }
 
@@ -37,5 +39,19 @@ class Order extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function shippingFullName(): ?string
+    {
+        $a = $this->shipping_address;
+
+        return $a ? trim(($a['first_name'] ?? '').' '.($a['last_name'] ?? '')) : null;
+    }
+
+    public function shippingStreetWithNumber(): ?string
+    {
+        $a = $this->shipping_address;
+
+        return $a ? trim(($a['street'] ?? '').' '.($a['house_number'] ?? '')) : null;
     }
 }
