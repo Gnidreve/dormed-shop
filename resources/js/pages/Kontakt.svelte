@@ -58,16 +58,6 @@
             Wir empfangen Sie ausschließlich nach vorheriger Terminvereinbarung.
         </p>
 
-        <!-- Opening hours banner -->
-        <div class="mb-10 flex items-start gap-3 rounded-lg border border-[#1a6bbf]/20 bg-[#1a6bbf]/5 px-5 py-4">
-            <Clock class="mt-0.5 size-4 shrink-0 text-[#1a6bbf]" />
-            <div class="text-sm text-gray-700">
-                <p class="font-semibold text-[#1a3a5c]">Öffnungszeiten (alle Standorte)</p>
-                <p class="mt-1">Mo – Do: 08:00 – 17:00 Uhr &nbsp;·&nbsp; Fr: 08:00 – 14:00 Uhr</p>
-                <p class="mt-0.5 text-gray-500">Besuche nur nach Terminvereinbarung</p>
-            </div>
-        </div>
-
         <!-- Location cards -->
         <div class="grid gap-5 sm:grid-cols-2">
             {#each locations as loc (loc.name)}
@@ -106,6 +96,16 @@
                     </div>
                 </div>
             {/each}
+        </div>
+
+        <!-- Opening hours banner -->
+        <div class="mt-10 flex items-start gap-3 rounded-lg border border-[#1a6bbf]/20 bg-[#1a6bbf]/5 px-5 py-4">
+            <Clock class="mt-0.5 size-4 shrink-0 text-[#1a6bbf]" />
+            <div class="text-sm text-gray-700">
+                <p class="font-semibold text-[#1a3a5c]">Öffnungszeiten (alle Standorte)</p>
+                <p class="mt-1">Mo – Do: 08:00 – 17:00 Uhr &nbsp;·&nbsp; Fr: 08:00 – 14:00 Uhr</p>
+                <p class="mt-0.5 text-gray-500">Besuche nur nach Terminvereinbarung</p>
+            </div>
         </div>
     </main>
 
