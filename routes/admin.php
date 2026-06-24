@@ -38,6 +38,9 @@ Route::middleware('ensure.admin')->prefix('admin')->name('admin.')->group(functi
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+    Route::get('/settings/general', [SettingController::class, 'showGeneral'])->name('settings.general');
+    Route::get('/settings/mail', [SettingController::class, 'showMail'])->name('settings.mail');
+    Route::get('/settings/payment', [SettingController::class, 'showPayment'])->name('settings.payment');
     Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
     Route::get('/settings/stripe/check', [SettingController::class, 'checkStripe'])->name('settings.stripe.check');
     Route::get('/settings/mail/check', [SettingController::class, 'checkMail'])->name('settings.mail.check');

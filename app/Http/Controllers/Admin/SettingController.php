@@ -22,6 +22,41 @@ class SettingController extends Controller
         'mail.smtp_password',
     ];
 
+    public function showGeneral(): Response
+    {
+        $settings = $this->loadSettings();
+
+        return Inertia::render('Admin/Settings/General', [
+            'settings' => $settings,
+        ]);
+    }
+
+    public function showMail(): Response
+    {
+        $settings = $this->loadSettings();
+
+        return Inertia::render('Admin/Settings/Mail', [
+            'settings' => $settings,
+            'hasSensitive' => collect(self::SENSITIVE_KEYS)
+                ->mapWithKeys(fn ($k) => [$k => Setting::get($k) !== null])
+                ->all(),
+        ]);
+    }
+
+    public function showPayment(): Response
+    {
+        $settings = $this->loadSettings();
+
+        return Inertia::render('Admin/Settings/Payment', [
+            'settings' => $settings,
+            'hasSensitive' => collect(self::SENSITIVE_KEYS)
+                ->mapWithKeys(fn ($k) => [$k => Setting::get($k) !== null])
+                ->all(),
+            'webhookUrl' => route('stripe.webhook'),
+        ]);
+    }
+
+
     public function index(): Response
     {
         $raw = Setting::all(['key', 'value'])->pluck('value', 'key');
@@ -115,4 +150,31 @@ class SettingController extends Controller
             return response()->json(['message' => 'Fehler: '.$e->getMessage()], 422);
         }
     }
+
+
+    private function loadSettings(): array
+    {
+        $raw = Setting::all(['key', 'value'])->pluck('value', 'key');
+
+        $settings = [
+            'shop.name' => $raw->get('shop.name', ''),
+            'shop.email' => $raw->get('shop.email', ''),
+            'shop.phone' => $raw->get('shop.phone', ''),
+            'mail.smtp_host' => $raw->get('mail.smtp_host', ''),
+            'mail.smtp_port' => $raw->get('mail.smtp_port', ''),
+            'mail.smtp_user' => $raw->get('mail.smtp_user', ''),
+            'mail.smtp_password' => '',
+            'stripe.publishable_key' => $raw->get('stripe.publishable_key', ''),
+            'stripe.secret_key' => '',
+            'stripe.webhook_secret' => '',
+        ];
+
+        foreach (self::SENSITIVE_KEYS as $key) {
+            $decrypted = Setting::get($key);
+            $settings[$key] = $decrypted ? '••••••••' : '';
+        }
+
+        return $settings;
+    }
+
 }

@@ -1,6 +1,5 @@
 <script lang="ts">
     import { Link } from '@inertiajs/svelte';
-    import BookOpen from 'lucide-svelte/icons/book-open';
     import LayoutGrid from 'lucide-svelte/icons/layout-grid';
     import Package from 'lucide-svelte/icons/package';
     import Tag from 'lucide-svelte/icons/tag';
@@ -25,7 +24,6 @@
         SidebarMenuButton,
         SidebarMenuItem,
     } from '@/components/ui/sidebar';
-    import { toUrl } from '@/lib/utils';
     import type { NavItem } from '@/types';
 
     let {
@@ -38,7 +36,6 @@
         { title: 'Dashboard', href: '/admin', icon: LayoutGrid },
         { title: 'Kunden', href: '/admin/customers', icon: Users },
         { title: 'Bestellungen', href: '/admin/orders', icon: ShoppingCart },
-        { title: 'Einstellungen', href: '/admin/settings', icon: Settings },
     ];
 
     const catalogItems: NavItem[] = [
@@ -47,7 +44,11 @@
         { title: 'Hersteller', href: '/admin/manufacturers', icon: Building2 },
     ];
 
-    const footerNavItems: NavItem[] = [];
+    const settingsItems: NavItem[] = [
+        { title: 'Allgemein', href: '/admin/settings/general' },
+        { title: 'Mailversand', href: '/admin/settings/mail' },
+        { title: 'Zahlungsarten', href: '/admin/settings/payment' },
+    ];
 </script>
 
 <Sidebar collapsible="icon" variant="inset">
@@ -72,10 +73,10 @@
     <SidebarContent>
         <NavMain items={mainNavItems} />
         <NavGroup title="Katalog" icon={Layers} items={catalogItems} />
+        <NavGroup title="Einstellungen" icon={Settings} items={settingsItems} />
     </SidebarContent>
 
     <SidebarFooter>
-        <NavFooter items={footerNavItems} />
         <NavAdmin />
         <NavCustomer />
     </SidebarFooter>
