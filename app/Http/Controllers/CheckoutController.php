@@ -26,8 +26,20 @@ class CheckoutController extends Controller
             return to_route('checkout.index');
         }
 
+        // If PayPal is the selected payment method, pass the client ID
+        $selectedPayment = $cart['selected_payment_method'] ?? [];
+        $paypalClientId = null;
+
+        if (($selectedPayment['id'] ?? '') === 'paypal') {
+            $mode = config('paypal.mode', 'sandbox');
+            $paypalClientId = $mode === 'live'
+                ? config('paypal.live.client_id')
+                : config('paypal.sandbox.client_id');
+        }
+
         return Inertia::render('Checkout/Confirm', [
             'cart' => $cart,
+            'paypal_client_id' => $paypalClientId,
         ]);
     }
 
@@ -106,15 +118,21 @@ class CheckoutController extends Controller
     public function success(Request $request): Response|RedirectResponse
     {
         $sessionId = $request->query('session_id');
+        $paypalOrderId = $request->query('paypal_order_id');
 
-        if (! $sessionId) {
-            return to_route('home');
+        $order = null;
+
+        if ($sessionId) {
+            $order = Order::query()
+                ->with(['items', 'customer'])
+                ->where('stripe_checkout_session_id', $sessionId)
+                ->first();
+        } elseif ($paypalOrderId) {
+            $order = Order::query()
+                ->with(['items', 'customer'])
+                ->whereHas('payments', fn ($q) => $q->where('paypal_order_id', $paypalOrderId))
+                ->first();
         }
-
-        $order = Order::query()
-            ->with(['items', 'customer'])
-            ->where('stripe_checkout_session_id', $sessionId)
-            ->first();
 
         if (! $order) {
             return to_route('home');

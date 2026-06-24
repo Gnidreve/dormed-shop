@@ -29,6 +29,11 @@ return [
                 'label' => 'Vorkasse',
                 'description' => 'Sie erhalten die Zahlungsdaten nach der Bestellung.',
             ],
+            [
+                'id' => 'paypal',
+                'label' => 'PayPal',
+                'description' => 'Sicher bezahlen mit PayPal – Lastschrift, Kreditkarte oder PayPal-Guthaben.',
+            ],
         ],
     ],
 ];

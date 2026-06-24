@@ -15,6 +15,7 @@ Engine: **SQLite** (Entwicklung) — Produktionsumgebung: MySQL/MariaDB-kompatib
 | `products`            | Produkte                                   |
 | `manufacturers`       | Hersteller (FK von `products`)             |
 | `categories`          | Produktkategorien                          |
+| `payments`            | PayPal-Transaktionen (FK zu `orders`)      |
 | `orders`              | Bestellungen (FK zu `customers`)           |
 | `ratings`             | Produktbewertungen (FK zu `products`)      |
 | `settings`            | Key-Value-Konfiguration                    |
@@ -86,6 +87,7 @@ Shop-Kunden. Fortify-Auth, Passkeys, optionale 2FA.
 |-------------------|----------|----------|---------|----------------------------------|
 | `id`              | integer  | NO       | —       | PK, autoincrement                |
 | `manufacturer_id` | integer  | NO       | —       | FK → `manufacturers.id` CASCADE  |
+| `category_id`     | integer  | YES      | —       | FK → `categories.id` SET NULL    |
 | `name`            | varchar  | NO       | —       |                                  |
 | `description`     | text     | YES      | —       |                                  |
 | `price`           | numeric  | NO       | —       | decimal(8,2)                     |
@@ -109,14 +111,44 @@ Shop-Kunden. Fortify-Auth, Passkeys, optionale 2FA.
 
 ## orders
 
-| Spalte         | Typ      | Nullable | Default     | Hinweis                        |
-|----------------|----------|----------|-------------|--------------------------------|
-| `id`           | integer  | NO       | —           | PK, autoincrement              |
-| `customer_id`  | integer  | NO       | —           | FK → `customers.id` CASCADE    |
-| `status`       | varchar  | NO       | `'pending'` | pending/processing/completed/cancelled |
-| `total_amount` | numeric  | NO       | —           | decimal(10,2)                  |
-| `created_at`   | datetime | YES      | —           |                                |
-| `updated_at`   | datetime | YES      | —           |                                |
+| Spalte                      | Typ      | Nullable | Default     | Hinweis                            |
+|-----------------------------|----------|----------|-------------|-------------------------------------|
+| `id`                        | integer  | NO       | —           | PK, autoincrement                   |
+| `customer_id`               | integer  | NO       | —           | FK → `customers.id` CASCADE         |
+| `status`                    | varchar  | NO       | `'pending'` | pending/paid/failed/cancelled       |
+| `stripe_checkout_session_id`| varchar  | YES      | —           | UNIQUE, Stripe Session              |
+| `stripe_payment_intent_id`  | varchar  | YES      | —           | Stripe Payment Intent               |
+| `total_amount`              | numeric  | NO       | —           | decimal(10,2)                       |
+| `shipping_amount`           | numeric  | NO       | `0.00`      | decimal(10,2), Versandkosten        |
+| `created_at`                | datetime | YES      | —           |                                     |
+| `updated_at`                | datetime | YES      | —           |                                     |
+
+---
+
+## payments
+
+PayPal-Transaktionen, verknüpft mit einer Bestellung.
+
+| Spalte              | Typ      | Nullable | Default     | Hinweis                                |
+|---------------------|----------|----------|-------------|----------------------------------------|
+| `id`                | integer  | NO       | —           | PK, autoincrement                      |
+| `order_id`          | integer  | NO       | —           | FK → `orders.id` CASCADE               |
+| `paypal_order_id`   | varchar  | YES      | —           | PayPal-Order-ID (z. B. `1AB23456`)     |
+| `paypal_payer_id`   | varchar  | YES      | —           | Payer-ID (z. B. `PAYER123456`)         |
+| `paypal_capture_id` | varchar  | YES      | —           | Capture-/Transaktions-ID               |
+| `status`            | varchar  | NO       | `'CREATED'` | CREATED / APPROVED / COMPLETED / FAILED / REFUNDED |
+| `amount`            | numeric  | NO       | —           | decimal(10,2)                          |
+| `currency`          | varchar  | NO       | `'EUR'`     | ISO 4217                               |
+| `fee`               | numeric  | YES      | —           | decimal(10,2), PayPal-Gebühr           |
+| `payer_email`       | varchar  | YES      | —           | Käufer-E-Mail                          |
+| `payer_name`        | varchar  | YES      | —           | Käufer-Name                            |
+| `response_data`     | json     | YES      | —           | Roher API-Response (Auditing)          |
+| `created_at`        | datetime | YES      | —           |                                        |
+| `updated_at`        | datetime | YES      | —           |                                        |
+
+Indexe:
+- `payments_paypal_order_id_index` auf (`paypal_order_id`)
+- `payments_status_index` auf (`status`)
 
 ---
 
@@ -199,9 +231,11 @@ Diese Tabellen werden von Laravel verwaltet und sollten nicht manuell geändert 
 
 ## Fremdschlüssel-Übersicht
 
-| Tabelle    | Spalte          | Ziel                   | ON DELETE |
-|------------|-----------------|------------------------|-----------|
-| `products` | `manufacturer_id` | `manufacturers.id`   | CASCADE   |
-| `orders`   | `customer_id`   | `customers.id`         | CASCADE   |
-| `ratings`  | `product_id`    | `products.id`          | CASCADE   |
-| `passkeys` | `customer_id`   | `customers.id`         | CASCADE   |
+| Tabelle    | Spalte              | Ziel                  | ON DELETE |
+|------------|---------------------|-----------------------|-----------|
+| `products` | `manufacturer_id`   | `manufacturers.id`    | CASCADE   |
+| `products` | `category_id`       | `categories.id`       | SET NULL  |
+| `orders`   | `customer_id`       | `customers.id`        | CASCADE   |
+| `payments` | `order_id`          | `orders.id`           | CASCADE   |
+| `ratings`  | `product_id`        | `products.id`         | CASCADE   |
+| `passkeys` | `customer_id`       | `customers.id`        | CASCADE   |

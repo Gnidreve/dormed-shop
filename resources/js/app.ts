@@ -17,6 +17,7 @@ createInertiaApp({
             case name === 'Impressum':
             case name === 'AGB':
             case name === 'Datenschutz':
+            case name === 'Kontakt':
             case name.startsWith('Checkout/'):
             case name.startsWith('Products/'):
                 return null;

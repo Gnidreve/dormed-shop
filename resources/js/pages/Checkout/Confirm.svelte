@@ -2,6 +2,7 @@
     import { Link, page, router } from '@inertiajs/svelte';
     import ChevronLeft from 'lucide-svelte/icons/chevron-left';
     import AppHead from '@/components/AppHead.svelte';
+    import PayPalButton from '@/components/PayPalButton.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
     import { Button } from '@/components/ui/button';
     import { Checkbox } from '@/components/ui/checkbox';
@@ -12,17 +13,28 @@
     import { formatPrice } from '@/lib/currency';
     import type { Cart, Customer } from '@/types';
 
-    let { cart }: { cart: Cart } = $props();
+    let { cart, paypal_client_id }: { cart: Cart; paypal_client_id?: string | null } = $props();
 
     let agreedToTerms = $state(false);
 
     const auth = $derived(page.props.auth);
     const customer = $derived(auth.user as Customer | undefined);
 
+    const selectedPayment = $derived(cart.selected_payment_method);
+    const isPayPal = $derived(selectedPayment?.id === 'paypal');
+
     function updateShipping(shippingMethod: string) {
         router.patch(
             cartRoutes.shipping.update.url(),
             { shipping_method: shippingMethod },
+            { preserveScroll: true, preserveState: true },
+        );
+    }
+
+    function updatePayment(paymentMethod: string) {
+        router.patch(
+            checkout.payment.update.url(),
+            { payment_method: paymentMethod },
             { preserveScroll: true, preserveState: true },
         );
     }
@@ -90,37 +102,65 @@
                         </p>
                     {/if}
                     <p class="mt-3 text-sm text-gray-500">
-                        Rechnungs- und Lieferadresse werden im Stripe-Checkout erfasst.
+                        Rechnungs- und Lieferadresse werden im Zahlungsprozess erfasst.
                     </p>
                 </div>
 
                 <div class="rounded-lg border bg-white p-5">
-                        <h2 class="mb-2 font-bold text-gray-900">Versandart</h2>
-                        <Separator class="mb-4" />
-                        <div class="flex flex-col gap-3">
-                            {#each cart.shipping_methods as method (method.id)}
-                                <label class="flex cursor-pointer items-start gap-3">
-                                    <input
-                                        type="radio"
-                                        name="shipping"
-                                        value={method.id}
-                                        checked={method.selected}
-                                        onchange={() => updateShipping(method.id)}
-                                        class="mt-0.5 accent-[#0d1f44]"
-                                    />
-                                    <span class="text-sm">
-                                        <span class="font-semibold text-gray-900">
-                                            {method.label}
-                                        </span>
-                                        <span class="text-gray-500"> - {formatPrice(method.price ?? 0)}</span>
-                                        {#if method.description}
-                                            <br />
-                                            <span class="text-gray-500">{method.description}</span>
-                                        {/if}
+                    <h2 class="mb-2 font-bold text-gray-900">Versandart</h2>
+                    <Separator class="mb-4" />
+                    <div class="flex flex-col gap-3">
+                        {#each cart.shipping_methods as method (method.id)}
+                            <label class="flex cursor-pointer items-start gap-3">
+                                <input
+                                    type="radio"
+                                    name="shipping"
+                                    value={method.id}
+                                    checked={method.selected}
+                                    onchange={() => updateShipping(method.id)}
+                                    class="mt-0.5 accent-[#0d1f44]"
+                                />
+                                <span class="text-sm">
+                                    <span class="font-semibold text-gray-900">
+                                        {method.label}
                                     </span>
-                                </label>
-                            {/each}
-                        </div>
+                                    <span class="text-gray-500"> - {formatPrice(method.price ?? 0)}</span>
+                                    {#if method.description}
+                                        <br />
+                                        <span class="text-gray-500">{method.description}</span>
+                                    {/if}
+                                </span>
+                            </label>
+                        {/each}
+                    </div>
+                </div>
+
+                <div class="rounded-lg border bg-white p-5">
+                    <h2 class="mb-2 font-bold text-gray-900">Zahlungsart</h2>
+                    <Separator class="mb-4" />
+                    <div class="flex flex-col gap-3">
+                        {#each cart.payment_methods as method (method.id)}
+                            <label class="flex cursor-pointer items-start gap-3">
+                                <input
+                                    type="radio"
+                                    name="payment"
+                                    value={method.id}
+                                    checked={method.selected}
+                                    onchange={() => updatePayment(method.id)}
+                                    class="mt-0.5 accent-[#0d1f44]"
+                                />
+                                <span class="text-sm">
+                                    <span class="font-semibold text-gray-900">
+                                        {method.label}
+                                    </span>
+                                    {#if method.description}
+                                        <br />
+                                        <span class="text-gray-500">{method.description}</span>
+                                    {/if}
+                                </span>
+                            </label>
+                        {/each}
+                    </div>
                 </div>
 
                 <div class="overflow-hidden rounded-lg border bg-white">
@@ -215,16 +255,29 @@
                     </div>
 
                     {#if customer}
-                        <Button
-                            class="mt-6 w-full bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90 disabled:opacity-50"
-                            disabled={!agreedToTerms || cart.is_empty}
-                            onclick={submitOrder}
-                        >
-                            Zahlungspflichtig bestellen
-                        </Button>
-                        <p class="mt-3 text-sm text-gray-500">
-                            Sie werden zur sicheren Zahlung über Stripe weitergeleitet.
-                        </p>
+                        {#if isPayPal && paypal_client_id}
+                            <div class="mt-6">
+                                <PayPalButton
+                                    total={Number(cart.total)}
+                                    {paypal_client_id}
+                                    disabled={!agreedToTerms}
+                                />
+                            </div>
+                            <p class="mt-3 text-sm text-gray-500">
+                                Sie werden zu PayPal weitergeleitet, um die Zahlung zu bestätigen.
+                            </p>
+                        {:else}
+                            <Button
+                                class="mt-6 w-full bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90 disabled:opacity-50"
+                                disabled={!agreedToTerms || cart.is_empty}
+                                onclick={submitOrder}
+                            >
+                                Zahlungspflichtig bestellen
+                            </Button>
+                            <p class="mt-3 text-sm text-gray-500">
+                                Sie werden zur sicheren Zahlung über Stripe weitergeleitet.
+                            </p>
+                        {/if}
                     {:else}
                         <Button asChild class="mt-6 w-full bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90">
                             {#snippet children(props)}

@@ -17,3 +17,4 @@ require __DIR__.'/public/rating.php';
 require __DIR__.'/checkout.php';
 require __DIR__.'/settings.php';
 require __DIR__.'/categories.php';
+require __DIR__.'/paypal.php';
