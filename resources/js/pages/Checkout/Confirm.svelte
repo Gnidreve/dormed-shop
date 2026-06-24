@@ -5,6 +5,7 @@
     import AddressForm from '@/components/AddressForm.svelte';
     import PayPalButton from '@/components/PayPalButton.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
+    import TestModeBanner from '@/components/TestModeBanner.svelte';
     import { Button } from '@/components/ui/button';
     import { Checkbox } from '@/components/ui/checkbox';
     import { Separator } from '@/components/ui/separator';
@@ -137,6 +138,7 @@
 <AppHead title="Bestellung abschließen" />
 
 <ShopHeader />
+<TestModeBanner />
 
 <main class="min-h-screen bg-gray-50">
     <div class="mx-auto max-w-7xl px-4 py-8 lg:px-8">

@@ -57,7 +57,7 @@ class CheckoutController extends Controller
         $paypalClientId = null;
 
         if (($selectedPayment['id'] ?? '') === 'paypal') {
-            $mode = Setting::get('paypal.mode') ?? 'sandbox';
+            $mode = config('app.test_mode') ? 'sandbox' : (Setting::get('paypal.mode') ?? 'sandbox');
             $paypalClientId = $mode === 'live'
                 ? Setting::get('paypal.live.client_id')
                 : Setting::get('paypal.sandbox.client_id');
@@ -134,6 +134,7 @@ class CheckoutController extends Controller
         $order = Order::query()->create([
             'customer_id' => $request->user()->id,
             'status' => 'pending',
+            'is_test' => config('app.test_mode', false),
             'total_amount' => $cart['total'],
             'shipping_amount' => $shippingAmount,
             'shipping_address' => $shippingAddress,

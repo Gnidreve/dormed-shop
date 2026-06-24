@@ -18,3 +18,10 @@ require __DIR__.'/checkout.php';
 require __DIR__.'/settings.php';
 require __DIR__.'/categories.php';
 require __DIR__.'/paypal.php';
+
+Route::prefix('test')
+    ->middleware(['web', \App\Http\Middleware\ForceTestMode::class])
+    ->group(function () {
+        require __DIR__.'/products.php';
+        require __DIR__.'/checkout.php';
+    });

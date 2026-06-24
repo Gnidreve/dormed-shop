@@ -155,6 +155,7 @@ Bestellungen mit JSON-Adress-Snapshots (immutable zum Zeitpunkt der Bestellung).
 | `id`                        | integer  | NO       | —           | PK, autoincrement                   |
 | `customer_id`               | integer  | NO       | —           | FK → `customers.id` CASCADE         |
 | `status`                    | varchar  | NO       | `'pending'` | pending/paid/failed/cancelled       |
+| `is_test`                   | boolean  | NO       | `false`     | true = Sandbox-/Testbestellung      |
 | `stripe_checkout_session_id`| varchar  | YES      | —           | UNIQUE, Stripe Session              |
 | `stripe_payment_intent_id`  | varchar  | YES      | —           | Stripe Payment Intent               |
 | `total_amount`              | numeric  | NO       | —           | decimal(10,2)                       |

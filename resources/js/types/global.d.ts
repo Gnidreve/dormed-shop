@@ -24,6 +24,7 @@ declare module '@inertiajs/core' {
             auth: Auth;
             cart: Cart;
             sidebarOpen: boolean;
+            testMode: boolean;
             [key: string]: unknown;
         };
     }

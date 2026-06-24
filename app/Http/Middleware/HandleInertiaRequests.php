@@ -53,6 +53,7 @@ class HandleInertiaRequests extends Middleware
                 fn () => Category::orderBy('name')->get(['id', 'name', 'slug']),
             ),
             'stripeKey' => config('services.stripe.publishable_key'),
+            'testMode' => config('app.test_mode', false),
         ];
     }
 }
