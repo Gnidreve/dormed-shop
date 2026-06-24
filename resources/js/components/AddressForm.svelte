@@ -1,7 +1,7 @@
 <script lang="ts">
     import { Input } from '@/components/ui/input';
     import { Label } from '@/components/ui/label';
-    import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+    import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
     import type { AddressData } from '@/types/cart';
 
     let {
@@ -51,7 +51,11 @@
                 onValueChange={(v: string) => update('salutation', v)}
             >
                 <SelectTrigger id="{prefix}.salutation" class="w-full">
-                    <SelectValue placeholder="—" />
+                    {#if data.salutation}
+                        <div data-slot="select-value">{data.salutation}</div>
+                    {:else}
+                        <div data-slot="select-value" class="text-muted-foreground">—</div>
+                    {/if}
                 </SelectTrigger>
                 <SelectContent>
                     <SelectItem value="">—</SelectItem>
@@ -170,7 +174,9 @@
                 onValueChange={(v: string) => update('country', v)}
             >
                 <SelectTrigger id="{prefix}.country" class="w-full">
-                    <SelectValue />
+                    <div data-slot="select-value">
+                        {#if data.country === 'DE'}Deutschland{:else if data.country === 'AT'}Österreich{:else if data.country === 'CH'}Schweiz{:else if data.country === 'NL'}Niederlande{:else if data.country === 'BE'}Belgien{:else if data.country === 'LU'}Luxemburg{:else if data.country === 'FR'}Frankreich{:else}Deutschland{/if}
+                    </div>
                 </SelectTrigger>
                 <SelectContent>
                     <SelectItem value="DE">Deutschland</SelectItem>
