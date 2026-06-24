@@ -214,7 +214,7 @@
                         </Button>
                     </div>
                     <Separator class="mb-4" />
-                    <div on:addressupdate={handleAddressUpdate}>
+                    <div onaddressupdate={handleAddressUpdate}>
                         <AddressForm
                             data={shippingAddress}
                             errors={addressErrors}
@@ -242,7 +242,7 @@
                             Abweichende Rechnungsadresse eingeben
                         </button>
                     {:else}
-                        <div on:addressupdate={handleAddressUpdate}>
+                        <div onaddressupdate={handleAddressUpdate}>
                             <AddressForm
                                 data={billingAddress ?? defaultBillingAddress()}
                                 errors={addressErrors}
