@@ -4,12 +4,12 @@
     import checkout from '@/routes/checkout';
 
     let {
-        total,
-        clientId,
+        total = 0,
+        clientId = '',
         disabled = false,
     }: {
-        total: number;
-        clientId: string;
+        total?: number;
+        clientId?: string;
         disabled?: boolean;
     } = $props();
 
@@ -22,6 +22,11 @@
     });
 
     function loadPayPalSDK(clientId: string) {
+        if (!clientId) {
+            errorMessage = 'PayPal ist nicht konfiguriert (Client-ID fehlt).';
+            return;
+        }
+
         const script = document.createElement('script');
         script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=EUR&locale=de_DE`;
         script.async = true;

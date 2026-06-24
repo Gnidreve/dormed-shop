@@ -261,7 +261,7 @@
                             <div class="mt-6">
                                 <PayPalButton
                                     total={Number(cart.total)}
-                                    {paypal_client_id}
+                                    clientId={paypal_client_id ?? ''}
                                     disabled={!agreedToTerms}
                                 />
                             </div>
