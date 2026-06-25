@@ -6,12 +6,15 @@
     import { formatPrice } from '@/lib/currency';
     import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
 
+    type ProductImage = { id: number; url: string; sort_order: number };
+
     type Product = {
         id: number;
         name: string;
         price: string;
         description: string | null;
         manufacturer: { id: number; name: string } | null;
+        images: ProductImage[];
     };
 
     type Paginator = {
@@ -76,9 +79,15 @@
                         href={ProductController.show.url(product.id)}
                         class="group rounded-lg border bg-white p-3 shadow-sm transition hover:shadow-md"
                     >
-                        <div
-                            class="mb-3 aspect-square w-full rounded bg-gray-100"
-                        ></div>
+                        <div class="mb-3 aspect-square w-full overflow-hidden rounded bg-gray-100">
+                            {#if product.images[0]}
+                                <img
+                                    src={product.images[0].url}
+                                    alt={product.name}
+                                    class="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                />
+                            {/if}
+                        </div>
                         <div class="flex flex-col gap-1">
                             <p
                                 class="line-clamp-2 text-sm font-medium text-gray-900 group-hover:text-[#1a6bbf]"

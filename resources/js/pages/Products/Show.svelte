@@ -19,12 +19,15 @@
     import { formatPrice } from '@/lib/currency';
     import { cn } from '@/lib/utils';
 
+    type ProductImage = { id: number; url: string; sort_order: number };
+
     type Product = {
         id: number;
         name: string;
         description: string | null;
         price: string;
         manufacturer: { id: number; name: string } | null;
+        images: ProductImage[];
     };
 
     type Rating = {
@@ -52,6 +55,7 @@
     let quantity = $state(1);
     let activeTab = $state<'beschreibung' | 'bewertungen'>('beschreibung');
     let ratingStars = $state(5);
+    let activeImageIndex = $state(0);
 
     function starLabel(stars: number): string {
         return `${stars} Stern${stars === 1 ? '' : 'e'}`;
@@ -105,11 +109,44 @@
         <!-- Two-column layout -->
         <div class="flex flex-col gap-10 lg:flex-row lg:items-start">
 
-            <!-- Left: image -->
+            <!-- Left: image gallery -->
             <div class="w-full lg:max-w-lg xl:max-w-xl">
-                <div class="flex aspect-square items-center justify-center rounded-xl border bg-gray-50">
-                    <ShoppingCart class="size-20 text-gray-200" strokeWidth={1} />
-                </div>
+                {#if product.images.length > 0}
+                    <div class="flex flex-col gap-3">
+                        <!-- Main image -->
+                        <div class="aspect-square w-full overflow-hidden rounded-xl border bg-gray-50">
+                            <img
+                                src={product.images[activeImageIndex]?.url}
+                                alt={product.name}
+                                class="size-full object-cover"
+                            />
+                        </div>
+                        <!-- Thumbnails -->
+                        {#if product.images.length > 1}
+                            <div class="flex gap-2">
+                                {#each product.images as image, i (image.id)}
+                                    <button
+                                        type="button"
+                                        onclick={() => (activeImageIndex = i)}
+                                        class={cn(
+                                            'size-16 shrink-0 overflow-hidden rounded-lg border-2 bg-gray-50 transition-colors',
+                                            activeImageIndex === i
+                                                ? 'border-[#1a6bbf]'
+                                                : 'border-transparent hover:border-gray-300',
+                                        )}
+                                        aria-label={`Bild ${i + 1}`}
+                                    >
+                                        <img src={image.url} alt="" class="size-full object-cover" />
+                                    </button>
+                                {/each}
+                            </div>
+                        {/if}
+                    </div>
+                {:else}
+                    <div class="flex aspect-square items-center justify-center rounded-xl border bg-gray-50">
+                        <ShoppingCart class="size-20 text-gray-200" strokeWidth={1} />
+                    </div>
+                {/if}
             </div>
 
             <!-- Right: purchase info -->

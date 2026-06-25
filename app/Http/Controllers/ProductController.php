@@ -14,7 +14,7 @@ class ProductController extends Controller
     {
         $query = $request->string('q')->trim();
 
-        $products = Product::with('manufacturer')
+        $products = Product::with(['manufacturer', 'images' => fn ($q) => $q->where('sort_order', 0)])
             ->when($query, fn ($q) => $q->where('name', 'like', "%{$query}%"))
             ->orderBy('name')
             ->paginate(24)
@@ -28,11 +28,17 @@ class ProductController extends Controller
 
     public function show(Product $product): Response
     {
-        $product->load(['manufacturer', 'ratings']);
+        $product->load(['manufacturer', 'ratings', 'images']);
         $product->loadAvg('ratings', 'stars');
 
         return Inertia::render('Products/Show', [
-            'product' => $product,
+            'product' => array_merge($product->toArray(), [
+                'images' => $product->images->map(fn ($img) => [
+                    'id' => $img->id,
+                    'url' => $img->url,
+                    'sort_order' => $img->sort_order,
+                ])->values(),
+            ]),
             'ratings' => $product->ratings->map(fn ($rating) => [
                 'id' => $rating->id,
                 'stars' => $rating->stars,
