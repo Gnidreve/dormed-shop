@@ -8,7 +8,6 @@
     import AppFooter from '@/components/AppFooter.svelte';
     import AppHead from '@/components/AppHead.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
-    import TestModeBanner from '@/components/TestModeBanner.svelte';
 
     const trustItems = [
         {
@@ -41,7 +40,6 @@
 
 <div class="min-h-screen bg-white">
     <ShopHeader />
-    <TestModeBanner />
 
     <!-- Hero -->
     <section class="relative overflow-hidden">

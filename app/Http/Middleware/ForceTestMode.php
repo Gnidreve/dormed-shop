@@ -10,10 +10,12 @@ class ForceTestMode
 {
     public function handle(Request $request, Closure $next): Response
     {
-        config([
-            'app.test_mode' => true,
-            'payment.mode' => 'sandbox',
-        ]);
+        if ($request->session()->get('sandbox', false)) {
+            config([
+                'app.test_mode' => true,
+                'payment.mode' => 'sandbox',
+            ]);
+        }
 
         return $next($request);
     }

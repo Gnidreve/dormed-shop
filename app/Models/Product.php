@@ -39,6 +39,11 @@ class Product extends Model
         return $this->belongsTo(Manufacturer::class);
     }
 
+    public function images(): HasMany
+    {
+        return $this->hasMany(ProductImage::class)->orderBy('sort_order');
+    }
+
     public function ratings(): HasMany
     {
         return $this->hasMany(Rating::class)->latest();

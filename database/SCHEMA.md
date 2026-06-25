@@ -13,6 +13,7 @@ Engine: **SQLite** (Entwicklung) — Produktionsumgebung: MySQL/MariaDB-kompatib
 | `users`               | Admin-Nutzer (internes Panel)              |
 | `customers`           | Shop-Kunden (Frontend-Auth via Fortify)    |
 | `products`            | Produkte                                   |
+| `product_images`      | Produktbilder (max. 5, sortiert)           |
 | `addresses`           | Adressen (Customer-Profil)                 |
 | `manufacturers`       | Hersteller (FK von `products`)             |
 | `categories`          | Produktkategorien                          |
@@ -130,6 +131,24 @@ Indexe:
 | `price`           | numeric  | NO       | —       | decimal(8,2)                     |
 | `created_at`      | datetime | YES      | —       |                                  |
 | `updated_at`      | datetime | YES      | —       |                                  |
+
+---
+
+## product_images
+
+Produktbilder. Mehrere pro Produkt, Reihenfolge via `sort_order` (0 = Hauptbild, max. 5 pro Produkt).
+
+| Spalte       | Typ              | Nullable | Default | Hinweis                            |
+|--------------|------------------|----------|---------|------------------------------------|
+| `id`         | integer          | NO       | —       | PK, autoincrement                  |
+| `product_id` | integer          | NO       | —       | FK → `products.id` CASCADE         |
+| `path`       | varchar          | NO       | —       | Storage-Pfad auf Public-Disk       |
+| `sort_order` | smallint unsigned| NO       | `0`     | 0 = Hauptbild                      |
+| `created_at` | datetime         | YES      | —       |                                    |
+| `updated_at` | datetime         | YES      | —       |                                    |
+
+Indexe:
+- `product_images_product_id_sort_order_index` auf (`product_id`, `sort_order`)
 
 ---
 
@@ -302,5 +321,6 @@ Indexe:
 | `orders`      | `customer_id`       | `customers.id`         | CASCADE   |
 | `order_items` | `order_id`          | `orders.id`            | CASCADE   |
 | `payments`    | `order_id`          | `orders.id`            | CASCADE   |
+| `product_images` | `product_id`     | `products.id`          | CASCADE   |
 | `ratings`     | `product_id`        | `products.id`          | CASCADE   |
 | `passkeys`    | `customer_id`       | `customers.id`         | CASCADE   |

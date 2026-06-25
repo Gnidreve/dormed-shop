@@ -9,6 +9,7 @@
     import Settings from 'lucide-svelte/icons/settings';
     import User from 'lucide-svelte/icons/user';
     import CartSheet from '@/components/CartSheet.svelte';
+    import TestModeBanner from '@/components/TestModeBanner.svelte';
     import UserPlus from 'lucide-svelte/icons/user-plus';
     import * as Dialog from '@/components/ui/dialog';
     import {Sheet, SheetContent, SheetTitle, SheetTrigger} from '@/components/ui/sheet';
@@ -149,6 +150,7 @@
 
 <svelte:window onclick={handleClickOutside} onkeydown={handleKeydown} />
 
+<TestModeBanner />
 <header class="bg-white shadow-sm">
     <!-- Top row: logo + search + icons -->
     <div class="border-b">
