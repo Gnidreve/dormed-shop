@@ -68,6 +68,10 @@
                         data-active={isActive}
                         {...rest}
                         {...triggerProps}
+                        onclick={(e: MouseEvent) => {
+                            (rest as any).onclick?.(e);
+                            (triggerProps as any).onclick?.(e);
+                        }}
                     >
                         {@render children?.({})}
                     </button>
