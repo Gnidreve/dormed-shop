@@ -14,6 +14,7 @@ Engine: **SQLite** (Entwicklung) — Produktionsumgebung: MySQL/MariaDB-kompatib
 | `customers`           | Shop-Kunden (Frontend-Auth via Fortify)    |
 | `products`            | Produkte                                   |
 | `product_images`      | Produktbilder (max. 5, sortiert)           |
+| `shipping_methods`    | Versandarten mit Bezeichnung und Preis     |
 | `addresses`           | Adressen (Customer-Profil)                 |
 | `manufacturers`       | Hersteller (FK von `products`)             |
 | `categories`          | Produktkategorien                          |
@@ -149,6 +150,21 @@ Produktbilder. Mehrere pro Produkt, Reihenfolge via `sort_order` (0 = Hauptbild,
 
 Indexe:
 - `product_images_product_id_sort_order_index` auf (`product_id`, `sort_order`)
+
+---
+
+## shipping_methods
+
+Versandarten für den Shop. Preis nullable = "auf Anfrage".
+
+| Spalte       | Typ              | Nullable | Default | Hinweis           |
+|--------------|------------------|----------|---------|-------------------|
+| `id`         | integer          | NO       | —       | PK, autoincrement |
+| `name`       | varchar          | NO       | —       | Bezeichnung       |
+| `price`      | decimal(8,2)     | YES      | —       | null = auf Anfrage|
+| `sort_order` | smallint unsigned| NO       | `0`     |                   |
+| `created_at` | datetime         | YES      | —       |                   |
+| `updated_at` | datetime         | YES      | —       |                   |
 
 ---
 

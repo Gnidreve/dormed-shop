@@ -48,6 +48,7 @@
         { title: 'Allgemein', href: '/admin/settings/general' },
         { title: 'Mailversand', href: '/admin/settings/mail' },
         { title: 'Zahlungsarten', href: '/admin/settings/payment' },
+        { title: 'Versandarten', href: '/admin/settings/shipping' },
     ];
 </script>
 

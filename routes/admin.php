@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ProductImageController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\ShippingMethodController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest:admin')->group(function () {
@@ -46,6 +47,10 @@ Route::middleware('ensure.admin')->prefix('admin')->name('admin.')->group(functi
     Route::get('/settings/mail', [SettingController::class, 'showMail'])->name('settings.mail');
     Route::get('/settings/payment', [SettingController::class, 'showPayment'])->name('settings.payment');
     Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
+    Route::get('/settings/shipping', [ShippingMethodController::class, 'index'])->name('settings.shipping');
+    Route::post('/settings/shipping', [ShippingMethodController::class, 'store'])->name('settings.shipping.store');
+    Route::put('/settings/shipping/{shippingMethod}', [ShippingMethodController::class, 'update'])->name('settings.shipping.update');
+    Route::delete('/settings/shipping/{shippingMethod}', [ShippingMethodController::class, 'destroy'])->name('settings.shipping.destroy');
     Route::get('/settings/stripe/check', [SettingController::class, 'checkStripe'])->name('settings.stripe.check');
     Route::get('/settings/mail/check', [SettingController::class, 'checkMail'])->name('settings.mail.check');
     Route::get('/settings/paypal/check', [SettingController::class, 'checkPayPal'])->name('settings.paypal.check');
