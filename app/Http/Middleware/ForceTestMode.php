@@ -12,7 +12,7 @@ class ForceTestMode
     {
         config([
             'app.test_mode' => true,
-            'paypal.mode' => 'sandbox',
+            'payment.mode' => 'sandbox',
         ]);
 
         return $next($request);

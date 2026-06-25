@@ -57,7 +57,7 @@ class CheckoutController extends Controller
         $paypalClientId = null;
 
         if (($selectedPayment['id'] ?? '') === 'paypal') {
-            $mode = config('app.test_mode') ? 'sandbox' : (Setting::get('paypal.mode') ?? 'sandbox');
+            $mode = config('app.test_mode') ? 'sandbox' : (Setting::get('payment.mode') ?? 'sandbox');
             $paypalClientId = $mode === 'live'
                 ? Setting::get('paypal.live.client_id')
                 : Setting::get('paypal.sandbox.client_id');
@@ -171,7 +171,11 @@ class CheckoutController extends Controller
             ];
         }
 
-        $stripe = new StripeClient(config('services.stripe.key'));
+        $mode = config('app.test_mode') ? 'sandbox' : (Setting::get('payment.mode') ?? 'sandbox');
+        $stripeKey = $mode === 'live'
+            ? Setting::get('stripe.live.secret_key')
+            : Setting::get('stripe.sandbox.secret_key');
+        $stripe = new StripeClient($stripeKey ?? config('services.stripe.key'));
 
         $session = $stripe->checkout->sessions->create([
             'mode' => 'payment',

@@ -28,7 +28,7 @@ class PayPalService
 
     private function buildConfig(): array
     {
-        $mode = config('app.test_mode') ? 'sandbox' : (Setting::get('paypal.mode') ?? 'sandbox');
+        $mode = config('app.test_mode') ? 'sandbox' : (Setting::get('payment.mode') ?? 'sandbox');
 
         return [
             'mode' => $mode,

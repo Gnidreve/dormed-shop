@@ -18,8 +18,10 @@ use Stripe\StripeClient;
 class SettingController extends Controller
 {
     private const SENSITIVE_KEYS = [
-        'stripe.secret_key',
-        'stripe.webhook_secret',
+        'stripe.sandbox.secret_key',
+        'stripe.sandbox.webhook_secret',
+        'stripe.live.secret_key',
+        'stripe.live.webhook_secret',
         'mail.smtp_password',
         'paypal.sandbox.client_secret',
         'paypal.live.client_secret',
@@ -136,7 +138,10 @@ class SettingController extends Controller
 
     public function checkStripe(): JsonResponse
     {
-        $key = Setting::get('stripe.secret_key');
+        $mode = Setting::get('payment.mode') ?? 'sandbox';
+        $key = $mode === 'live'
+            ? Setting::get('stripe.live.secret_key')
+            : Setting::get('stripe.sandbox.secret_key');
 
         if (! $key) {
             return response()->json(['message' => 'Kein Secret Key konfiguriert.'], 422);
@@ -156,7 +161,7 @@ class SettingController extends Controller
 
     public function checkPayPal(): JsonResponse
     {
-        $mode = Setting::get('paypal.mode', 'sandbox') ?? 'sandbox';
+        $mode = Setting::get('payment.mode') ?? 'sandbox';
         $clientId = $mode === 'live'
             ? Setting::get('paypal.live.client_id')
             : Setting::get('paypal.sandbox.client_id');
@@ -199,11 +204,14 @@ class SettingController extends Controller
             'mail.smtp_port' => $raw->get('mail.smtp_port', ''),
             'mail.smtp_user' => $raw->get('mail.smtp_user', ''),
             'mail.smtp_password' => '',
-            'stripe.publishable_key' => $raw->get('stripe.publishable_key', ''),
-            'stripe.secret_key' => '',
-            'stripe.webhook_secret' => '',
             'payment.provider' => $raw->get('payment.provider', 'stripe'),
-            'paypal.mode' => $raw->get('paypal.mode', 'sandbox'),
+            'payment.mode' => $raw->get('payment.mode', 'sandbox'),
+            'stripe.sandbox.publishable_key' => $raw->get('stripe.sandbox.publishable_key', ''),
+            'stripe.sandbox.secret_key' => '',
+            'stripe.sandbox.webhook_secret' => '',
+            'stripe.live.publishable_key' => $raw->get('stripe.live.publishable_key', ''),
+            'stripe.live.secret_key' => '',
+            'stripe.live.webhook_secret' => '',
             'paypal.sandbox.client_id' => $raw->get('paypal.sandbox.client_id', ''),
             'paypal.sandbox.merchant_id' => $raw->get('paypal.sandbox.merchant_id', ''),
             'paypal.sandbox.client_secret' => '',

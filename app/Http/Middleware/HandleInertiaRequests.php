@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Category;
+use App\Models\Setting;
 use App\Support\Cart\CartService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -52,7 +53,14 @@ class HandleInertiaRequests extends Middleware
             'navCategories' => Inertia::always(
                 fn () => Category::orderBy('name')->get(['id', 'name', 'slug']),
             ),
-            'stripeKey' => config('services.stripe.publishable_key'),
+            'stripeKey' => (function () {
+                $mode = config('app.test_mode') ? 'sandbox' : (Setting::get('payment.mode') ?? 'sandbox');
+                $key = $mode === 'live'
+                    ? Setting::get('stripe.live.publishable_key')
+                    : Setting::get('stripe.sandbox.publishable_key');
+
+                return $key ?? config('services.stripe.publishable_key');
+            })(),
             'sandbox' => config('app.test_mode', false),
         ];
     }
