@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductImage;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -46,7 +45,7 @@ class ProductImageController extends Controller
         return back()->with('success', 'Bild gelöscht.');
     }
 
-    public function reorder(Request $request, Product $product): JsonResponse
+    public function reorder(Request $request, Product $product): RedirectResponse
     {
         $validated = $request->validate([
             'ids' => ['required', 'array'],
@@ -62,6 +61,6 @@ class ProductImageController extends Controller
             $product->images()->where('id', $id)->update(['sort_order' => $order]);
         }
 
-        return response()->json(['ok' => true]);
+        return back();
     }
 }

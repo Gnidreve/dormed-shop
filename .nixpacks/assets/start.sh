@@ -13,7 +13,7 @@ chmod -R 775 /app/storage /app/bootstrap/cache
 cd /app
 php artisan package:discover --ansi
 php artisan migrate --force
-php artisan storage:link || true
+rm -f /app/public/storage && php artisan storage:link
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
