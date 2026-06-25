@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest:admin')->group(function () {
     Route::get('/admin/login', [LoginController::class, 'showLoginForm'])->name('admin.login');
-    Route::post('/admin/login', [LoginController::class, 'login'])->name('admin.login.store');
+    Route::post('/admin/login', [LoginController::class, 'login'])->name('admin.login.store')->middleware('throttle:6,1');
 });
 
 Route::post('/admin/logout', [LoginController::class, 'logout'])

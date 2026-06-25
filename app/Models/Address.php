@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Address extends Model
 {
     protected $fillable = [
-        'customer_id', 'type', 'company', 'salutation',
+        'type', 'company', 'salutation',
         'first_name', 'last_name', 'street', 'house_number',
         'address_line2', 'zip', 'city', 'country', 'phone',
         'is_default',

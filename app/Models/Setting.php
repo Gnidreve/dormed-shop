@@ -17,7 +17,14 @@ class Setting extends Model
     protected static array $encryptedKeys = [
         'stripe.secret_key',
         'stripe.webhook_secret',
+        'stripe.sandbox.secret_key',
+        'stripe.sandbox.webhook_secret',
+        'stripe.live.secret_key',
+        'stripe.live.webhook_secret',
         'mail.smtp_password',
+        'paypal.sandbox.client_secret',
+        'paypal.live.client_secret',
+        'paypal.webhook_id',
     ];
 
     public static function get(string $key, ?string $default = null): ?string

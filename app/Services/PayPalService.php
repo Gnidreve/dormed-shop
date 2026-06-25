@@ -35,7 +35,7 @@ class PayPalService
             'sandbox' => [
                 'client_id' => Setting::get('paypal.sandbox.client_id') ?? env('PAYPAL_SANDBOX_CLIENT_ID', ''),
                 'client_secret' => Setting::get('paypal.sandbox.client_secret') ?? env('PAYPAL_SANDBOX_CLIENT_SECRET', ''),
-                'app_id' => 'APP-80W284485P519543T',
+                'app_id' => Setting::get('paypal.sandbox.app_id') ?? env('PAYPAL_SANDBOX_APP_ID', 'APP-80W284485P519543T'),
                 'merchant_id' => Setting::get('paypal.sandbox.merchant_id') ?? env('PAYPAL_SANDBOX_MERCHANT_ID', ''),
             ],
             'live' => [

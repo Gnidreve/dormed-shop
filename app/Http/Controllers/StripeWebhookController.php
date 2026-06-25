@@ -19,7 +19,7 @@ class StripeWebhookController extends Controller
     {
         $payload = $request->getContent();
         $signature = $request->header('Stripe-Signature');
-        $secret = Setting::get('stripe.webhook_secret');
+        $secret = Setting::get('stripe.webhook_secret') ?? env('STRIPE_WEBHOOK_SECRET');
 
         try {
             $event = Webhook::constructEvent($payload, $signature, $secret);

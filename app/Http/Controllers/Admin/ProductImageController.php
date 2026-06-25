@@ -35,6 +35,8 @@ class ProductImageController extends Controller
 
     public function destroy(Product $product, ProductImage $image): RedirectResponse
     {
+        abort_unless($image->product_id === $product->id, 403);
+
         Storage::disk('public')->delete($image->path);
         $image->delete();
 
@@ -46,12 +48,17 @@ class ProductImageController extends Controller
 
     public function reorder(Request $request, Product $product): JsonResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'ids' => ['required', 'array'],
-            'ids.*' => ['integer', 'exists:product_images,id'],
+            'ids.*' => ['integer'],
         ]);
 
-        foreach ($request->ids as $order => $id) {
+        $ids = $validated['ids'];
+        $ownedCount = $product->images()->whereIn('id', $ids)->count();
+
+        abort_unless($ownedCount === count($ids), 403);
+
+        foreach ($ids as $order => $id) {
             $product->images()->where('id', $id)->update(['sort_order' => $order]);
         }
 
