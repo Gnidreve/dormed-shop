@@ -8,6 +8,7 @@
     import { toUrl } from '@/lib/utils';
     import { edit as editProfile } from '@/routes/profile';
     import { edit as editSecurity } from '@/routes/security';
+    import customerRoutes from '@/routes/customer';
     import type { NavItem } from '@/types';
 
     let {
@@ -18,11 +19,15 @@
 
     const sidebarNavItems: NavItem[] = [
         {
-            title: 'Profile',
+            title: 'Bestellungen',
+            href: customerRoutes.orders(),
+        },
+        {
+            title: 'Profil',
             href: editProfile(),
         },
         {
-            title: 'Security',
+            title: 'Sicherheit',
             href: editSecurity(),
         },
     ];
