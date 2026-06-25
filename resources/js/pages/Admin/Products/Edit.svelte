@@ -258,9 +258,10 @@
                 Noch keine Bilder hochgeladen
             </div>
         {:else}
-            <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div role="list" class="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {#each images as image (image.id)}
                     <div
+                        role="listitem"
                         draggable="true"
                         ondragstart={() => onDragStart(image.id)}
                         ondragover={(e) => onDragOver(e, image.id)}
