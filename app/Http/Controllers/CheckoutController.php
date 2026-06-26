@@ -7,6 +7,7 @@ use App\Http\Requests\Checkout\PlaceOrderRequest;
 use App\Models\Order;
 use App\Models\Setting;
 use App\Support\Cart\CartService;
+use App\Support\PaymentMode;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -57,8 +58,7 @@ class CheckoutController extends Controller
         $paypalClientId = null;
 
         if (($selectedPayment['id'] ?? '') === 'paypal') {
-            $mode = app()->environment('production') ? 'live' : 'sandbox';
-            $paypalClientId = $mode === 'live'
+            $paypalClientId = PaymentMode::isLive()
                 ? Setting::get('paypal.live.client_id')
                 : Setting::get('paypal.sandbox.client_id');
         }
@@ -134,7 +134,7 @@ class CheckoutController extends Controller
         $order = Order::query()->create([
             'customer_id' => $request->user()->id,
             'status' => 'pending',
-            'is_test' => ! app()->environment('production'),
+            'is_test' => ! PaymentMode::isLive(),
             'total_amount' => $cart['total'],
             'shipping_amount' => $shippingAmount,
             'shipping_address' => $shippingAddress,
@@ -171,8 +171,7 @@ class CheckoutController extends Controller
             ];
         }
 
-        $mode = app()->environment('production') ? 'live' : 'sandbox';
-        $stripeKey = $mode === 'live'
+        $stripeKey = PaymentMode::isLive()
             ? Setting::get('stripe.live.secret_key')
             : Setting::get('stripe.sandbox.secret_key');
         $stripe = new StripeClient($stripeKey ?? config('services.stripe.key'));

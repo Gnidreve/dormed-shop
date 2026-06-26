@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\Category;
 use App\Models\Setting;
 use App\Support\Cart\CartService;
+use App\Support\PaymentMode;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Middleware;
@@ -54,14 +55,13 @@ class HandleInertiaRequests extends Middleware
                 fn () => Category::orderBy('name')->get(['id', 'name', 'slug']),
             ),
             'stripeKey' => (function () {
-                $mode = app()->environment('production') ? 'live' : 'sandbox';
-                $key = $mode === 'live'
+                $key = PaymentMode::isLive()
                     ? Setting::get('stripe.live.publishable_key')
                     : Setting::get('stripe.sandbox.publishable_key');
 
                 return $key ?? config('services.stripe.publishable_key');
             })(),
-            'sandbox' => ! app()->environment('production'),
+            'sandbox' => ! PaymentMode::isLive(),
         ];
     }
 }

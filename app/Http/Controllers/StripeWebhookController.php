@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\NewOrderMail;
 use App\Models\Order;
 use App\Models\Setting;
+use App\Support\PaymentMode;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
@@ -19,8 +20,7 @@ class StripeWebhookController extends Controller
     {
         $payload = $request->getContent();
         $signature = $request->header('Stripe-Signature');
-        $mode = app()->environment('production') ? 'live' : 'sandbox';
-        $secret = Setting::get("stripe.{$mode}.webhook_secret") ?? env('STRIPE_WEBHOOK_SECRET');
+        $secret = Setting::get('stripe.'.PaymentMode::current().'.webhook_secret') ?? env('STRIPE_WEBHOOK_SECRET');
 
         try {
             $event = Webhook::constructEvent($payload, $signature, $secret);

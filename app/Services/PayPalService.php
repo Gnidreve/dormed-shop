@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Setting;
+use App\Support\PaymentMode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Srmklive\PayPal\Services\PayPal;
@@ -28,7 +29,7 @@ class PayPalService
 
     private function buildConfig(): array
     {
-        $mode = app()->environment('production') ? 'live' : 'sandbox';
+        $mode = PaymentMode::current();
 
         return [
             'mode' => $mode,

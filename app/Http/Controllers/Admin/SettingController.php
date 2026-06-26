@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Support\PaymentMode;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -59,7 +60,7 @@ class SettingController extends Controller
                 ->mapWithKeys(fn ($k) => [$k => Setting::get($k) !== null])
                 ->all(),
             'stripeWebhookUrl' => route('stripe.webhook'),
-            'paymentMode' => app()->environment('production') ? 'live' : 'sandbox',
+            'paymentMode' => PaymentMode::current(),
         ]);
     }
 
@@ -139,8 +140,7 @@ class SettingController extends Controller
 
     public function checkStripe(): JsonResponse
     {
-        $mode = app()->environment('production') ? 'live' : 'sandbox';
-        $key = $mode === 'live'
+        $key = PaymentMode::isLive()
             ? Setting::get('stripe.live.secret_key')
             : Setting::get('stripe.sandbox.secret_key');
 
@@ -162,11 +162,11 @@ class SettingController extends Controller
 
     public function checkPayPal(): JsonResponse
     {
-        $mode = app()->environment('production') ? 'live' : 'sandbox';
-        $clientId = $mode === 'live'
+        $isLive = PaymentMode::isLive();
+        $clientId = $isLive
             ? Setting::get('paypal.live.client_id')
             : Setting::get('paypal.sandbox.client_id');
-        $clientSecret = $mode === 'live'
+        $clientSecret = $isLive
             ? Setting::get('paypal.live.client_secret')
             : Setting::get('paypal.sandbox.client_secret');
 
@@ -174,9 +174,10 @@ class SettingController extends Controller
             return response()->json(['message' => 'Client-ID oder Secret nicht konfiguriert.'], 422);
         }
 
-        $baseUrl = $mode === 'live'
+        $baseUrl = $isLive
             ? 'https://api-m.paypal.com'
             : 'https://api-m.sandbox.paypal.com';
+        $mode = PaymentMode::current();
 
         try {
             $response = Http::withBasicAuth($clientId, $clientSecret)
@@ -206,7 +207,6 @@ class SettingController extends Controller
             'mail.smtp_user' => $raw->get('mail.smtp_user', ''),
             'mail.smtp_password' => '',
             'payment.provider' => $raw->get('payment.provider', 'stripe'),
-            'payment.mode' => $raw->get('payment.mode', 'sandbox'),
             'stripe.sandbox.publishable_key' => $raw->get('stripe.sandbox.publishable_key', ''),
             'stripe.sandbox.secret_key' => '',
             'stripe.sandbox.webhook_secret' => '',
