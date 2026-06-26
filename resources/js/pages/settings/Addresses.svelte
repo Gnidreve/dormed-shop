@@ -17,7 +17,6 @@
     import { Input } from '@/components/ui/input';
     import { Label } from '@/components/ui/label';
     import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
-    import addresses from '@/routes/addresses';
     import type { AddressData } from '@/types/cart';
 
     const EMPTY_ADDRESS: AddressData = {
