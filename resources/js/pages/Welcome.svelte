@@ -167,32 +167,25 @@
         </div>
     </div>
 
-    <section class="bg-[#f5f5f7]">
-        <div class="mx-auto max-w-7xl px-4 py-18 lg:px-8 lg:py-24">
+    <section class="bg-gray-50">
+        <div class="mx-auto max-w-7xl px-4 py-12 lg:px-8 lg:py-16">
             <div class="max-w-3xl">
-                <p class="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-[#1a6bbf]">
-                    Beschaffung mit klarer Linie
-                </p>
-                <h2 class="max-w-2xl text-3xl font-semibold tracking-[-0.02em] text-[#0d1f44] lg:text-5xl">
-                    Ein Shop, der wie eine echte medizinische Landingpage erklärt, wie Einkauf hier funktioniert.
+                <h2 class="text-2xl font-bold text-gray-900 lg:text-3xl">
+                    Einfach registrieren, freischalten lassen und direkt bestellen
                 </h2>
-                <p class="mt-5 max-w-2xl text-base leading-7 text-[#1a3a5c]/78 lg:text-lg">
-                    Der Live-Stand von dormed24 setzt stark auf einfache Registrierung, schnelles Freischalten und direkte Produktverfügbarkeit. Genau darauf baut dieser Mittelteil auf.
+                <p class="mt-3 text-sm leading-6 text-muted-foreground lg:text-base">
+                    Der bisherige Auftritt von dormed24 lebt stark davon, dass neue Kunden schnell
+                    verstehen, wie sie ins Sortiment kommen. Genau dieses Prinzip soll die
+                    Startseite auch unterhalb des Headers sauber fortführen.
                 </p>
             </div>
 
-            <div class="mt-12 grid gap-5 lg:grid-cols-3">
+            <div class="mt-8 grid gap-4 md:grid-cols-3">
                 {#each onboardingSteps as step, index}
-                    <article class="rounded-[28px] bg-white p-7 shadow-[0_22px_60px_rgba(13,31,68,0.08)]">
-                        <div class="mb-6 flex size-12 items-center justify-center rounded-full bg-[#0d1f44] text-sm font-semibold text-white">
-                            0{index + 1}
-                        </div>
-                        <h3 class="text-xl font-semibold tracking-[-0.01em] text-[#0d1f44]">
-                            {step.title}
-                        </h3>
-                        <p class="mt-3 text-sm leading-6 text-[#1a3a5c]/78">
-                            {step.text}
-                        </p>
+                    <article class="rounded-xl border bg-white p-6 shadow-sm">
+                        <p class="text-sm font-semibold text-[#1a6bbf]">Schritt {index + 1}</p>
+                        <h3 class="mt-2 text-lg font-semibold text-gray-900">{step.title}</h3>
+                        <p class="mt-3 text-sm leading-6 text-muted-foreground">{step.text}</p>
                     </article>
                 {/each}
             </div>
@@ -200,124 +193,112 @@
     </section>
 
     <section class="bg-white">
-        <div class="mx-auto max-w-7xl px-4 py-18 lg:px-8 lg:py-24">
-            <div class="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
-                <div>
-                    <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[#1a6bbf]">
-                        Sortiment & Nachfrage
-                    </p>
-                    <h2 class="mt-3 max-w-xl text-3xl font-semibold tracking-[-0.02em] text-[#0d1f44] lg:text-5xl">
-                        Neuheiten und Bedarfsträger sauber inszeniert, statt nur Produktlisten aneinanderzureihen.
+        <div class="mx-auto max-w-7xl px-4 py-12 lg:px-8 lg:py-16">
+            <div class="mb-8 flex items-end justify-between gap-6">
+                <div class="max-w-3xl">
+                    <h2 class="text-2xl font-bold text-gray-900 lg:text-3xl">
+                        Neu bei dormed24
                     </h2>
-                    <p class="mt-5 max-w-xl text-base leading-7 text-[#1a3a5c]/78 lg:text-lg">
-                        Auf dormed24.de stehen aktuell kompakte Diagnostik- und Notfallprodukte im Vordergrund. Für die neue Startseite übersetzen wir das in kuratierte Highlights und eine stärkere Vertrauensdramaturgie.
+                    <p class="mt-3 text-sm leading-6 text-muted-foreground lg:text-base">
+                        Im aktuellen Live-Shop stehen kompakte Geräte für Diagnostik und
+                        Notfallversorgung sichtbar im Vordergrund. Dieser Bereich greift das auf,
+                        ohne vom restlichen Shop-Design wegzulaufen.
                     </p>
-
-                    <div class="mt-8 grid gap-3">
-                        {#each assortmentPillars as pillar}
-                            <div class="flex items-start gap-3 rounded-full bg-[#f5f7fb] px-5 py-3 text-sm font-medium text-[#0d1f44]">
-                                <Check class="mt-0.5 size-4 shrink-0 text-[#1a6bbf]" />
-                                <span>{pillar}</span>
-                            </div>
-                        {/each}
-                    </div>
-
-                    <div class="mt-8 flex flex-wrap gap-3">
-                        <Link
-                            href={ProductController.index.url()}
-                            class="inline-flex items-center gap-2 rounded-full bg-[#0071e3] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#005fcc]"
-                        >
-                            Produkte ansehen
-                            <ArrowRight class="size-4" />
-                        </Link>
-                        <Link
-                            href="/kontakt"
-                            class="inline-flex items-center gap-2 rounded-full border border-[#0d1f44]/12 px-5 py-3 text-sm font-semibold text-[#0d1f44] transition hover:border-[#1a6bbf] hover:text-[#1a6bbf]"
-                        >
-                            Beratung anfragen
-                        </Link>
-                    </div>
                 </div>
-
-                <div class="grid gap-4">
-                    {#each highlightProducts as product}
-                        <article class="rounded-[28px] border border-[#dfe7f1] bg-white p-6 shadow-[0_16px_40px_rgba(13,31,68,0.06)]">
-                            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-[#1a6bbf]">
-                                Neu bei dormed24
-                            </p>
-                            <h3 class="mt-3 text-xl font-semibold tracking-[-0.01em] text-[#0d1f44]">
-                                {product.title}
-                            </h3>
-                            <p class="mt-3 text-sm leading-6 text-[#1a3a5c]/78">
-                                {product.summary}
-                            </p>
-                            <div class="mt-5 flex items-center justify-between gap-4 border-t border-[#e8edf5] pt-4">
-                                <span class="text-lg font-semibold text-[#0d1f44]">{product.price}</span>
-                                <Link
-                                    href={ProductController.index.url()}
-                                    class="inline-flex items-center gap-2 text-sm font-semibold text-[#1a6bbf] hover:text-[#0d1f44]"
-                                >
-                                    Zum Sortiment
-                                    <ArrowRight class="size-4" />
-                                </Link>
-                            </div>
-                        </article>
-                    {/each}
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="bg-[#0d1f44] text-white">
-        <div class="mx-auto max-w-7xl px-4 py-18 lg:px-8 lg:py-24">
-            <div class="max-w-3xl">
-                <p class="text-sm font-semibold uppercase tracking-[0.18em] text-white/60">
-                    Landingpage-Mitte mit mehr Gewicht
-                </p>
-                <h2 class="mt-3 text-3xl font-semibold tracking-[-0.02em] lg:text-5xl">
-                    Mehr Substanz zwischen Trust-Leiste und Footer, ohne den bestehenden Kopfbereich umzubauen.
-                </h2>
+                <Link
+                    href={ProductController.index.url()}
+                    class="hidden shrink-0 text-sm font-semibold text-[#1a6bbf] hover:underline lg:inline-flex lg:items-center lg:gap-2"
+                >
+                    Alle Produkte ansehen
+                    <ArrowRight class="size-4" />
+                </Link>
             </div>
 
-            <div class="mt-12 grid gap-5 lg:grid-cols-3">
-                {#each serviceColumns as column}
-                    <article class="rounded-[28px] bg-white/8 p-7 backdrop-blur-sm">
-                        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-[#8ec7ff]">
-                            {column.eyebrow}
+            <div class="grid gap-4 md:grid-cols-3">
+                {#each highlightProducts as product}
+                    <article class="rounded-xl border bg-white p-6 shadow-sm transition hover:shadow-md">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-[#1a6bbf]">
+                            Produkthighlight
                         </p>
-                        <h3 class="mt-3 text-2xl font-semibold tracking-[-0.02em] text-white">
-                            {column.title}
-                        </h3>
-                        <p class="mt-4 text-sm leading-6 text-white/72">
-                            {column.text}
+                        <h3 class="mt-3 text-lg font-semibold text-gray-900">{product.title}</h3>
+                        <p class="mt-3 text-sm leading-6 text-muted-foreground">
+                            {product.summary}
                         </p>
+                        <div class="mt-5 flex items-center justify-between gap-4 border-t pt-4">
+                            <span class="text-sm font-semibold text-[#1a3a5c]">{product.price}</span>
+                            <Link
+                                href={ProductController.index.url()}
+                                class="text-sm font-semibold text-[#1a6bbf] hover:underline"
+                            >
+                                Zum Sortiment
+                            </Link>
+                        </div>
                     </article>
                 {/each}
             </div>
 
-            <div class="mt-12 rounded-[32px] bg-white px-6 py-8 text-[#0d1f44] shadow-[0_26px_80px_rgba(0,0,0,0.16)] lg:flex lg:items-center lg:justify-between lg:px-10">
-                <div class="max-w-2xl">
-                    <h3 class="text-2xl font-semibold tracking-[-0.02em] lg:text-3xl">
-                        Sie brauchen mehr als nur einen Warenkorb.
-                    </h3>
-                    <p class="mt-3 text-sm leading-6 text-[#1a3a5c]/78 lg:text-base">
-                        Dann sollte die Startseite das auch zeigen: mit Sortimentssignal, Beratungskontext und einem klaren Weg in den Shop oder direkt zum Kontakt.
+            <div class="mt-6 lg:hidden">
+                <Link
+                    href={ProductController.index.url()}
+                    class="inline-flex items-center gap-2 text-sm font-semibold text-[#1a6bbf] hover:underline"
+                >
+                    Alle Produkte ansehen
+                    <ArrowRight class="size-4" />
+                </Link>
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-gray-50">
+        <div class="mx-auto max-w-7xl px-4 py-12 lg:px-8 lg:py-16">
+            <div class="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900 lg:text-3xl">
+                        Beschaffung für Praxis, MVZ und Klinik
+                    </h2>
+                    <p class="mt-3 text-sm leading-6 text-muted-foreground lg:text-base">
+                        Statt einer komplett eigenen Landingpage-Ästhetik bekommt der Shop hier
+                        eher denselben nüchternen Ton wie die anderen Seiten: klare Informationen,
+                        erkennbare Vorteile und direkte Wege in Sortiment oder Kontakt.
                     </p>
+
+                    <div class="mt-6 grid gap-3">
+                        {#each assortmentPillars as pillar}
+                            <div class="rounded-lg border bg-white px-4 py-3 text-sm text-gray-700 shadow-sm">
+                                {pillar}
+                            </div>
+                        {/each}
+                    </div>
                 </div>
-                <div class="mt-6 flex flex-wrap gap-3 lg:mt-0">
-                    <Link
-                        href={ProductController.index.url()}
-                        class="inline-flex items-center gap-2 rounded-full bg-[#0d1f44] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#1a3a5c]"
-                    >
-                        Jetzt shoppen
-                        <ArrowRight class="size-4" />
-                    </Link>
-                    <a
-                        href="tel:023011886000"
-                        class="inline-flex items-center gap-2 rounded-full border border-[#0d1f44]/12 px-5 py-3 text-sm font-semibold text-[#0d1f44] transition hover:border-[#1a6bbf] hover:text-[#1a6bbf]"
-                    >
-                        Anrufen
-                    </a>
+
+                <div class="rounded-xl border bg-white p-6 shadow-sm">
+                    <h3 class="text-lg font-semibold text-gray-900">Beratung und schnelle Wege</h3>
+                    <div class="mt-5 space-y-5">
+                        {#each serviceColumns as column}
+                            <div class="border-b pb-5 last:border-b-0 last:pb-0">
+                                <p class="text-sm font-semibold text-[#1a3a5c]">{column.title}</p>
+                                <p class="mt-2 text-sm leading-6 text-muted-foreground">
+                                    {column.text}
+                                </p>
+                            </div>
+                        {/each}
+                    </div>
+
+                    <div class="mt-6 flex flex-wrap gap-3">
+                        <Link
+                            href={ProductController.index.url()}
+                            class="inline-flex items-center gap-2 rounded-lg bg-[#0d1f44] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#0d1f44]/90"
+                        >
+                            Jetzt shoppen
+                            <ArrowRight class="size-4" />
+                        </Link>
+                        <Link
+                            href="/kontakt"
+                            class="inline-flex items-center gap-2 rounded-lg border bg-white px-4 py-2.5 text-sm font-semibold text-[#1a3a5c] hover:text-[#1a6bbf]"
+                        >
+                            Beratung anfragen
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>
