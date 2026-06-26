@@ -6,10 +6,9 @@
     import { Separator } from '@/components/ui/separator';
     import { currentUrlState } from '@/lib/currentUrl.svelte';
     import { toUrl } from '@/lib/utils';
+    import customerRoutes from '@/routes/customer';
     import { edit as editProfile } from '@/routes/profile';
     import { edit as editSecurity } from '@/routes/security';
-    import { edit as editAddresses } from '@/routes/addresses';
-    import customerRoutes from '@/routes/customer';
     import type { NavItem } from '@/types';
 
     let {
@@ -25,7 +24,7 @@
         },
         {
             title: 'Adressen',
-            href: editAddresses(),
+            href: '/settings/addresses',
         },
         {
             title: 'Profil',

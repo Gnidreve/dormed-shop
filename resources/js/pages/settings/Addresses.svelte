@@ -1,9 +1,7 @@
 <script module lang="ts">
-    import addresses from '@/routes/addresses';
-
     export const layout = {
         breadcrumbs: [
-            { title: 'Adressen', href: addresses.edit.url() },
+            { title: 'Adressen', href: '/settings/addresses' },
         ],
     };
 </script>
@@ -18,6 +16,8 @@
     import { Label } from '@/components/ui/label';
     import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
     import type { AddressData } from '@/types/cart';
+
+    const ADDRESSES_URL = '/settings/addresses';
 
     const EMPTY_ADDRESS: AddressData = {
         company: '', salutation: '', first_name: '', last_name: '',
@@ -41,7 +41,7 @@
 
     function submit(e: SubmitEvent) {
         e.preventDefault();
-        form.put(addresses.update.url(), { preserveScroll: true });
+        form.put(ADDRESSES_URL, { preserveScroll: true });
     }
 </script>
 
