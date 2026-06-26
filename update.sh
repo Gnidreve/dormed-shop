@@ -19,6 +19,10 @@ echo "📦 Installing NPM dependencies..."
 npm install --no-audit --no-fund
 
 echo ""
+echo "⚙️  Generating Wayfinder routes..."
+php artisan wayfinder:generate --with-form
+
+echo ""
 echo "🔨 Building frontend assets..."
 npm run build
 
