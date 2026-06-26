@@ -54,14 +54,14 @@ class HandleInertiaRequests extends Middleware
                 fn () => Category::orderBy('name')->get(['id', 'name', 'slug']),
             ),
             'stripeKey' => (function () {
-                $mode = config('app.test_mode') ? 'sandbox' : (Setting::get('payment.mode') ?? 'sandbox');
+                $mode = app()->environment('production') ? 'live' : 'sandbox';
                 $key = $mode === 'live'
                     ? Setting::get('stripe.live.publishable_key')
                     : Setting::get('stripe.sandbox.publishable_key');
 
                 return $key ?? config('services.stripe.publishable_key');
             })(),
-            'sandbox' => config('app.test_mode', false),
+            'sandbox' => ! app()->environment('production'),
         ];
     }
 }

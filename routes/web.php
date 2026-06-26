@@ -11,15 +11,6 @@ Route::inertia('/zahlung', 'Zahlung')->name('zahlung');
 Route::inertia('/widerrufsbelehrung', 'Widerrufsbelehrung')->name('widerrufsbelehrung');
 Route::inertia('/kontakt', 'Kontakt')->name('kontakt');
 
-Route::get('/sandbox', function () {
-    session(['sandbox' => true]);
-    return redirect('/');
-})->name('sandbox.enter');
-
-Route::get('/sandbox/exit', function () {
-    session()->forget('sandbox');
-    return redirect('/');
-})->name('sandbox.exit');
 
 require __DIR__.'/admin.php';
 require __DIR__.'/products.php';

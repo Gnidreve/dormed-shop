@@ -59,6 +59,7 @@ class SettingController extends Controller
                 ->mapWithKeys(fn ($k) => [$k => Setting::get($k) !== null])
                 ->all(),
             'stripeWebhookUrl' => route('stripe.webhook'),
+            'paymentMode' => app()->environment('production') ? 'live' : 'sandbox',
         ]);
     }
 
@@ -138,7 +139,7 @@ class SettingController extends Controller
 
     public function checkStripe(): JsonResponse
     {
-        $mode = Setting::get('payment.mode') ?? 'sandbox';
+        $mode = app()->environment('production') ? 'live' : 'sandbox';
         $key = $mode === 'live'
             ? Setting::get('stripe.live.secret_key')
             : Setting::get('stripe.sandbox.secret_key');
@@ -161,7 +162,7 @@ class SettingController extends Controller
 
     public function checkPayPal(): JsonResponse
     {
-        $mode = Setting::get('payment.mode') ?? 'sandbox';
+        $mode = app()->environment('production') ? 'live' : 'sandbox';
         $clientId = $mode === 'live'
             ? Setting::get('paypal.live.client_id')
             : Setting::get('paypal.sandbox.client_id');

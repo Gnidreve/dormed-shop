@@ -57,7 +57,7 @@ class CheckoutController extends Controller
         $paypalClientId = null;
 
         if (($selectedPayment['id'] ?? '') === 'paypal') {
-            $mode = config('app.test_mode') ? 'sandbox' : (Setting::get('payment.mode') ?? 'sandbox');
+            $mode = app()->environment('production') ? 'live' : 'sandbox';
             $paypalClientId = $mode === 'live'
                 ? Setting::get('paypal.live.client_id')
                 : Setting::get('paypal.sandbox.client_id');
@@ -134,7 +134,7 @@ class CheckoutController extends Controller
         $order = Order::query()->create([
             'customer_id' => $request->user()->id,
             'status' => 'pending',
-            'is_test' => config('app.test_mode', false),
+            'is_test' => ! app()->environment('production'),
             'total_amount' => $cart['total'],
             'shipping_amount' => $shippingAmount,
             'shipping_address' => $shippingAddress,
@@ -171,7 +171,7 @@ class CheckoutController extends Controller
             ];
         }
 
-        $mode = config('app.test_mode') ? 'sandbox' : (Setting::get('payment.mode') ?? 'sandbox');
+        $mode = app()->environment('production') ? 'live' : 'sandbox';
         $stripeKey = $mode === 'live'
             ? Setting::get('stripe.live.secret_key')
             : Setting::get('stripe.sandbox.secret_key');
