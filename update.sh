@@ -13,7 +13,15 @@ echo ""
 echo "📦 Installing/updating Composer dependencies..."
 composer install --no-interaction --prefer-dist --optimize-autoloader
 
-# 3. NPM install & build
+# 3. Clear Laravel caches before route generation/build
+echo ""
+echo "🧹 Clearing Laravel caches before build..."
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear
+php artisan route:clear
+
+# 4. NPM install & build
 echo ""
 echo "📦 Installing NPM dependencies..."
 npm install --no-audit --no-fund
@@ -26,12 +34,12 @@ echo ""
 echo "🔨 Building frontend assets..."
 npm run build
 
-# 4. Run migrations
+# 5. Run migrations
 echo ""
 echo "🗄️  Running database migrations..."
 php artisan migrate --force
 
-# 5. Clear caches
+# 6. Clear caches
 echo ""
 echo "🧹 Clearing caches..."
 php artisan config:clear
@@ -39,19 +47,19 @@ php artisan cache:clear
 php artisan view:clear
 php artisan route:clear
 
-# 6. Restart queue (if running)
+# 7. Restart queue (if running)
 echo ""
 echo "🔄 Restarting queue workers..."
 php artisan queue:restart 2>/dev/null || true
 
-# 7. Re-cache for production
+# 8. Re-cache for production
 echo ""
 echo "⚡ Re-caching for production..."
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
-# 8. Set permissions
+# 9. Set permissions
 echo ""
 echo "🔐 Setting storage permissions..."
 chmod -R 775 storage bootstrap/cache 2>/dev/null || true
