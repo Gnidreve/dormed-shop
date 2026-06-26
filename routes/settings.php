@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Settings\AddressController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
 use Illuminate\Auth\Middleware\RequirePassword;
@@ -10,6 +11,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    Route::get('settings/addresses', [AddressController::class, 'edit'])->name('addresses.edit');
+    Route::put('settings/addresses', [AddressController::class, 'update'])->name('addresses.update');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

@@ -8,6 +8,7 @@
     import { toUrl } from '@/lib/utils';
     import { edit as editProfile } from '@/routes/profile';
     import { edit as editSecurity } from '@/routes/security';
+    import { edit as editAddresses } from '@/routes/addresses';
     import customerRoutes from '@/routes/customer';
     import type { NavItem } from '@/types';
 
@@ -21,6 +22,10 @@
         {
             title: 'Bestellungen',
             href: customerRoutes.orders(),
+        },
+        {
+            title: 'Adressen',
+            href: editAddresses(),
         },
         {
             title: 'Profil',

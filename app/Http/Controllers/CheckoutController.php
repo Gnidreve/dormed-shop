@@ -46,8 +46,10 @@ class CheckoutController extends Controller
         private readonly CartService $cartService,
     ) {}
 
-    public function confirm(): Response|RedirectResponse
+    public function confirm(Request $request): Response|RedirectResponse
     {
+        $this->prefillAddressFromProfile($request);
+
         $cart = $this->cartService->cart();
 
         if ($cart['is_empty']) {
@@ -67,6 +69,33 @@ class CheckoutController extends Controller
             'cart' => $cart,
             'paypal_client_id' => $paypalClientId,
         ]);
+    }
+
+    private function prefillAddressFromProfile(Request $request): void
+    {
+        if (! $request->user() || $this->cartService->isAddressComplete()) {
+            return;
+        }
+
+        $customer = $request->user();
+
+        $shipping = $customer->addresses()
+            ->whereIn('type', ['shipping', 'both'])
+            ->where('is_default', true)
+            ->first();
+
+        if ($shipping) {
+            $this->cartService->setShippingAddress($shipping->toAddressArray());
+        }
+
+        $billing = $customer->addresses()
+            ->where('type', 'billing')
+            ->where('is_default', true)
+            ->first();
+
+        if ($billing) {
+            $this->cartService->setBillingAddress($billing->toAddressArray());
+        }
     }
 
     public function updatePayment(UpdateCartPaymentMethodRequest $request): RedirectResponse
