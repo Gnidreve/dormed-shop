@@ -12,8 +12,10 @@
     import type { NavItem } from '@/types';
 
     let {
+        title = 'Plattform',
         items = [],
     }: {
+        title?: string;
         items: NavItem[];
     } = $props();
 
@@ -21,7 +23,7 @@
 </script>
 
 <SidebarGroup class="px-2 py-0">
-    <SidebarGroupLabel>Platform</SidebarGroupLabel>
+    <SidebarGroupLabel>{title}</SidebarGroupLabel>
     <SidebarMenu>
         {#each items as item (toUrl(item.href))}
             <SidebarMenuItem>

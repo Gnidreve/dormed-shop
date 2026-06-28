@@ -24,6 +24,7 @@
     function loadPayPalSDK(clientId: string) {
         if (!clientId) {
             errorMessage = 'PayPal ist nicht konfiguriert (Client-ID fehlt).';
+
             return;
         }
 
@@ -40,11 +41,15 @@
     function renderButtons() {
         if (typeof paypal === 'undefined') {
             errorMessage = 'PayPal SDK nicht verfügbar.';
+
             return;
         }
 
         const container = document.getElementById(containerId);
-        if (!container) return;
+
+        if (!container) {
+return;
+}
 
         paypal
             .Buttons({
@@ -72,6 +77,7 @@
 
                     if (!response.ok) {
                         isProcessing = false;
+
                         throw new Error(data.error || 'PayPal-Order konnte nicht erstellt werden.');
                     }
 
@@ -95,6 +101,7 @@
                     if (!response.ok) {
                         errorMessage = result.error || 'Zahlung konnte nicht abgeschlossen werden.';
                         isProcessing = false;
+
                         return;
                     }
 
@@ -116,6 +123,7 @@
 
     function getCsrfToken(): string {
         const meta = document.querySelector('meta[name="csrf-token"]');
+
         return meta?.getAttribute('content') ?? '';
     }
 </script>

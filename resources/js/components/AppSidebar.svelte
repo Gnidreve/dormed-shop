@@ -1,19 +1,22 @@
 <script lang="ts">
     import { Link } from '@inertiajs/svelte';
-    import LayoutGrid from 'lucide-svelte/icons/layout-grid';
-    import Package from 'lucide-svelte/icons/package';
-    import Tag from 'lucide-svelte/icons/tag';
     import Building2 from 'lucide-svelte/icons/building-2';
+    import CreditCard from 'lucide-svelte/icons/credit-card';
     import Layers from 'lucide-svelte/icons/layers';
-    import ShoppingCart from 'lucide-svelte/icons/shopping-cart';
+    import LayoutGrid from 'lucide-svelte/icons/layout-grid';
+    import Mail from 'lucide-svelte/icons/mail';
+    import Package from 'lucide-svelte/icons/package';
     import Settings from 'lucide-svelte/icons/settings';
+    import ShoppingCart from 'lucide-svelte/icons/shopping-cart';
+    import Tag from 'lucide-svelte/icons/tag';
+    import Truck from 'lucide-svelte/icons/truck';
     import Users from 'lucide-svelte/icons/users';
     import type { Snippet } from 'svelte';
     import AppLogo from '@/components/AppLogo.svelte';
-    import NavMain from '@/components/NavMain.svelte';
-    import NavGroup from '@/components/NavGroup.svelte';
-    import NavCustomer from '@/components/NavCustomer.svelte';
     import NavAdmin from '@/components/NavAdmin.svelte';
+    import NavCustomer from '@/components/NavCustomer.svelte';
+    import NavGroup from '@/components/NavGroup.svelte';
+    import NavMain from '@/components/NavMain.svelte';
     import {
         Sidebar,
         SidebarContent,
@@ -44,10 +47,10 @@
     ];
 
     const settingsItems: NavItem[] = [
-        { title: 'Allgemein', href: '/admin/settings/general' },
-        { title: 'Mailversand', href: '/admin/settings/mail' },
-        { title: 'Zahlungsarten', href: '/admin/settings/payment' },
-        { title: 'Versandarten', href: '/admin/settings/shipping' },
+        { title: 'Allgemein', href: '/admin/settings/general', icon: Settings },
+        { title: 'Mailversand', href: '/admin/settings/mail', icon: Mail },
+        { title: 'Zahlungsarten', href: '/admin/settings/payment', icon: CreditCard },
+        { title: 'Versandarten', href: '/admin/settings/shipping', icon: Truck },
     ];
 </script>
 
@@ -74,6 +77,8 @@
         <NavMain items={mainNavItems} />
         <NavGroup title="Katalog" icon={Layers} items={catalogItems} />
         <NavGroup title="Einstellungen" icon={Settings} items={settingsItems} />
+        <NavMain title="Katalog" items={catalogItems} />
+        <NavMain title="Einstellungen" items={settingsItems} />
     </SidebarContent>
 
     <SidebarFooter>

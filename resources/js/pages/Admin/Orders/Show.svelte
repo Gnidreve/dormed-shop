@@ -68,7 +68,10 @@
     };
 
     function formatAddress(a: AddressSnapshot): string {
-        if (!a) return '—';
+        if (!a) {
+return '—';
+}
+
         const lines = [
             a.company,
             (a.salutation ? a.salutation + ' ' : '') + (a.first_name ?? '') + ' ' + (a.last_name ?? ''),
@@ -76,6 +79,7 @@
             a.address_line2,
             (a.zip ?? '') + ' ' + (a.city ?? ''),
         ].filter(Boolean);
+
         return lines.join(', ') || '—';
     }
 </script>

@@ -1,20 +1,22 @@
 <script lang="ts">
     import { Link, page, router } from '@inertiajs/svelte';
     import ChevronLeft from 'lucide-svelte/icons/chevron-left';
-    import AppHead from '@/components/AppHead.svelte';
     import AddressForm from '@/components/AddressForm.svelte';
+    import AppHead from '@/components/AppHead.svelte';
     import PayPalButton from '@/components/PayPalButton.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
-    import TestModeBanner from '@/components/TestModeBanner.svelte';
     import { Button } from '@/components/ui/button';
     import { Checkbox } from '@/components/ui/checkbox';
     import { Separator } from '@/components/ui/separator';
-    import checkout from '@/routes/checkout';
-    import { login } from '@/routes';
     import { formatPrice } from '@/lib/currency';
+    import { login } from '@/routes';
+    import checkout from '@/routes/checkout';
     import type { AddressData, Cart, Customer } from '@/types';
 
-    let { cart, paypal_client_id }: { cart: Cart; paypal_client_id?: string | null } = $props();
+    let {
+        cart,
+        paypal_client_id,
+    }: { cart: Cart; paypal_client_id?: string | null } = $props();
 
     let agreedToTerms = $state(false);
     let billingSameAsShipping = $state(cart.billing_address === null);
@@ -38,11 +40,11 @@
 
     const addressComplete = $derived(
         shippingAddress.first_name !== '' &&
-        shippingAddress.last_name !== '' &&
-        shippingAddress.street !== '' &&
-        shippingAddress.house_number !== '' &&
-        shippingAddress.zip !== '' &&
-        shippingAddress.city !== '',
+            shippingAddress.last_name !== '' &&
+            shippingAddress.street !== '' &&
+            shippingAddress.house_number !== '' &&
+            shippingAddress.zip !== '' &&
+            shippingAddress.city !== '',
     );
 
     function updatePayment(paymentMethod: string) {
@@ -53,17 +55,23 @@
         );
     }
 
-    function handleAddressUpdate(event: CustomEvent<{ prefix: string; key: string; value: string }>) {
+    function handleAddressUpdate(
+        event: CustomEvent<{ prefix: string; key: string; value: string }>,
+    ) {
         const { prefix, key, value } = event.detail;
 
         if (prefix === 'shipping') {
             shippingAddress = { ...shippingAddress, [key]: value };
         } else if (prefix === 'billing') {
-            billingAddress = { ...(billingAddress ?? defaultBillingAddress()), [key]: value };
+            billingAddress = {
+                ...(billingAddress ?? defaultBillingAddress()),
+                [key]: value,
+            };
         }
 
         // Clear error for this field
         const errorKey = `${prefix}_address.${key}`;
+
         if (addressErrors[errorKey]) {
             const next = { ...addressErrors };
             delete next[errorKey];
@@ -73,9 +81,17 @@
 
     function defaultBillingAddress(): AddressData {
         return {
-            company: '', salutation: '', first_name: '', last_name: '',
-            street: '', house_number: '', address_line2: '',
-            zip: '', city: '', country: 'DE', phone: '',
+            company: '',
+            salutation: '',
+            first_name: '',
+            last_name: '',
+            street: '',
+            house_number: '',
+            address_line2: '',
+            zip: '',
+            city: '',
+            country: 'DE',
+            phone: '',
         };
     }
 
@@ -106,7 +122,10 @@
         try {
             const resp = await fetch(checkout.address.update.url(), {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
                 body: JSON.stringify(payload),
             });
 
@@ -115,12 +134,15 @@
                 router.reload({ only: ['errors'], preserveScroll: true });
             } else if (!resp.ok) {
                 const body = await resp.json();
+
                 if (body.errors) {
                     addressErrors = body.errors;
                 }
             }
         } catch {
-            addressErrors = { _form: 'Adresse konnte nicht gespeichert werden.' };
+            addressErrors = {
+                _form: 'Adresse konnte nicht gespeichert werden.',
+            };
         } finally {
             isSavingAddress = false;
         }
@@ -138,7 +160,6 @@
 <AppHead title="Bestellung abschließen" />
 
 <ShopHeader />
-<TestModeBanner />
 
 <main class="min-h-screen bg-gray-50">
     <div class="mx-auto max-w-7xl px-4 py-8 lg:px-8">
@@ -164,7 +185,10 @@
                     <Separator class="mb-4" />
                     <p class="mb-3 text-sm text-gray-600">
                         Bitte beachten Sie die
-                        <Link href="/widerrufsbelehrung" class="text-[#1a6bbf] hover:underline">
+                        <Link
+                            href="/widerrufsbelehrung"
+                            class="text-[#1a6bbf] hover:underline"
+                        >
                             Widerrufsbelehrung
                         </Link>.
                     </p>
@@ -172,25 +196,13 @@
                         <Checkbox bind:checked={agreedToTerms} class="mt-0.5" />
                         <span class="text-sm text-gray-700">
                             Ich habe die
-                            <Link href="/agb" class="text-[#1a6bbf] hover:underline">AGB</Link>
+                            <Link
+                                href="/agb"
+                                class="text-[#1a6bbf] hover:underline">AGB</Link
+                            >
                             gelesen und bin mit ihnen einverstanden.
                         </span>
                     </label>
-                </div>
-
-                <!-- Kundendaten -->
-                <div class="rounded-lg border bg-white p-5">
-                    <h2 class="mb-2 font-bold text-gray-900">Kundendaten</h2>
-                    <Separator class="mb-4" />
-                    {#if customer}
-                        <p class="text-sm text-gray-700">
-                            Angemeldet als <span class="font-semibold">{customer.name}</span> ({customer.email}).
-                        </p>
-                    {:else}
-                        <p class="text-sm text-gray-700">
-                            Sie bestellen aktuell ohne gespeicherte Kundendaten.
-                        </p>
-                    {/if}
                 </div>
 
                 <!-- Lieferadresse -->
@@ -203,7 +215,9 @@
                             disabled={isSavingAddress || !addressComplete}
                             onclick={saveAddress}
                         >
-                            {isSavingAddress ? 'Speichere...' : 'Adresse speichern'}
+                            {isSavingAddress
+                                ? 'Speichere...'
+                                : 'Adresse speichern'}
                         </Button>
                     </div>
                     <Separator class="mb-4" />
@@ -216,13 +230,17 @@
                         />
                     </div>
                     {#if addressErrors._form}
-                        <p class="mt-2 text-sm text-red-500">{addressErrors._form}</p>
+                        <p class="mt-2 text-sm text-red-500">
+                            {addressErrors._form}
+                        </p>
                     {/if}
                 </div>
 
                 <!-- Rechnungsadresse -->
                 <div class="rounded-lg border bg-white p-5">
-                    <h2 class="mb-2 font-bold text-gray-900">Rechnungsadresse</h2>
+                    <h2 class="mb-2 font-bold text-gray-900">
+                        Rechnungsadresse
+                    </h2>
                     <Separator class="mb-4" />
                     {#if billingSameAsShipping}
                         <p class="text-sm text-gray-600">
@@ -252,13 +270,15 @@
                     {/if}
                 </div>
 
-<!-- Zahlungsart -->
+                <!-- Zahlungsart -->
                 <div class="rounded-lg border bg-white p-5">
                     <h2 class="mb-2 font-bold text-gray-900">Zahlungsart</h2>
                     <Separator class="mb-4" />
                     <div class="flex flex-col gap-3">
                         {#each cart.payment_methods as method (method.id)}
-                            <label class="flex cursor-pointer items-start gap-3">
+                            <label
+                                class="flex cursor-pointer items-start gap-3"
+                            >
                                 <input
                                     type="radio"
                                     name="payment"
@@ -273,7 +293,9 @@
                                     </span>
                                     {#if method.description}
                                         <br />
-                                        <span class="text-gray-500">{method.description}</span>
+                                        <span class="text-gray-500"
+                                            >{method.description}</span
+                                        >
                                     {/if}
                                 </span>
                             </label>
@@ -286,16 +308,24 @@
                     <table class="w-full text-sm">
                         <thead class="border-b bg-gray-50">
                             <tr>
-                                <th class="px-5 py-3 text-left font-semibold text-gray-700">
+                                <th
+                                    class="px-5 py-3 text-left font-semibold text-gray-700"
+                                >
                                     Produkt
                                 </th>
-                                <th class="px-4 py-3 text-center font-semibold text-gray-700">
+                                <th
+                                    class="px-4 py-3 text-center font-semibold text-gray-700"
+                                >
                                     Anzahl
                                 </th>
-                                <th class="px-4 py-3 text-right font-semibold text-gray-700">
+                                <th
+                                    class="px-4 py-3 text-right font-semibold text-gray-700"
+                                >
                                     MwSt.-Anteil
                                 </th>
-                                <th class="px-5 py-3 text-right font-semibold text-gray-700">
+                                <th
+                                    class="px-5 py-3 text-right font-semibold text-gray-700"
+                                >
                                     Summe
                                 </th>
                             </tr>
@@ -308,7 +338,9 @@
                                             <div
                                                 class="flex size-14 shrink-0 items-center justify-center rounded border bg-gray-50"
                                             >
-                                                <div class="size-8 rounded bg-gray-200"></div>
+                                                <div
+                                                    class="size-8 rounded bg-gray-200"
+                                                ></div>
                                             </div>
                                             <div>
                                                 <Link
@@ -317,7 +349,9 @@
                                                 >
                                                     {item.name}
                                                 </Link>
-                                                <p class="text-xs text-gray-400">
+                                                <p
+                                                    class="text-xs text-gray-400"
+                                                >
                                                     Produkt-Nr.: {item.product_number}
                                                 </p>
                                             </div>
@@ -326,13 +360,18 @@
                                     <td class="px-4 py-4 text-center">
                                         {item.quantity}
                                     </td>
-                                    <td class="px-4 py-4 text-right text-gray-600">
+                                    <td
+                                        class="px-4 py-4 text-right text-gray-600"
+                                    >
                                         {formatPrice(
-                                            (Number(item.line_total) * cart.vat_rate) /
+                                            (Number(item.line_total) *
+                                                cart.vat_rate) /
                                                 (100 + cart.vat_rate),
                                         )}
                                     </td>
-                                    <td class="px-5 py-4 text-right font-semibold">
+                                    <td
+                                        class="px-5 py-4 text-right font-semibold"
+                                    >
                                         {formatPrice(item.line_total)}*
                                     </td>
                                 </tr>
@@ -351,16 +390,24 @@
                     <div class="flex flex-col gap-2 text-sm">
                         <div class="flex justify-between">
                             <span class="text-gray-600">Zwischensumme</span>
-                            <span class="font-medium">{formatPrice(cart.subtotal)}*</span>
+                            <span class="font-medium"
+                                >{formatPrice(cart.subtotal)}*</span
+                            >
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Versandkosten</span>
-                            <span class="font-medium">{formatPrice(cart.shipping_total)}*</span>
+                            <span class="font-medium"
+                                >{formatPrice(cart.shipping_total)}*</span
+                            >
                         </div>
                         <div class="my-2 border-t pt-2">
                             <div class="flex justify-between">
-                                <span class="font-bold text-gray-900">Gesamtsumme</span>
-                                <span class="font-bold text-gray-900">{formatPrice(cart.total)}*</span>
+                                <span class="font-bold text-gray-900"
+                                    >Gesamtsumme</span
+                                >
+                                <span class="font-bold text-gray-900"
+                                    >{formatPrice(cart.total)}*</span
+                                >
                             </div>
                         </div>
                         <div class="flex justify-between text-gray-500">
@@ -378,7 +425,9 @@
                             <!-- Kauf auf Rechnung (vorläufig ohne Funktion) -->
                             <Button
                                 class="mt-6 w-full bg-white text-[#0d1f44] ring-1 ring-[#0d1f44] hover:bg-gray-50"
-                                disabled={!agreedToTerms || cart.is_empty || !addressComplete}
+                                disabled={!agreedToTerms ||
+                                    cart.is_empty ||
+                                    !addressComplete}
                             >
                                 Kauf auf Rechnung
                             </Button>
@@ -386,22 +435,27 @@
                                 <PayPalButton
                                     total={Number(cart.total)}
                                     clientId={paypal_client_id ?? ''}
-                                    disabled={!agreedToTerms || !addressComplete}
+                                    disabled={!agreedToTerms ||
+                                        !addressComplete}
                                 />
                             </div>
                             <p class="mt-3 text-sm text-gray-500">
-                                Sie werden zu PayPal weitergeleitet, um die Zahlung zu bestätigen.
+                                Sie werden zu PayPal weitergeleitet, um die
+                                Zahlung zu bestätigen.
                             </p>
                         {:else if isStripe}
                             <Button
                                 class="mt-6 w-full bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90 disabled:opacity-50"
-                                disabled={!agreedToTerms || cart.is_empty || !addressComplete}
+                                disabled={!agreedToTerms ||
+                                    cart.is_empty ||
+                                    !addressComplete}
                                 onclick={submitOrder}
                             >
                                 Zahlungspflichtig bestellen
                             </Button>
                             <p class="mt-3 text-sm text-gray-500">
-                                Sie werden zur sicheren Zahlung über Stripe weitergeleitet.
+                                Sie werden zur sicheren Zahlung über Stripe
+                                weitergeleitet.
                             </p>
                         {:else}
                             <p class="mt-3 text-sm text-gray-500">
@@ -409,10 +463,17 @@
                             </p>
                         {/if}
                     {:else}
-                        <Button asChild class="mt-6 w-full bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90">
+                        <Button
+                            asChild
+                            class="mt-6 w-full bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90"
+                        >
                             {#snippet children(props)}
                                 <Link
-                                    href={login.url({ query: { redirect: checkout.confirm.url() } })}
+                                    href={login.url({
+                                        query: {
+                                            redirect: checkout.confirm.url(),
+                                        },
+                                    })}
                                     class={props.class}
                                 >
                                     Zum Login
@@ -420,7 +481,8 @@
                             {/snippet}
                         </Button>
                         <p class="mt-3 text-sm text-gray-500">
-                            Für den Bestellabschluss ist aktuell ein Kundenkonto erforderlich.
+                            Für den Bestellabschluss ist aktuell ein Kundenkonto
+                            erforderlich.
                         </p>
                     {/if}
                 </div>

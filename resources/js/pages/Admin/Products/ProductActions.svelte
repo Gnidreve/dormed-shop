@@ -4,6 +4,8 @@
     import ExternalLink from 'lucide-svelte/icons/external-link';
     import Pencil from 'lucide-svelte/icons/pencil';
     import Trash2 from 'lucide-svelte/icons/trash-2';
+    import * as AdminProductController from '@/actions/App/Http/Controllers/Admin/ProductController';
+    import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
     import { Button } from '@/components/ui/button';
     import {
         DropdownMenu,
@@ -12,13 +14,14 @@
         DropdownMenuSeparator,
         DropdownMenuTrigger,
     } from '@/components/ui/dropdown-menu';
-    import * as AdminProductController from '@/actions/App/Http/Controllers/Admin/ProductController';
-    import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
 
     let { product }: { product: { id: number; name: string } } = $props();
 
     function destroy() {
-        if (!confirm(`Produkt „${product.name}" wirklich löschen?`)) return;
+        if (!confirm(`Produkt „${product.name}" wirklich löschen?`)) {
+return;
+}
+
         router.delete(AdminProductController.destroy.url(product.id));
     }
 </script>

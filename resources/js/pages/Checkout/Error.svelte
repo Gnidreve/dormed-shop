@@ -9,10 +9,10 @@
 
 <AppHead title="Fehler bei der Bestellung" />
 
-<div class="min-h-screen bg-gray-50">
+<div class="flex min-h-screen flex-col bg-gray-50">
     <ShopHeader />
 
-    <main class="mx-auto max-w-2xl px-4 py-16 text-center lg:px-8">
+    <main class="flex-1 mx-auto max-w-2xl px-4 py-16 text-center lg:px-8">
         <div class="mb-5 flex justify-center">
             <div class="flex size-16 items-center justify-center rounded-full bg-red-100">
                 <AlertCircle class="size-8 text-red-600" />

@@ -5,7 +5,6 @@
     import Plus from 'lucide-svelte/icons/plus';
     import ShoppingCart from 'lucide-svelte/icons/shopping-cart';
     import X from 'lucide-svelte/icons/x';
-    import cartRoutes from '@/routes/cart';
     import { Button } from '@/components/ui/button';
     import {
         Sheet,
@@ -15,6 +14,7 @@
         SheetTrigger,
     } from '@/components/ui/sheet';
     import { formatPrice } from '@/lib/currency';
+    import cartRoutes from '@/routes/cart';
     import type { Cart } from '@/types';
 
     let { cart }: { cart: Cart } = $props();

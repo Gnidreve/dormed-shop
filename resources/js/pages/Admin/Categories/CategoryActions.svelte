@@ -3,6 +3,7 @@
     import Ellipsis from 'lucide-svelte/icons/ellipsis';
     import Pencil from 'lucide-svelte/icons/pencil';
     import Trash2 from 'lucide-svelte/icons/trash-2';
+    import * as AdminCategoryController from '@/actions/App/Http/Controllers/Admin/CategoryController';
     import { Button } from '@/components/ui/button';
     import {
         DropdownMenu,
@@ -11,12 +12,14 @@
         DropdownMenuSeparator,
         DropdownMenuTrigger,
     } from '@/components/ui/dropdown-menu';
-    import * as AdminCategoryController from '@/actions/App/Http/Controllers/Admin/CategoryController';
 
     let { category }: { category: { id: number; name: string } } = $props();
 
     function destroy() {
-        if (!confirm(`Kategorie „${category.name}" wirklich löschen?`)) return;
+        if (!confirm(`Kategorie „${category.name}" wirklich löschen?`)) {
+return;
+}
+
         router.delete(AdminCategoryController.destroy.url(category.id));
     }
 </script>

@@ -41,10 +41,10 @@
 
 <AppHead title="Bestellung bestätigt" />
 
-<div class="min-h-screen bg-gray-50">
+<div class="flex min-h-screen flex-col bg-gray-50">
     <ShopHeader />
 
-    <main class="mx-auto max-w-3xl px-4 py-12 lg:px-8">
+    <main class="flex-1 mx-auto max-w-3xl px-4 py-12 lg:px-8">
 
         <!-- Success header -->
         <div class="mb-10 flex flex-col items-center text-center">

@@ -6,35 +6,36 @@
 
 <script lang="ts">
     import {
-        type ColumnDef,
-        type ColumnFiltersState,
-        type PaginationState,
-        type RowSelectionState,
-        type SortingState,
-        type VisibilityState,
+        
+        
+        
+        
+        
+        
         getCoreRowModel,
         getFilteredRowModel,
         getPaginationRowModel,
-        getSortedRowModel,
+        getSortedRowModel
     } from '@tanstack/table-core';
+import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, SortingState, VisibilityState} from '@tanstack/table-core';
+    import ChevronDown from 'lucide-svelte/icons/chevron-down';
     import AppHead from '@/components/AppHead.svelte';
     import { Button } from '@/components/ui/button';
     import { Checkbox } from '@/components/ui/checkbox';
-    import { Input } from '@/components/ui/input';
-    import * as Table from '@/components/ui/table';
     import {
         FlexRender,
         createSvelteTable,
         renderComponent,
     } from '@/components/ui/data-table';
-    import ManufacturerActions from './ManufacturerActions.svelte';
     import {
         DropdownMenu,
         DropdownMenuCheckboxItem,
         DropdownMenuContent,
         DropdownMenuTrigger,
     } from '@/components/ui/dropdown-menu';
-    import ChevronDown from 'lucide-svelte/icons/chevron-down';
+    import { Input } from '@/components/ui/input';
+    import * as Table from '@/components/ui/table';
+    import ManufacturerActions from './ManufacturerActions.svelte';
 
     type Manufacturer = {
         id: number;

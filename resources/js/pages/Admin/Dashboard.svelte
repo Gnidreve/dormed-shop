@@ -10,7 +10,11 @@
 </script>
 
 <script lang="ts">
-    import { page, router } from '@inertiajs/svelte';
+    import { page } from '@inertiajs/svelte';
+    import { scaleUtc } from 'd3-scale';
+    import { curveNatural } from 'd3-shape';
+    import { Area, AreaChart, ChartClipPath } from 'layerchart';
+    import { cubicInOut } from 'svelte/easing';
     import AppHead from '@/components/AppHead.svelte';
     import { Button } from '@/components/ui/button';
     import {
@@ -20,21 +24,15 @@
         CardDescription,
         CardContent,
     } from '@/components/ui/card';
-    import { ChartContainer, type ChartConfig } from '@/components/ui/chart';
+    import { ChartContainer  } from '@/components/ui/chart';
+import type {ChartConfig} from '@/components/ui/chart';
     import * as Popover from '@/components/ui/popover';
     import { Separator } from '@/components/ui/separator';
-    import { scaleUtc } from 'd3-scale';
-    import { Area, AreaChart, ChartClipPath } from 'layerchart';
-    import { curveNatural } from 'd3-shape';
-    import { cubicInOut } from 'svelte/easing';
-    import * as AdminLoginController from '@/actions/App/Http/Controllers/Admin/LoginController';
-
-
     type ChartEntry = { date: string; orders: number; revenue: number };
 
     let { chartData }: { chartData: ChartEntry[] } = $props();
 
-    // eslint-disable-next-line svelte/prefer-svelte-reactivity
+     
     const allData = $derived(chartData.map((d) => ({ ...d, date: new Date(d.date) })));
 
     const admin = $derived((page.props.auth as any).admin);
@@ -59,8 +57,10 @@
         if (timeRange === 'custom' && customFrom && customTo) {
             const from = new Date(customFrom);
             const to = new Date(customTo);
+
             return `${fmt(from)} – ${fmt(to)}`;
         }
+
         return presets.find((p) => p.value === timeRange)?.label ?? 'Zeitraum';
     });
 
@@ -68,18 +68,24 @@
         if (timeRange === 'custom') {
             const from = customFrom ? new Date(customFrom) : null;
             const to = customTo ? new Date(customTo + 'T23:59:59') : null;
+
             return allData.filter(
                 (d) => (!from || d.date >= from) && (!to || d.date <= to),
             );
         }
+
         const days = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
-        const cutoff = new Date();
-        cutoff.setDate(cutoff.getDate() - days);
+         
+        const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
         return allData.filter((d) => d.date >= cutoff);
     });
 
     const dateRange = $derived.by(() => {
-        if (!filteredData.length) return '';
+        if (!filteredData.length) {
+return '';
+}
+
         return `${fmt(filteredData[0].date)} – ${fmt(filteredData[filteredData.length - 1].date)}`;
     });
 
@@ -137,7 +143,9 @@
                     {#each presets as preset (preset.value)}
                         <button
                             class="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-sm transition-colors hover:bg-accent {timeRange === preset.value ? 'font-medium' : ''}"
-                            onclick={() => { timeRange = preset.value; popoverOpen = false; }}
+                            onclick={() => {
+ timeRange = preset.value; popoverOpen = false; 
+}}
                         >
                             {preset.label}
                             {#if timeRange === preset.value}

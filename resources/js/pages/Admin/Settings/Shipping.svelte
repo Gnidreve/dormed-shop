@@ -76,7 +76,10 @@
     }
 
     function formatPrice(price: string | null): string {
-        if (price === null) return 'auf Anfrage';
+        if (price === null) {
+return 'auf Anfrage';
+}
+
         return parseFloat(price).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
     }
 </script>
@@ -88,7 +91,9 @@
         <h1 class="text-xl font-semibold">Versandarten</h1>
         <Button
             size="sm"
-            onclick={() => { addingNew = true; }}
+            onclick={() => {
+ addingNew = true; 
+}}
             disabled={addingNew}
         >
             <Plus class="size-4" />

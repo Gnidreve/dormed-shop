@@ -8,9 +8,9 @@
     import ShopHeader from '@/components/ShopHeader.svelte';
     import { Button } from '@/components/ui/button';
     import * as Empty from '@/components/ui/empty';
+    import { formatPrice } from '@/lib/currency';
     import cartRoutes from '@/routes/cart';
     import checkout from '@/routes/checkout';
-    import { formatPrice } from '@/lib/currency';
     import type { Cart } from '@/types';
 
     let { cart }: { cart: Cart } = $props();

@@ -1,10 +1,10 @@
 <script lang="ts">
-    import { Link } from '@inertiajs/svelte';
+    import { Link, router } from '@inertiajs/svelte';
+    import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
     import AppFooter from '@/components/AppFooter.svelte';
     import AppHead from '@/components/AppHead.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
     import { formatPrice } from '@/lib/currency';
-    import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
 
     type Product = {
         id: number;
@@ -30,16 +30,30 @@
         description: string | null;
     };
 
-    let { category, products }: { category: Category; products: Paginator } = $props();
+    let { category, products, sort = 'name_asc' }: { category: Category; products: Paginator; sort: string } = $props();
+
+    const sortOptions = [
+        { value: 'name_asc', label: 'Name A-Z' },
+        { value: 'name_desc', label: 'Name Z-A' },
+        { value: 'price_asc', label: 'Preis aufsteigend' },
+        { value: 'price_desc', label: 'Preis absteigend' },
+    ];
+
+    function onSortChange(value: string) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('sort', value);
+        url.searchParams.delete('page');
+        router.visit(url.toString(), { preserveScroll: false });
+    }
 </script>
 
 <AppHead title={category.name} />
 
-<div class="min-h-screen bg-gray-50">
+<div class="flex min-h-screen flex-col bg-gray-50">
     <ShopHeader />
 
-    <main class="mx-auto max-w-7xl px-4 py-8 lg:px-8">
-        <div class="mb-6 flex items-baseline justify-between">
+    <main class="flex-1 mx-auto max-w-7xl px-4 py-8 lg:px-8">
+        <div class="mb-6 flex items-center justify-between gap-4">
             <div>
                 <h1 class="text-xl font-semibold text-gray-900">{category.name}</h1>
                 {#if category.description}
@@ -48,6 +62,15 @@
                     <p class="mt-1 text-sm text-muted-foreground">{products.total} Produkte</p>
                 {/if}
             </div>
+            <select
+                value={sort}
+                onchange={(e) => onSortChange(e.currentTarget.value)}
+                class="rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm focus:border-[#0d1f44] focus:outline-none"
+            >
+                {#each sortOptions as option (option.value)}
+                    <option value={option.value}>{option.label}</option>
+                {/each}
+            </select>
         </div>
 
         {#if products.data.length === 0}

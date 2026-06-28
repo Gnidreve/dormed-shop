@@ -1,21 +1,20 @@
 <script lang="ts">
     import { Link, page, router } from '@inertiajs/svelte';
     import ChevronRight from 'lucide-svelte/icons/chevron-right';
-    import Menu from 'lucide-svelte/icons/menu';
     import LogOut from 'lucide-svelte/icons/log-out';
     import MapPin from 'lucide-svelte/icons/map-pin';
+    import Menu from 'lucide-svelte/icons/menu';
     import Package from 'lucide-svelte/icons/package';
     import Search from 'lucide-svelte/icons/search';
     import Settings from 'lucide-svelte/icons/settings';
     import User from 'lucide-svelte/icons/user';
-    import CartSheet from '@/components/CartSheet.svelte';
-    import TestModeBanner from '@/components/TestModeBanner.svelte';
     import UserPlus from 'lucide-svelte/icons/user-plus';
-    import {Sheet, SheetContent, SheetTitle, SheetTrigger} from '@/components/ui/sheet';
-    import customerRoutes from '@/routes/customer';
     import X from 'lucide-svelte/icons/x';
+    import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
+    import CartSheet from '@/components/CartSheet.svelte';
+    import CustomerInfo from '@/components/CustomerInfo.svelte';
+    import TestModeBanner from '@/components/TestModeBanner.svelte';
     import { Button } from '@/components/ui/button';
-    import { Input } from '@/components/ui/input';
     import {
         DropdownMenu,
         DropdownMenuContent,
@@ -25,12 +24,13 @@
         DropdownMenuSeparator,
         DropdownMenuTrigger,
     } from '@/components/ui/dropdown-menu';
-    import CustomerInfo from '@/components/CustomerInfo.svelte';
-    import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
+    import { Input } from '@/components/ui/input';
+    import {Sheet, SheetContent, SheetTitle, SheetTrigger} from '@/components/ui/sheet';
     import { formatPrice } from '@/lib/currency';
-    import { logout } from '@/routes';
-    import { edit as editProfile } from '@/routes/profile';
     import { toUrl } from '@/lib/utils';
+    import { logout } from '@/routes';
+    import customerRoutes from '@/routes/customer';
+    import { edit as editProfile } from '@/routes/profile';
     import type { Cart, Customer } from '@/types';
 
     type NavCategory = { id: number; name: string; slug: string };
@@ -69,6 +69,7 @@
             results = [];
             total = 0;
             isOpen = false;
+
             return;
         }
 

@@ -6,10 +6,10 @@
 
 <AppHead title="Zahlung" />
 
-<div class="min-h-screen bg-white">
+<div class="flex min-h-screen flex-col bg-white">
     <ShopHeader />
 
-    <main class="mx-auto max-w-4xl px-4 py-10 lg:px-8">
+    <main class="flex-1 mx-auto max-w-4xl px-4 py-10 lg:px-8">
         <h1 class="mb-6 text-2xl font-bold text-[#1a3a5c]">Zahlung</h1>
     </main>
 

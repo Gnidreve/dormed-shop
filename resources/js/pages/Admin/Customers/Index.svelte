@@ -6,22 +6,23 @@
 
 <script lang="ts">
     import {
-        type ColumnDef,
-        type ColumnFiltersState,
-        type PaginationState,
-        type RowSelectionState,
-        type SortingState,
-        type VisibilityState,
+        
+        
+        
+        
+        
+        
         getCoreRowModel,
         getFilteredRowModel,
         getPaginationRowModel,
-        getSortedRowModel,
+        getSortedRowModel
     } from '@tanstack/table-core';
+import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, SortingState, VisibilityState} from '@tanstack/table-core';
+    import ChevronDown from 'lucide-svelte/icons/chevron-down';
     import AppHead from '@/components/AppHead.svelte';
+    import TableCellLink from '@/components/TableCellLink.svelte';
     import { Button } from '@/components/ui/button';
     import { Checkbox } from '@/components/ui/checkbox';
-    import { Input } from '@/components/ui/input';
-    import * as Table from '@/components/ui/table';
     import {
         FlexRender,
         createSvelteTable,
@@ -33,8 +34,8 @@
         DropdownMenuContent,
         DropdownMenuTrigger,
     } from '@/components/ui/dropdown-menu';
-    import ChevronDown from 'lucide-svelte/icons/chevron-down';
-    import TableCellLink from '@/components/TableCellLink.svelte';
+    import { Input } from '@/components/ui/input';
+    import * as Table from '@/components/ui/table';
 
     type Customer = {
         id: number;

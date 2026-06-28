@@ -1,8 +1,8 @@
 <script lang="ts">
+    import Clock from 'lucide-svelte/icons/clock';
+    import Mail from 'lucide-svelte/icons/mail';
     import MapPin from 'lucide-svelte/icons/map-pin';
     import Phone from 'lucide-svelte/icons/phone';
-    import Mail from 'lucide-svelte/icons/mail';
-    import Clock from 'lucide-svelte/icons/clock';
     import AppFooter from '@/components/AppFooter.svelte';
     import AppHead from '@/components/AppHead.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
@@ -49,10 +49,10 @@
 
 <AppHead title="Kontakt" />
 
-<div class="min-h-screen bg-white">
+<div class="flex min-h-screen flex-col bg-white">
     <ShopHeader />
 
-    <main class="mx-auto max-w-5xl px-4 py-12 lg:px-8">
+    <main class="flex-1 mx-auto max-w-5xl px-4 py-12 lg:px-8">
         <h1 class="mb-2 text-2xl font-bold text-[#1a3a5c]">Kontakt & Standorte</h1>
         <p class="mb-10 text-sm text-gray-500">
             Wir empfangen Sie ausschließlich nach vorheriger Terminvereinbarung.

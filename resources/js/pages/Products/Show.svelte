@@ -3,21 +3,21 @@
     import ChevronRight from 'lucide-svelte/icons/chevron-right';
     import Minus from 'lucide-svelte/icons/minus';
     import Plus from 'lucide-svelte/icons/plus';
-    import Star from 'lucide-svelte/icons/star';
     import ShoppingCart from 'lucide-svelte/icons/shopping-cart';
+    import Star from 'lucide-svelte/icons/star';
+    import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
     import AppFooter from '@/components/AppFooter.svelte';
     import AppHead from '@/components/AppHead.svelte';
     import InputError from '@/components/InputError.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
-    import cartRoutes from '@/routes/cart';
-    import ratingsRoutes from '@/routes/ratings';
     import { Button } from '@/components/ui/button';
     import { Label } from '@/components/ui/label';
-    import { Textarea } from '@/components/ui/textarea';
     import { Separator } from '@/components/ui/separator';
-    import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
+    import { Textarea } from '@/components/ui/textarea';
     import { formatPrice } from '@/lib/currency';
     import { cn } from '@/lib/utils';
+    import cartRoutes from '@/routes/cart';
+    import ratingsRoutes from '@/routes/ratings';
 
     type ProductImage = { id: number; url: string; sort_order: number };
     type ProductVariant = { id: number; label: string; price: string; is_default: boolean };
@@ -62,6 +62,29 @@
     let activeTab = $state<'beschreibung' | 'bewertungen'>('beschreibung');
     let ratingStars = $state(5);
     let activeImageIndex = $state(0);
+    let zoomActive = $state(false);
+    let cursorPct = $state({ x: 0.5, y: 0.5 });
+    let zoomPanel = $state<{ left: number; top: number; size: number } | null>(null);
+
+    function handleZoomMouseEnter(e: MouseEvent) {
+        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+        const availableWidth = window.innerWidth - rect.right - 24;
+        const size = Math.min(rect.height, Math.max(280, availableWidth));
+        zoomPanel = { left: rect.right + 16, top: rect.top, size };
+        zoomActive = true;
+    }
+
+    function handleZoomMouseLeave() {
+        zoomActive = false;
+    }
+
+    function handleZoomMouseMove(e: MouseEvent) {
+        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+        cursorPct = {
+            x: Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)),
+            y: Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height)),
+        };
+    }
 
     const selectedVariant = $derived(
         hasVariants ? product.variants.find((v) => v.id === selectedVariantId) ?? null : null,
@@ -89,10 +112,10 @@
 
 <AppHead title={product.name} />
 
-<div class="min-h-screen bg-white">
+<div class="flex min-h-screen flex-col bg-white">
     <ShopHeader />
 
-    <main class="mx-auto max-w-7xl px-4 py-6 lg:px-8">
+    <main class="flex-1 mx-auto max-w-7xl px-4 py-6 lg:px-8">
 
         <!-- Breadcrumb -->
         <nav class="mb-6 flex items-center gap-1.5 text-sm text-gray-500">
@@ -115,7 +138,13 @@
                 {#if product.images.length > 0}
                     <div class="flex flex-col gap-3">
                         <!-- Main image -->
-                        <div class="aspect-square w-full overflow-hidden rounded-xl border bg-gray-50">
+                        <div
+                            class="aspect-square w-full overflow-hidden rounded-xl border bg-gray-50 cursor-crosshair"
+                            onmouseenter={handleZoomMouseEnter}
+                            onmouseleave={handleZoomMouseLeave}
+                            onmousemove={handleZoomMouseMove}
+                            role="none"
+                        >
                             <img
                                 src={product.images[activeImageIndex]?.url}
                                 alt={product.name}
@@ -174,8 +203,7 @@
 
                 <!-- Short description -->
                 {#if product.description}
-                    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                    <p class="mb-5 text-sm leading-relaxed text-gray-600">{@html product.description}</p>
+                    <p class="mb-5 whitespace-pre-line text-sm leading-relaxed text-gray-600">{product.description}</p>
                 {/if}
 
                 <Separator class="mb-6" />
@@ -275,10 +303,7 @@
                             Produktinformationen „{product.name}"
                         </h2>
                         {#if product.description}
-                            <div class="prose prose-sm max-w-none text-gray-700">
-                                <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-                                {@html product.description}
-                            </div>
+                            <p class="whitespace-pre-line text-sm leading-relaxed text-gray-700">{product.description}</p>
                         {:else}
                             <p class="text-sm text-gray-400">
                                 Keine Beschreibung vorhanden.
@@ -415,6 +440,14 @@
 
     <AppFooter />
 </div>
+
+<!-- Zoom panel: fixed, viewport-aware, desktop only -->
+{#if zoomActive && zoomPanel && product.images[activeImageIndex]}
+    <div
+        class="pointer-events-none fixed z-50 hidden overflow-hidden rounded-xl border bg-gray-50 shadow-2xl lg:block"
+        style="left: {zoomPanel.left}px; top: {zoomPanel.top}px; width: {zoomPanel.size}px; height: {zoomPanel.size}px; background-image: url('{product.images[activeImageIndex].url}'); background-size: 300%; background-position: {cursorPct.x * 100}% {cursorPct.y * 100}%; background-repeat: no-repeat;"
+    ></div>
+{/if}
 
 <style>
     .star-wrapper {

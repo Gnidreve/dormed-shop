@@ -43,7 +43,9 @@
                     <SidebarMenuButton
                         tooltip={title}
                         isActive={isAnyChildActive}
-                        onclick={() => { open = !open; }}
+                        onclick={() => {
+ open = !open; 
+}}
                     >
                         {#if Icon}
                             <Icon class="size-4 shrink-0" />

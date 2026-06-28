@@ -6,22 +6,23 @@
 
 <script lang="ts">
     import {
-        type ColumnDef,
-        type ColumnFiltersState,
-        type PaginationState,
-        type RowSelectionState,
-        type SortingState,
-        type VisibilityState,
+        
+        
+        
+        
+        
+        
         getCoreRowModel,
         getFilteredRowModel,
         getPaginationRowModel,
-        getSortedRowModel,
+        getSortedRowModel
     } from '@tanstack/table-core';
+import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, SortingState, VisibilityState} from '@tanstack/table-core';
+    import ChevronDown from 'lucide-svelte/icons/chevron-down';
     import AppHead from '@/components/AppHead.svelte';
+    import TableCellLink from '@/components/TableCellLink.svelte';
     import { Button } from '@/components/ui/button';
     import { Checkbox } from '@/components/ui/checkbox';
-    import { Input } from '@/components/ui/input';
-    import * as Table from '@/components/ui/table';
     import { FlexRender, createSvelteTable, renderComponent } from '@/components/ui/data-table';
     import {
         DropdownMenu,
@@ -29,8 +30,8 @@
         DropdownMenuContent,
         DropdownMenuTrigger,
     } from '@/components/ui/dropdown-menu';
-    import ChevronDown from 'lucide-svelte/icons/chevron-down';
-    import TableCellLink from '@/components/TableCellLink.svelte';
+    import { Input } from '@/components/ui/input';
+    import * as Table from '@/components/ui/table';
     import { formatPrice } from '@/lib/currency';
 
     type Order = {
@@ -114,23 +115,45 @@
     let columnVisibility = $state<VisibilityState>({});
 
     const table = createSvelteTable({
-        get data() { return orders.data; },
+        get data() {
+ return orders.data; 
+},
         columns,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
-        onSortingChange: (u) => { sorting = typeof u === 'function' ? u(sorting) : u; },
-        onColumnFiltersChange: (u) => { columnFilters = typeof u === 'function' ? u(columnFilters) : u; },
-        onRowSelectionChange: (u) => { rowSelection = typeof u === 'function' ? u(rowSelection) : u; },
-        onPaginationChange: (u) => { pagination = typeof u === 'function' ? u(pagination) : u; },
-        onColumnVisibilityChange: (u) => { columnVisibility = typeof u === 'function' ? u(columnVisibility) : u; },
+        onSortingChange: (u) => {
+ sorting = typeof u === 'function' ? u(sorting) : u; 
+},
+        onColumnFiltersChange: (u) => {
+ columnFilters = typeof u === 'function' ? u(columnFilters) : u; 
+},
+        onRowSelectionChange: (u) => {
+ rowSelection = typeof u === 'function' ? u(rowSelection) : u; 
+},
+        onPaginationChange: (u) => {
+ pagination = typeof u === 'function' ? u(pagination) : u; 
+},
+        onColumnVisibilityChange: (u) => {
+ columnVisibility = typeof u === 'function' ? u(columnVisibility) : u; 
+},
         state: {
-            get sorting() { return sorting; },
-            get columnFilters() { return columnFilters; },
-            get rowSelection() { return rowSelection; },
-            get pagination() { return pagination; },
-            get columnVisibility() { return columnVisibility; },
+            get sorting() {
+ return sorting; 
+},
+            get columnFilters() {
+ return columnFilters; 
+},
+            get rowSelection() {
+ return rowSelection; 
+},
+            get pagination() {
+ return pagination; 
+},
+            get columnVisibility() {
+ return columnVisibility; 
+},
         },
     });
 </script>

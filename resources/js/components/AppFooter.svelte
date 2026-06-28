@@ -1,6 +1,6 @@
 <script lang="ts">
-    import Phone from 'lucide-svelte/icons/phone';
     import Mail from 'lucide-svelte/icons/mail';
+    import Phone from 'lucide-svelte/icons/phone';
 </script>
 
 <footer class="mt-auto border-t bg-white">

@@ -13,16 +13,25 @@ class ProductController extends Controller
     public function index(Request $request): Response
     {
         $query = $request->string('q')->trim();
+        $sort = $request->input('sort', 'name_asc');
+
+        [$column, $direction] = match ($sort) {
+            'name_desc' => ['name', 'desc'],
+            'price_asc' => ['price', 'asc'],
+            'price_desc' => ['price', 'desc'],
+            default => ['name', 'asc'],
+        };
 
         $products = Product::with(['manufacturer', 'images' => fn ($q) => $q->where('sort_order', 0)])
             ->when($query, fn ($q) => $q->where('name', 'like', "%{$query}%"))
-            ->orderBy('name')
+            ->orderBy($column, $direction)
             ->paginate(24)
             ->withQueryString();
 
         return Inertia::render('Products/Index', [
             'products' => $products,
             'query' => $query->toString(),
+            'sort' => $sort,
         ]);
     }
 

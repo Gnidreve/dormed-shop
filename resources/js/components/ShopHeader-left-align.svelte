@@ -8,8 +8,9 @@
     import User from 'lucide-svelte/icons/user';
     import UserPlus from 'lucide-svelte/icons/user-plus';
     import X from 'lucide-svelte/icons/x';
+    import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
+    import CustomerInfo from '@/components/CustomerInfo.svelte';
     import { Button } from '@/components/ui/button';
-    import { Input } from '@/components/ui/input';
     import {
         DropdownMenu,
         DropdownMenuContent,
@@ -19,11 +20,10 @@
         DropdownMenuSeparator,
         DropdownMenuTrigger,
     } from '@/components/ui/dropdown-menu';
-    import CustomerInfo from '@/components/CustomerInfo.svelte';
-    import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
+    import { Input } from '@/components/ui/input';
+    import { toUrl } from '@/lib/utils';
     import { logout } from '@/routes';
     import { edit as editProfile } from '@/routes/profile';
-    import { toUrl } from '@/lib/utils';
     import type { Customer } from '@/types';
 
     const navItems = [
@@ -72,6 +72,7 @@
             results = [];
             total = 0;
             isOpen = false;
+
             return;
         }
 

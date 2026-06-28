@@ -8,12 +8,12 @@
     import { useForm } from '@inertiajs/svelte';
     import { Copy, Check, Info, Loader2 } from 'lucide-svelte';
     import { toast } from 'svelte-sonner';
+    import * as AdminSettingController from '@/actions/App/Http/Controllers/Admin/SettingController';
     import AppHead from '@/components/AppHead.svelte';
     import { Button } from '@/components/ui/button';
     import { Input } from '@/components/ui/input';
     import { Label } from '@/components/ui/label';
     import * as Tabs from '@/components/ui/tabs';
-    import * as AdminSettingController from '@/actions/App/Http/Controllers/Admin/SettingController';
 
     let {
         settings,
@@ -61,12 +61,14 @@
             document.execCommand('copy');
             document.body.removeChild(el);
         }
+
         copied = true;
         setTimeout(() => (copied = false), 2000);
     }
 
     async function checkStripe() {
         checkingStripe = true;
+
         try {
             const token = decodeURIComponent(
                 document.cookie
@@ -78,6 +80,7 @@
                 headers: { 'X-XSRF-TOKEN': token, Accept: 'application/json' },
             });
             const data = await res.json();
+
             if (res.ok) {
                 toast.success(data.message);
             } else {
@@ -92,6 +95,7 @@
 
     async function checkMail() {
         checkingMail = true;
+
         try {
             const token = decodeURIComponent(
                 document.cookie
@@ -103,6 +107,7 @@
                 headers: { 'X-XSRF-TOKEN': token, Accept: 'application/json' },
             });
             const data = await res.json();
+
             if (res.ok) {
                 toast.success(data.message);
             } else {

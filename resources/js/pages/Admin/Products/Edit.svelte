@@ -6,14 +6,14 @@
 
 <script lang="ts">
     import { useForm, router } from '@inertiajs/svelte';
+    import { GripVertical, Trash2, ImagePlus, Star, Plus, Check } from 'lucide-svelte';
+    import * as AdminProductController from '@/actions/App/Http/Controllers/Admin/ProductController';
+    import * as AdminProductVariantController from '@/actions/App/Http/Controllers/Admin/ProductVariantController';
     import AppHead from '@/components/AppHead.svelte';
     import { Button } from '@/components/ui/button';
     import { Input } from '@/components/ui/input';
     import { Label } from '@/components/ui/label';
     import * as Select from '@/components/ui/select';
-    import * as AdminProductController from '@/actions/App/Http/Controllers/Admin/ProductController';
-    import * as AdminProductVariantController from '@/actions/App/Http/Controllers/Admin/ProductVariantController';
-    import { GripVertical, Trash2, ImagePlus, Star, Plus, Check } from 'lucide-svelte';
     import { cn } from '@/lib/utils';
 
     type ProductImage = {
@@ -87,7 +87,10 @@
     function uploadImage(e: Event) {
         const input = e.target as HTMLInputElement;
         const file = input.files?.[0];
-        if (!file) return;
+
+        if (!file) {
+return;
+}
 
         uploading = true;
         const data = new FormData();
@@ -116,11 +119,17 @@
 
     function onDrop(e: DragEvent, targetId: number) {
         e.preventDefault();
-        if (draggedId === null || draggedId === targetId) return;
+
+        if (draggedId === null || draggedId === targetId) {
+return;
+}
 
         const from = images.findIndex((img) => img.id === draggedId);
         const to = images.findIndex((img) => img.id === targetId);
-        if (from === -1 || to === -1) return;
+
+        if (from === -1 || to === -1) {
+return;
+}
 
         const reordered = [...images];
         const [moved] = reordered.splice(from, 1);
@@ -143,21 +152,22 @@
 
     // --- Variant management ---
 
-    let variants = $state([...product.variants]);
+    const variants = $derived([...product.variants]);
     let newVariant = $state({ label: '', price: '', is_default: false });
     let editingVariantId = $state<number | null>(null);
     let editVariant = $state({ label: '', price: '', is_default: false });
 
-    $effect(() => {
-        variants = [...product.variants];
-    });
-
     function addVariant() {
-        if (!newVariant.label || !newVariant.price) return;
+        if (!newVariant.label || !newVariant.price) {
+return;
+}
+
         router.post(
             AdminProductVariantController.store.url(product.id),
             { label: newVariant.label, price: newVariant.price, is_default: newVariant.is_default },
-            { onSuccess: () => { newVariant = { label: '', price: '', is_default: false }; } },
+            { onSuccess: () => {
+ newVariant = { label: '', price: '', is_default: false }; 
+} },
         );
     }
 
@@ -170,7 +180,9 @@
         router.put(
             AdminProductVariantController.update.url({ product: product.id, variant: variantId }),
             { label: editVariant.label, price: editVariant.price, is_default: editVariant.is_default },
-            { onSuccess: () => { editingVariantId = null; } },
+            { onSuccess: () => {
+ editingVariantId = null; 
+} },
         );
     }
 

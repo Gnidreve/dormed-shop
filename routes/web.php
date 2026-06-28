@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 Route::inertia('/', 'Welcome')->name('home');
 Route::inertia('/versand', 'VersandUndZahlung')->name('versand');
@@ -10,7 +13,6 @@ Route::inertia('/datenschutz', 'Datenschutz')->name('datenschutz');
 Route::inertia('/zahlung', 'Zahlung')->name('zahlung');
 Route::inertia('/widerrufsbelehrung', 'Widerrufsbelehrung')->name('widerrufsbelehrung');
 Route::inertia('/kontakt', 'Kontakt')->name('kontakt');
-
 
 require __DIR__.'/admin.php';
 require __DIR__.'/products.php';

@@ -2,6 +2,7 @@
     import { page, router } from '@inertiajs/svelte';
     import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down';
     import LogOut from 'lucide-svelte/icons/log-out';
+    import * as AdminLoginController from '@/actions/App/Http/Controllers/Admin/LoginController';
     import {
         DropdownMenu,
         DropdownMenuContent,
@@ -16,7 +17,6 @@
         SidebarMenuItem,
         useSidebar,
     } from '@/components/ui/sidebar';
-    import * as AdminLoginController from '@/actions/App/Http/Controllers/Admin/LoginController';
 
     const admin = $derived((page.props.auth as any).admin);
     const { isMobile, state: sidebarState } = useSidebar();
@@ -65,7 +65,9 @@
                             <button
                                 type="button"
                                 class={props.class}
-                                onclick={() => { props.onClick?.(); logout(); }}
+                                onclick={() => {
+ props.onClick?.(); logout(); 
+}}
                             >
                                 <LogOut class="mr-2 size-4" />
                                 Abmelden

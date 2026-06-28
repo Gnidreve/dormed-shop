@@ -8,6 +8,7 @@
     import AppLogo from '@/components/AppLogo.svelte';
     import AppLogoIcon from '@/components/AppLogoIcon.svelte';
     import Breadcrumbs from '@/components/Breadcrumbs.svelte';
+    import CustomerMenuContent from '@/components/CustomerMenuContent.svelte';
     import {
         Avatar,
         AvatarFallback,
@@ -38,7 +39,6 @@
         TooltipProvider,
         TooltipTrigger,
     } from '@/components/ui/tooltip';
-    import CustomerMenuContent from '@/components/CustomerMenuContent.svelte';
     import { currentUrlState } from '@/lib/currentUrl.svelte';
     import { getInitials } from '@/lib/initials';
     import { toUrl } from '@/lib/utils';
