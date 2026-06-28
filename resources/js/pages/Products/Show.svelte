@@ -20,6 +20,7 @@
     import { cn } from '@/lib/utils';
 
     type ProductImage = { id: number; url: string; sort_order: number };
+    type ProductVariant = { id: number; label: string; price: string; is_default: boolean };
 
     type Product = {
         id: number;
@@ -28,6 +29,7 @@
         price: string;
         manufacturer: { id: number; name: string } | null;
         images: ProductImage[];
+        variants: ProductVariant[];
     };
 
     type Rating = {
@@ -52,10 +54,19 @@
         ratingSummary: RatingSummary;
     } = $props();
 
+    const hasVariants = product.variants.length > 0;
+    const defaultVariant = product.variants.find((v) => v.is_default) ?? product.variants[0] ?? null;
+
+    let selectedVariantId = $state<number | null>(defaultVariant?.id ?? null);
     let quantity = $state(1);
     let activeTab = $state<'beschreibung' | 'bewertungen'>('beschreibung');
     let ratingStars = $state(5);
     let activeImageIndex = $state(0);
+
+    const selectedVariant = $derived(
+        hasVariants ? product.variants.find((v) => v.id === selectedVariantId) ?? null : null,
+    );
+    const displayedPrice = $derived(selectedVariant ? selectedVariant.price : product.price);
 
     function starLabel(stars: number): string {
         return `${stars} Stern${stars === 1 ? '' : 'e'}`;
@@ -154,7 +165,7 @@
                 <!-- Price -->
                 <div class="mb-1">
                     <span class="text-3xl font-bold text-gray-900">
-                        {formatPrice(product.price)}*
+                        {formatPrice(displayedPrice)}*
                     </span>
                 </div>
                 <p class="mb-5 text-sm text-[#1a6bbf] hover:underline">
@@ -167,6 +178,29 @@
                 {/if}
 
                 <Separator class="mb-6" />
+
+                <!-- Variant picker -->
+                {#if hasVariants}
+                    <div class="mb-5">
+                        <p class="mb-2 text-sm font-semibold text-gray-700">Verpackungseinheit</p>
+                        <div class="flex flex-wrap gap-2">
+                            {#each product.variants as variant (variant.id)}
+                                <button
+                                    type="button"
+                                    onclick={() => (selectedVariantId = variant.id)}
+                                    class={cn(
+                                        'rounded border px-4 py-1.5 text-sm font-medium transition-colors',
+                                        selectedVariantId === variant.id
+                                            ? 'border-[#0d1f44] bg-[#0d1f44] text-white'
+                                            : 'border-gray-300 text-gray-700 hover:border-[#0d1f44]',
+                                    )}
+                                >
+                                    {variant.label}
+                                </button>
+                            {/each}
+                        </div>
+                    </div>
+                {/if}
 
                 <!-- Availability -->
                 <div class="mb-5 flex items-center gap-2">

@@ -28,7 +28,7 @@ class ProductController extends Controller
 
     public function show(Product $product): Response
     {
-        $product->load(['manufacturer', 'ratings', 'images']);
+        $product->load(['manufacturer', 'ratings', 'images', 'variants']);
         $product->loadAvg('ratings', 'stars');
 
         return Inertia::render('Products/Show', [
@@ -37,6 +37,12 @@ class ProductController extends Controller
                     'id' => $img->id,
                     'url' => $img->url,
                     'sort_order' => $img->sort_order,
+                ])->values(),
+                'variants' => $product->variants->map(fn ($v) => [
+                    'id' => $v->id,
+                    'label' => $v->label,
+                    'price' => $v->price,
+                    'is_default' => $v->is_default,
                 ])->values(),
             ]),
             'ratings' => $product->ratings->map(fn ($rating) => [
