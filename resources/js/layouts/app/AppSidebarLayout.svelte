@@ -4,7 +4,6 @@
     import AppShell from '@/components/AppShell.svelte';
     import AppSidebar from '@/components/AppSidebar.svelte';
     import AppSidebarHeader from '@/components/AppSidebarHeader.svelte';
-    import TestModeBanner from '@/components/TestModeBanner.svelte';
     import { Toaster } from '@/components/ui/sonner';
     import type { BreadcrumbItem } from '@/types';
 
@@ -21,7 +20,6 @@
     <AppSidebar />
     <AppContent variant="sidebar" class="overflow-x-hidden">
         <AppSidebarHeader {breadcrumbs} />
-        <TestModeBanner />
         {@render children?.()}
     </AppContent>
     <Toaster />

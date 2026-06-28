@@ -27,6 +27,7 @@
     } from '@/components/ui/dropdown-menu';
     import CustomerInfo from '@/components/CustomerInfo.svelte';
     import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
+    import { formatPrice } from '@/lib/currency';
     import { logout } from '@/routes';
     import { edit as editProfile } from '@/routes/profile';
     import { toUrl } from '@/lib/utils';

@@ -96,16 +96,6 @@
             <span class="truncate text-gray-800">{product.name}</span>
         </nav>
 
-        <!-- Title row -->
-        <div class="mb-6 flex items-start justify-between gap-6">
-            <h1 class="text-2xl font-bold text-gray-900 lg:text-3xl">{product.name}</h1>
-            {#if product.manufacturer}
-                <span class="shrink-0 rounded border border-gray-200 px-3 py-1.5 text-sm font-semibold text-[#1a3a5c]">
-                    {product.manufacturer.name}
-                </span>
-            {/if}
-        </div>
-
         <!-- Two-column layout -->
         <div class="flex flex-col gap-10 lg:flex-row lg:items-start">
 
@@ -151,6 +141,16 @@
 
             <!-- Right: purchase info -->
             <div class="flex-1">
+                <!-- Name + manufacturer -->
+                <div class="mb-4 flex items-start justify-between gap-4">
+                    <h1 class="text-2xl font-bold text-gray-900 lg:text-3xl">{product.name}</h1>
+                    {#if product.manufacturer}
+                        <span class="shrink-0 rounded border border-gray-200 px-3 py-1.5 text-sm font-semibold text-[#1a3a5c]">
+                            {product.manufacturer.name}
+                        </span>
+                    {/if}
+                </div>
+
                 <!-- Price -->
                 <div class="mb-1">
                     <span class="text-3xl font-bold text-gray-900">
@@ -161,18 +161,21 @@
                     <a href="/versandkosten">Preise inkl. MwSt. zzgl. Versandkosten</a>
                 </p>
 
-                <!-- Availability -->
-                <div class="mb-6 flex items-center gap-2">
-                    <span class="size-2.5 shrink-0 rounded-full bg-green-500"></span>
-                    <span class="text-sm text-gray-700">
-                        Sofort verfügbar, Lieferzeit: 1–2 Wochen
-                    </span>
-                </div>
+                <!-- Short description -->
+                {#if product.description}
+                    <p class="mb-5 text-sm leading-relaxed text-gray-600">{@html product.description}</p>
+                {/if}
 
                 <Separator class="mb-6" />
 
+                <!-- Availability -->
+                <div class="mb-5 flex items-center gap-2">
+                    <span class="size-2.5 shrink-0 rounded-full bg-green-500"></span>
+                    <span class="text-sm text-gray-700">Sofort verfügbar, Lieferzeit: 1–2 Wochen</span>
+                </div>
+
                 <!-- Qty + CTA -->
-                <div class="mb-6 flex items-center gap-3">
+                <div class="flex items-center gap-3">
                     <div class="flex items-center rounded border">
                         <button
                             class="flex size-10 items-center justify-center text-gray-500 hover:bg-gray-50 disabled:opacity-40"
@@ -200,12 +203,6 @@
                         In den Warenkorb
                     </Button>
                 </div>
-
-                <!-- Product number -->
-                <p class="text-sm text-gray-500">
-                    <span class="font-semibold text-gray-700">Produktnummer:</span>
-                    #{product.id}
-                </p>
             </div>
         </div>
 
