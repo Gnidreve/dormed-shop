@@ -36,6 +36,7 @@
 
     const selectedPayment = $derived(cart.selected_payment_method);
     const selectedProvider = $derived(selectedPayment?.provider ?? null);
+    const isInvoice = $derived(selectedProvider === 'invoice');
     const isPayPal = $derived(selectedProvider === 'paypal');
     const isStripe = $derived(selectedProvider === 'stripe');
 
@@ -148,237 +149,309 @@
             { preserveScroll: true },
         );
     }
+
+    // Hold-to-confirm
+    const HOLD_DURATION = 1500;
+    let holdProgress = $state(0);
+    let holdStartTime: number | null = null;
+    let holdRaf: number | null = null;
+
+    function holdStart() {
+        if (!agreedToTerms || cart.is_empty || !addressComplete) return;
+        holdStartTime = performance.now();
+        tick();
+    }
+
+    function tick() {
+        if (holdStartTime === null) return;
+        const elapsed = performance.now() - holdStartTime;
+        holdProgress = Math.min(100, (elapsed / HOLD_DURATION) * 100);
+        if (holdProgress < 100) {
+            holdRaf = requestAnimationFrame(tick);
+        } else {
+            holdRaf = null;
+            holdStartTime = null;
+            submitOrder();
+        }
+    }
+
+    function holdEnd() {
+        if (holdRaf !== null) {
+            cancelAnimationFrame(holdRaf);
+            holdRaf = null;
+        }
+        holdStartTime = null;
+        holdProgress = 0;
+    }
 </script>
 
 <AppHead title="Bestellung abschließen" />
 
 <div class="flex min-h-screen flex-col bg-gray-50">
-<ShopHeader />
+    <ShopHeader />
 
-<main class="flex-1">
-    <div class="mx-auto max-w-7xl px-4 py-8 lg:px-8">
-        <Link
-            href={checkout.index.url()}
-            class="mb-6 inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800"
-        >
-            <ChevronLeft class="size-4" />
-            Zurück zur Bearbeitung
-        </Link>
+    <main class="flex-1">
+        <div class="mx-auto max-w-7xl px-4 py-8 lg:px-8">
+            <Link
+                href={checkout.index.url()}
+                class="mb-6 inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800"
+            >
+                <ChevronLeft class="size-4" />
+                Zurück zur Bearbeitung
+            </Link>
 
-        <h1 class="mb-8 text-3xl font-bold text-gray-900">
-            Bestellung abschließen
-        </h1>
+            <h1 class="mb-8 text-3xl font-bold text-gray-900">
+                Bestellung abschließen
+            </h1>
 
-        <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
-            <div class="flex flex-1 flex-col gap-6">
-                <!-- AGB -->
-                <div class="rounded-lg border bg-white p-5">
-                    <h2 class="mb-2 font-bold text-gray-900">
-                        AGB und Widerrufsbelehrung
-                    </h2>
-                    <Separator class="mb-4" />
-                    <p class="mb-3 text-sm text-gray-600">
-                        Bitte beachten Sie die
-                        <Link
-                            href="/widerrufsbelehrung"
-                            class="text-[#1a6bbf] hover:underline"
-                        >
-                            Widerrufsbelehrung
-                        </Link>.
-                    </p>
-                    <label class="flex cursor-pointer items-start gap-3">
-                        <Checkbox bind:checked={agreedToTerms} class="mt-0.5" />
-                        <span class="text-sm text-gray-700">
-                            Ich habe die
+            <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
+                <div class="flex flex-1 flex-col gap-6">
+                    <!-- AGB -->
+                    <div class="rounded-lg border bg-white p-5">
+                        <h2 class="mb-2 font-bold text-gray-900">
+                            AGB und Widerrufsbelehrung
+                        </h2>
+                        <Separator class="mb-4" />
+                        <p class="mb-3 text-sm text-gray-600">
+                            Bitte beachten Sie die
                             <Link
-                                href="/agb"
-                                class="text-[#1a6bbf] hover:underline">AGB</Link
+                                href="/widerrufsbelehrung"
+                                class="text-[#1a6bbf] hover:underline"
                             >
-                            gelesen und bin mit ihnen einverstanden.
-                        </span>
-                    </label>
-                </div>
-
-                <!-- Lieferadresse -->
-                <div class="rounded-lg border bg-white p-5">
-                    <div class="mb-2 flex items-center justify-between">
-                        <h2 class="font-bold text-gray-900">Lieferadresse</h2>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={isSavingAddress || !addressComplete}
-                            onclick={saveAddress}
-                        >
-                            {isSavingAddress
-                                ? 'Speichere...'
-                                : 'Adresse speichern'}
-                        </Button>
-                    </div>
-                    <Separator class="mb-4" />
-                    <div onaddressupdate={handleAddressUpdate}>
-                        <AddressForm
-                            data={shippingAddress}
-                            errors={addressErrors}
-                            prefix="shipping"
-                            legend=""
-                        />
-                    </div>
-                    {#if addressErrors._form}
-                        <p class="mt-2 text-sm text-red-500">
-                            {addressErrors._form}
+                                Widerrufsbelehrung
+                            </Link>.
                         </p>
-                    {/if}
-                </div>
+                        <label class="flex cursor-pointer items-start gap-3">
+                            <Checkbox
+                                bind:checked={agreedToTerms}
+                                class="mt-0.5"
+                            />
+                            <span class="text-sm text-gray-700">
+                                Ich habe die
+                                <Link
+                                    href="/agb"
+                                    class="text-[#1a6bbf] hover:underline"
+                                    >AGB</Link
+                                >
+                                gelesen und bin mit ihnen einverstanden.
+                            </span>
+                        </label>
+                    </div>
 
-                <!-- Rechnungsadresse -->
-                <div class="rounded-lg border bg-white p-5">
-                    <h2 class="mb-2 font-bold text-gray-900">
-                        Rechnungsadresse
-                    </h2>
-                    <Separator class="mb-4" />
-                    {#if billingSameAsShipping}
-                        <p class="text-sm text-gray-600">
-                            Identisch mit Lieferadresse.
-                        </p>
-                        <button
-                            onclick={enableBillingAddress}
-                            class="mt-2 text-sm text-[#1a6bbf] hover:underline"
-                        >
-                            Abweichende Rechnungsadresse eingeben
-                        </button>
-                    {:else}
+                    <!-- Lieferadresse -->
+                    <div class="rounded-lg border bg-white p-5">
+                        <div class="mb-2 flex items-center justify-between">
+                            <h2 class="font-bold text-gray-900">
+                                Lieferadresse
+                            </h2>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={isSavingAddress || !addressComplete}
+                                onclick={saveAddress}
+                            >
+                                {isSavingAddress
+                                    ? 'Speichere...'
+                                    : 'Adresse speichern'}
+                            </Button>
+                        </div>
+                        <Separator class="mb-4" />
                         <div onaddressupdate={handleAddressUpdate}>
                             <AddressForm
-                                data={billingAddress ?? defaultBillingAddress()}
+                                data={shippingAddress}
                                 errors={addressErrors}
-                                prefix="billing"
+                                prefix="shipping"
                                 legend=""
                             />
                         </div>
-                        <button
-                            onclick={disableBillingAddress}
-                            class="mt-2 text-sm text-[#1a6bbf] hover:underline"
-                        >
-                            Wie Lieferadresse verwenden
-                        </button>
-                    {/if}
-                </div>
-
-            </div>
-
-            <div class="w-full lg:w-80 xl:w-88">
-                <div class="rounded-lg border bg-white p-5">
-                    <h2 class="mb-4 text-xl font-bold text-gray-900">
-                        Zusammenfassung
-                    </h2>
-
-                    <div class="flex flex-col gap-2 text-sm">
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Zwischensumme</span>
-                            <span class="font-medium"
-                                >{formatPrice(cart.subtotal)}*</span
-                            >
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-gray-600">Versandkosten</span>
-                            <span class="font-medium"
-                                >{formatPrice(cart.shipping_total)}*</span
-                            >
-                        </div>
-                        <div class="my-2 border-t pt-2">
-                            <div class="flex justify-between">
-                                <span class="font-bold text-gray-900"
-                                    >Gesamtsumme</span
-                                >
-                                <span class="font-bold text-gray-900"
-                                    >{formatPrice(cart.total)}*</span
-                                >
-                            </div>
-                        </div>
-                        <div class="flex justify-between text-gray-500">
-                            <span>Gesamtnettosumme</span>
-                            <span>{formatPrice(cart.net_total)}</span>
-                        </div>
-                        <div class="flex justify-between text-gray-500">
-                            <span>zzgl. {cart.vat_rate} % MwSt.</span>
-                            <span>{formatPrice(cart.vat_amount)}</span>
-                        </div>
-                    </div>
-
-                    {#if customer}
-                        {#if isPayPal && paypal_client_id}
-                            <!-- Kauf auf Rechnung (vorläufig ohne Funktion) -->
-                            <Button
-                                class="mt-6 w-full bg-white text-[#0d1f44] ring-1 ring-[#0d1f44] hover:bg-gray-50"
-                                disabled={!agreedToTerms ||
-                                    cart.is_empty ||
-                                    !addressComplete}
-                            >
-                                Kauf auf Rechnung
-                            </Button>
-                            <div class="mt-3">
-                                <PayPalButton
-                                    total={Number(cart.total)}
-                                    clientId={paypal_client_id ?? ''}
-                                    disabled={!agreedToTerms ||
-                                        !addressComplete}
-                                />
-                            </div>
-                            <p class="mt-3 text-sm text-gray-500">
-                                Sie werden zu PayPal weitergeleitet, um die
-                                Zahlung zu bestätigen.
-                            </p>
-                        {:else if isStripe}
-                            <Button
-                                class="mt-6 w-full bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90 disabled:opacity-50"
-                                disabled={!agreedToTerms ||
-                                    cart.is_empty ||
-                                    !addressComplete}
-                                onclick={submitOrder}
-                            >
-                                Zahlungspflichtig bestellen
-                            </Button>
-                            <p class="mt-3 text-sm text-gray-500">
-                                Sie werden zur sicheren Zahlung über Stripe
-                                weitergeleitet.
-                            </p>
-                        {:else}
-                            <p class="mt-3 text-sm text-gray-500">
-                                Kein aktiver Zahlungsanbieter ausgewählt.
+                        {#if addressErrors._form}
+                            <p class="mt-2 text-sm text-red-500">
+                                {addressErrors._form}
                             </p>
                         {/if}
-                    {:else}
-                        <Button
-                            asChild
-                            class="mt-6 w-full bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90"
-                        >
-                            {#snippet children(props)}
-                                <Link
-                                    href={login.url({
-                                        query: {
-                                            redirect: checkout.confirm.url(),
-                                        },
-                                    })}
-                                    class={props.class}
-                                >
-                                    Zum Login
-                                </Link>
-                            {/snippet}
-                        </Button>
-                        <p class="mt-3 text-sm text-gray-500">
-                            Für den Bestellabschluss ist aktuell ein Kundenkonto
-                            erforderlich.
-                        </p>
-                    {/if}
+                    </div>
+
+                    <!-- Rechnungsadresse -->
+                    <div class="rounded-lg border bg-white p-5">
+                        <h2 class="mb-2 font-bold text-gray-900">
+                            Rechnungsadresse
+                        </h2>
+                        <Separator class="mb-4" />
+                        {#if billingSameAsShipping}
+                            <p class="text-sm text-gray-600">
+                                Identisch mit Lieferadresse.
+                            </p>
+                            <button
+                                onclick={enableBillingAddress}
+                                class="mt-2 text-sm text-[#1a6bbf] hover:underline"
+                            >
+                                Abweichende Rechnungsadresse eingeben
+                            </button>
+                        {:else}
+                            <div onaddressupdate={handleAddressUpdate}>
+                                <AddressForm
+                                    data={billingAddress ??
+                                        defaultBillingAddress()}
+                                    errors={addressErrors}
+                                    prefix="billing"
+                                    legend=""
+                                />
+                            </div>
+                            <button
+                                onclick={disableBillingAddress}
+                                class="mt-2 text-sm text-[#1a6bbf] hover:underline"
+                            >
+                                Wie Lieferadresse verwenden
+                            </button>
+                        {/if}
+                    </div>
                 </div>
 
-                <p class="mt-3 text-center text-xs text-gray-400">
-                    * Preise inkl. MwSt. zzgl. Versandkosten
-                </p>
+                <div class="w-full lg:w-80 xl:w-88">
+                    <div class="rounded-lg border bg-white p-5">
+                        <h2 class="mb-4 text-xl font-bold text-gray-900">
+                            Zusammenfassung
+                        </h2>
+
+                        <div class="flex flex-col gap-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Zwischensumme</span>
+                                <span class="font-medium"
+                                    >{formatPrice(cart.subtotal)}*</span
+                                >
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Versandkosten</span>
+                                <span class="font-medium"
+                                    >{formatPrice(cart.shipping_total)}*</span
+                                >
+                            </div>
+                            <div class="my-2 border-t pt-2">
+                                <div class="flex justify-between">
+                                    <span class="font-bold text-gray-900"
+                                        >Gesamtsumme</span
+                                    >
+                                    <span class="font-bold text-gray-900"
+                                        >{formatPrice(cart.total)}*</span
+                                    >
+                                </div>
+                            </div>
+                            <div class="flex justify-between text-gray-500">
+                                <span>Gesamtnettosumme</span>
+                                <span>{formatPrice(cart.net_total)}</span>
+                            </div>
+                            <div class="flex justify-between text-gray-500">
+                                <span>zzgl. {cart.vat_rate} % MwSt.</span>
+                                <span>{formatPrice(cart.vat_amount)}</span>
+                            </div>
+                        </div>
+
+                        {#if customer}
+                            {#if isInvoice}
+                                {@const isDisabled =
+                                    !agreedToTerms ||
+                                    cart.is_empty ||
+                                    !addressComplete}
+                                <div class="mt-6">
+                                    <button
+                                        class="relative w-full overflow-hidden rounded-md px-4 py-2.5 text-sm font-semibold text-white transition-opacity select-none"
+                                        style="background:#0d1f44;"
+                                        disabled={isDisabled}
+                                        onpointerdown={holdStart}
+                                        onpointerup={holdEnd}
+                                        onpointerleave={holdEnd}
+                                        onpointercancel={holdEnd}
+                                        style:opacity={isDisabled ? '0.5' : '1'}
+                                        style:cursor={isDisabled
+                                            ? 'not-allowed'
+                                            : 'pointer'}
+                                    >
+                                        <span
+                                            class="pointer-events-none absolute inset-0 origin-left transition-none"
+                                            style="background:rgba(255,255,255,0.15);transform:scaleX({holdProgress /
+                                                100});transform-origin:left;"
+                                        ></span>
+                                        <span class="relative">
+                                            {#if holdProgress > 0}
+                                                Gedrückt halten… {Math.round(
+                                                    holdProgress,
+                                                )}&nbsp;%
+                                            {:else}
+                                                Kaufen auf Rechnung
+                                            {/if}
+                                        </span>
+                                    </button>
+                                </div>
+                                <p class="mt-3 text-sm text-gray-500">
+                                    Halten Sie den Button gedrückt, um
+                                    verbindlich zu bestellen. Sie erhalten eine
+                                    Bestätigungsmail mit Bankverbindung.
+                                </p>
+                            {:else if isPayPal && paypal_client_id}
+                                <div class="mt-6">
+                                    <PayPalButton
+                                        total={Number(cart.total)}
+                                        clientId={paypal_client_id ?? ''}
+                                        disabled={!agreedToTerms ||
+                                            !addressComplete}
+                                    />
+                                </div>
+                                <p class="mt-3 text-sm text-gray-500">
+                                    Sie werden zu PayPal weitergeleitet, um die
+                                    Zahlung zu bestätigen.
+                                </p>
+                            {:else if isStripe}
+                                <Button
+                                    class="mt-6 w-full bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90 disabled:opacity-50"
+                                    disabled={!agreedToTerms ||
+                                        cart.is_empty ||
+                                        !addressComplete}
+                                    onclick={submitOrder}
+                                >
+                                    Zahlungspflichtig bestellen
+                                </Button>
+                                <p class="mt-3 text-sm text-gray-500">
+                                    Sie werden zur sicheren Zahlung über Stripe
+                                    weitergeleitet.
+                                </p>
+                            {:else}
+                                <p class="mt-3 text-sm text-gray-500">
+                                    Kein aktiver Zahlungsanbieter ausgewählt.
+                                </p>
+                            {/if}
+                        {:else}
+                            <Button
+                                asChild
+                                class="mt-6 w-full bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90"
+                            >
+                                {#snippet children(props)}
+                                    <Link
+                                        href={login.url({
+                                            query: {
+                                                redirect:
+                                                    checkout.confirm.url(),
+                                            },
+                                        })}
+                                        class={props.class}
+                                    >
+                                        Zum Login
+                                    </Link>
+                                {/snippet}
+                            </Button>
+                            <p class="mt-3 text-sm text-gray-500">
+                                Für den Bestellabschluss ist aktuell ein
+                                Kundenkonto erforderlich.
+                            </p>
+                        {/if}
+                    </div>
+
+                    <p class="mt-3 text-center text-xs text-gray-400">
+                        * Preise inkl. MwSt. zzgl. Versandkosten
+                    </p>
+                </div>
             </div>
         </div>
-    </div>
-</main>
+    </main>
 
-<AppFooter />
+    <AppFooter />
 </div>

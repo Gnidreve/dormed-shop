@@ -4,12 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Cart\UpdateCartPaymentMethodRequest;
 use App\Http\Requests\Checkout\PlaceOrderRequest;
+use App\Mail\NewOrderMail;
+use App\Mail\OrderConfirmationMail;
 use App\Models\Order;
 use App\Models\Setting;
 use App\Support\Cart\CartService;
 use App\Support\PaymentMode;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
 use Stripe\StripeClient;
@@ -156,28 +160,53 @@ class CheckoutController extends Controller
             return to_route('checkout.index');
         }
 
-        $shippingAmount = (float) ($cart['shipping_total'] ?? 0);
-        $shippingAddress = $this->cartService->getShippingAddress();
-        $billingAddress = $this->cartService->getBillingAddress();
+        $paymentMethodId = $cart['selected_payment_method']['id'] ?? '';
 
-        $order = Order::query()->create([
-            'customer_id' => $request->user()->id,
-            'status' => 'pending',
-            'is_test' => ! PaymentMode::isLive(),
-            'total_amount' => $cart['total'],
-            'shipping_amount' => $shippingAmount,
-            'shipping_address' => $shippingAddress,
-            'billing_address' => $billingAddress,
-        ]);
+        if ($paymentMethodId === 'invoice') {
+            return $this->submitInvoice($request, $cart);
+        }
 
-        foreach ($cart['items'] as $item) {
-            $order->items()->create([
-                'product_id' => $item['product_id'],
-                'product_name' => $item['name'],
-                'unit_price' => $item['unit_price'],
-                'quantity' => $item['quantity'],
+        return $this->submitStripe($request, $cart);
+    }
+
+    private function submitInvoice(PlaceOrderRequest $request, array $cart): RedirectResponse
+    {
+        $order = $this->createOrder($request, $cart, 'invoice');
+
+        $customer = $request->user();
+
+        try {
+            Mail::to($customer->email)->send(new OrderConfirmationMail($order, $customer));
+        } catch (\Throwable $e) {
+            Log::channel('mail')->error('Order confirmation mail failed', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
             ]);
         }
+
+        // Notify admin
+        try {
+            $adminRecipients = array_filter([
+                Setting::get('mail.admin_address') ?? config('mail.from.address'),
+            ]);
+            Mail::to($adminRecipients)->send(new NewOrderMail($order, $cart, $customer));
+        } catch (\Throwable $e) {
+            Log::channel('mail')->error('Admin order notification failed after invoice order', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        $this->cartService->clear();
+
+        return to_route('checkout.success', ['order_id' => $order->id]);
+    }
+
+    private function submitStripe(PlaceOrderRequest $request, array $cart): mixed
+    {
+        $order = $this->createOrder($request, $cart, 'stripe');
+
+        $shippingAmount = (float) ($cart['shipping_total'] ?? 0);
 
         $lineItems = collect($cart['items'])->map(fn (array $item): array => [
             'price_data' => [
@@ -221,10 +250,36 @@ class CheckoutController extends Controller
         return Inertia::location($session->url);
     }
 
+    private function createOrder(PlaceOrderRequest $request, array $cart, string $paymentMethod): Order
+    {
+        $order = Order::query()->create([
+            'customer_id' => $request->user()->id,
+            'status' => 'pending',
+            'payment_method' => $paymentMethod,
+            'is_test' => ! PaymentMode::isLive(),
+            'total_amount' => $cart['total'],
+            'shipping_amount' => (float) ($cart['shipping_total'] ?? 0),
+            'shipping_address' => $this->cartService->getShippingAddress(),
+            'billing_address' => $this->cartService->getBillingAddress(),
+        ]);
+
+        foreach ($cart['items'] as $item) {
+            $order->items()->create([
+                'product_id' => $item['product_id'],
+                'product_name' => $item['name'],
+                'unit_price' => $item['unit_price'],
+                'quantity' => $item['quantity'],
+            ]);
+        }
+
+        return $order;
+    }
+
     public function success(Request $request): Response|RedirectResponse
     {
         $sessionId = $request->query('session_id');
         $paypalOrderId = $request->query('paypal_order_id');
+        $orderId = $request->query('order_id');
 
         $order = null;
 
@@ -237,6 +292,12 @@ class CheckoutController extends Controller
             $order = Order::query()
                 ->with(['items', 'customer'])
                 ->whereHas('payments', fn ($q) => $q->where('paypal_order_id', $paypalOrderId))
+                ->first();
+        } elseif ($orderId) {
+            $order = Order::query()
+                ->with(['items', 'customer'])
+                ->where('id', $orderId)
+                ->where('customer_id', $request->user()?->id)
                 ->first();
         }
 

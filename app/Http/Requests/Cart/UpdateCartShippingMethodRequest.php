@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Cart;
 
+use App\Models\ShippingMethod;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -18,7 +19,7 @@ class UpdateCartShippingMethodRequest extends FormRequest
             'shipping_method' => [
                 'required',
                 'string',
-                Rule::in(collect(config('shop.cart.shipping_methods', []))->pluck('id')->all()),
+                Rule::in(ShippingMethod::pluck('id')->map(fn ($id) => (string) $id)->all()),
             ],
         ];
     }

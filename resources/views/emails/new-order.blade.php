@@ -14,7 +14,7 @@
     {{-- Logo --}}
     <tr>
         <td style="padding:0 0 24px 0;" align="center">
-            <img src="{{ config('app.url') }}/logo.svg" alt="dormed24" height="36" style="height:36px;display:block;">
+            <img src="https://dormed24.de/media/5d/8f/b3/1741900744/dormed24-logo.svg?ts=1741900744" alt="dormed24" height="36" style="height:36px;display:block;">
         </td>
     </tr>
 

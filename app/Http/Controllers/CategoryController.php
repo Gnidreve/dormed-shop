@@ -20,11 +20,12 @@ class CategoryController extends Controller
             default => ['name', 'asc'],
         };
 
-        $products = $category->products()
-            ->with('manufacturer')
+        $baseQuery = $category->products()
+            ->with(['manufacturer', 'images' => fn ($q) => $q->where('sort_order', 0)])
             ->orderBy($column, $direction)
-            ->paginate(24)
-            ->withQueryString();
+            ->orderBy('id');
+
+        $total = $baseQuery->count();
 
         return Inertia::render('Products/ByCategory', [
             'category' => [
@@ -33,7 +34,8 @@ class CategoryController extends Controller
                 'slug' => $category->slug,
                 'description' => $category->description,
             ],
-            'products' => $products,
+            'products' => Inertia::scroll(fn () => $baseQuery->paginate(24)),
+            'total' => $total,
             'sort' => $sort,
         ]);
     }

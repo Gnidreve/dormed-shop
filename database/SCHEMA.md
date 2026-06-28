@@ -160,11 +160,12 @@ Versandarten für den Shop. Preis nullable = "auf Anfrage".
 | Spalte       | Typ              | Nullable | Default | Hinweis           |
 |--------------|------------------|----------|---------|-------------------|
 | `id`         | integer          | NO       | —       | PK, autoincrement |
-| `name`       | varchar          | NO       | —       | Bezeichnung       |
-| `price`      | decimal(8,2)     | YES      | —       | null = auf Anfrage|
-| `sort_order` | smallint unsigned| NO       | `0`     |                   |
-| `created_at` | datetime         | YES      | —       |                   |
-| `updated_at` | datetime         | YES      | —       |                   |
+| `name`        | varchar           | NO       | —       | Bezeichnung        |
+| `description` | varchar           | YES      | —       | Kurzbeschreibung   |
+| `price`       | decimal(8,2)      | YES      | —       | null = auf Anfrage |
+| `sort_order`  | smallint unsigned | NO       | `0`     |                    |
+| `created_at`  | datetime          | YES      | —       |                    |
+| `updated_at`  | datetime          | YES      | —       |                    |
 
 ---
 
@@ -190,6 +191,7 @@ Bestellungen mit JSON-Adress-Snapshots (immutable zum Zeitpunkt der Bestellung).
 | `id`                        | integer  | NO       | —           | PK, autoincrement                   |
 | `customer_id`               | integer  | NO       | —           | FK → `customers.id` CASCADE         |
 | `status`                    | varchar  | NO       | `'pending'` | pending/paid/failed/cancelled       |
+| `payment_method`            | varchar  | YES      | —           | invoice / stripe / paypal           |
 | `is_test`                   | boolean  | NO       | `false`     | true = Sandbox-/Testbestellung      |
 | `stripe_checkout_session_id`| varchar  | YES      | —           | UNIQUE, Stripe Session              |
 | `stripe_payment_intent_id`  | varchar  | YES      | —           | Stripe Payment Intent               |

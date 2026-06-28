@@ -8,9 +8,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\Payment;
 
-#[Fillable(['customer_id', 'status', 'total_amount', 'shipping_amount', 'stripe_checkout_session_id', 'stripe_payment_intent_id'])]
+#[Fillable(['customer_id', 'status', 'payment_method', 'total_amount', 'shipping_amount', 'shipping_address', 'billing_address', 'stripe_checkout_session_id', 'stripe_payment_intent_id', 'is_test'])]
 class Order extends Model
 {
     /** @use HasFactory<OrderFactory> */

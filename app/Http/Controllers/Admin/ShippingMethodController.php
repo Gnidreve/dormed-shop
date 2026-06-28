@@ -22,6 +22,7 @@ class ShippingMethodController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:500'],
             'price' => ['nullable', 'numeric', 'min:0'],
         ]);
 
@@ -36,6 +37,7 @@ class ShippingMethodController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:500'],
             'price' => ['nullable', 'numeric', 'min:0'],
         ]);
 

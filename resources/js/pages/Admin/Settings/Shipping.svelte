@@ -17,6 +17,7 @@
     type ShippingMethod = {
         id: number;
         name: string;
+        description: string | null;
         price: string | null;
         sort_order: number;
     };
@@ -25,27 +26,32 @@
 
     let editingId = $state<number | null>(null);
     let editName = $state('');
+    let editDescription = $state('');
     let editPrice = $state('');
 
     let addingNew = $state(false);
     let newName = $state('');
+    let newDescription = $state('');
     let newPrice = $state('');
 
     function startEdit(method: ShippingMethod) {
         editingId = method.id;
         editName = method.name;
+        editDescription = method.description ?? '';
         editPrice = method.price ?? '';
     }
 
     function cancelEdit() {
         editingId = null;
         editName = '';
+        editDescription = '';
         editPrice = '';
     }
 
     function saveEdit(id: number) {
         router.put(`/admin/settings/shipping/${id}`, {
             name: editName,
+            description: editDescription === '' ? null : editDescription,
             price: editPrice === '' ? null : editPrice,
         }, {
             onSuccess: () => cancelEdit(),
@@ -59,11 +65,13 @@
     function saveNew() {
         router.post('/admin/settings/shipping', {
             name: newName,
+            description: newDescription === '' ? null : newDescription,
             price: newPrice === '' ? null : newPrice,
         }, {
             onSuccess: () => {
                 addingNew = false;
                 newName = '';
+                newDescription = '';
                 newPrice = '';
             },
         });
@@ -72,6 +80,7 @@
     function cancelNew() {
         addingNew = false;
         newName = '';
+        newDescription = '';
         newPrice = '';
     }
 
@@ -106,6 +115,7 @@ return 'auf Anfrage';
             <thead>
                 <tr class="border-b bg-muted/50">
                     <th class="px-4 py-3 text-left font-medium text-muted-foreground">Bezeichnung</th>
+                    <th class="px-4 py-3 text-left font-medium text-muted-foreground">Beschreibung</th>
                     <th class="px-4 py-3 text-left font-medium text-muted-foreground w-36">Preis</th>
                     <th class="px-4 py-3 w-24"></th>
                 </tr>
@@ -115,22 +125,13 @@ return 'auf Anfrage';
                     <tr class="border-b last:border-0 hover:bg-muted/30">
                         {#if editingId === method.id}
                             <td class="px-4 py-2">
-                                <Input
-                                    bind:value={editName}
-                                    class="h-8"
-                                    placeholder="Bezeichnung"
-                                    autofocus
-                                />
+                                <Input bind:value={editName} class="h-8" placeholder="Bezeichnung" autofocus />
                             </td>
                             <td class="px-4 py-2">
-                                <Input
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    bind:value={editPrice}
-                                    class="h-8"
-                                    placeholder="auf Anfrage"
-                                />
+                                <Input bind:value={editDescription} class="h-8" placeholder="Kurze Beschreibung (optional)" />
+                            </td>
+                            <td class="px-4 py-2">
+                                <Input type="number" step="0.01" min="0" bind:value={editPrice} class="h-8" placeholder="auf Anfrage" />
                             </td>
                             <td class="px-4 py-2">
                                 <div class="flex gap-1">
@@ -144,6 +145,7 @@ return 'auf Anfrage';
                             </td>
                         {:else}
                             <td class="px-4 py-3">{method.name}</td>
+                            <td class="px-4 py-3 text-sm text-muted-foreground">{method.description ?? '—'}</td>
                             <td class="px-4 py-3 tabular-nums">{formatPrice(method.price)}</td>
                             <td class="px-4 py-3">
                                 <div class="flex gap-1 justify-end">
@@ -172,22 +174,13 @@ return 'auf Anfrage';
                 {#if addingNew}
                     <tr class="border-b last:border-0 bg-muted/20">
                         <td class="px-4 py-2">
-                            <Input
-                                bind:value={newName}
-                                class="h-8"
-                                placeholder="z.B. Standardversand (DPD)"
-                                autofocus
-                            />
+                            <Input bind:value={newName} class="h-8" placeholder="z.B. Standardversand (DPD)" autofocus />
                         </td>
                         <td class="px-4 py-2">
-                            <Input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                bind:value={newPrice}
-                                class="h-8"
-                                placeholder="auf Anfrage"
-                            />
+                            <Input bind:value={newDescription} class="h-8" placeholder="Kurze Beschreibung (optional)" />
+                        </td>
+                        <td class="px-4 py-2">
+                            <Input type="number" step="0.01" min="0" bind:value={newPrice} class="h-8" placeholder="auf Anfrage" />
                         </td>
                         <td class="px-4 py-2">
                             <div class="flex gap-1">
@@ -204,7 +197,7 @@ return 'auf Anfrage';
 
                 {#if methods.length === 0 && !addingNew}
                     <tr>
-                        <td colspan="3" class="px-4 py-8 text-center text-muted-foreground">
+                        <td colspan="4" class="px-4 py-8 text-center text-muted-foreground">
                             Noch keine Versandarten angelegt.
                         </td>
                     </tr>

@@ -22,8 +22,8 @@
     });
 
     function loadPayPalSDK(clientId: string) {
-        if (!clientId) {
-            errorMessage = 'PayPal ist nicht konfiguriert (Client-ID fehlt).';
+        if (!clientId || clientId.length < 10) {
+            errorMessage = 'PayPal ist nicht konfiguriert. Bitte hinterlegen Sie eine gültige Client-ID in den Einstellungen.';
 
             return;
         }
@@ -33,7 +33,7 @@
         script.async = true;
         script.onload = () => renderButtons();
         script.onerror = () => {
-            errorMessage = 'PayPal SDK konnte nicht geladen werden.';
+            errorMessage = 'PayPal SDK konnte nicht geladen werden. Bitte prüfen Sie die Client-ID in den Einstellungen.';
         };
         document.head.appendChild(script);
     }

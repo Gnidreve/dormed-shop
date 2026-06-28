@@ -5,12 +5,27 @@ namespace Tests\Feature\Cart;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\ShippingMethod;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class CartFlowTest extends TestCase
 {
     use RefreshDatabase;
+
+    private ShippingMethod $freeShipping;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Create a free (Selbstabholung) shipping method as default so totals are predictable
+        $this->freeShipping = ShippingMethod::factory()->create([
+            'name' => 'Selbstabholung',
+            'price' => '0.00',
+            'sort_order' => 1,
+        ]);
+    }
 
     public function test_product_can_be_added_to_the_cart(): void
     {
@@ -27,7 +42,7 @@ class CartFlowTest extends TestCase
                 ->component('Checkout/Index')
                 ->where('cart.count', 2)
                 ->where('cart.items.0.product_id', $product->id)
-                ->where('cart.total', '49.50'));
+                ->where('cart.total', '39.98'));
     }
 
     public function test_cart_keeps_the_snapshot_price_when_product_price_changes(): void
@@ -45,7 +60,7 @@ class CartFlowTest extends TestCase
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->where('cart.items.0.unit_price', '19.99')
-                ->where('cart.total', '29.51'));
+                ->where('cart.total', '19.99'));
     }
 
     public function test_cart_item_quantity_can_be_updated(): void
@@ -62,7 +77,7 @@ class CartFlowTest extends TestCase
                         'product_number' => (string) $product->id,
                     ],
                 ],
-                'shipping_method' => 'dpd_standard',
+                'shipping_method' => (string) $this->freeShipping->id,
                 'payment_method' => 'invoice',
             ],
         ])->patch(route('cart.items.update', $product), [
@@ -74,22 +89,31 @@ class CartFlowTest extends TestCase
 
     public function test_shipping_method_can_be_updated(): void
     {
+        $expressShipping = ShippingMethod::factory()->create([
+            'name' => 'Express',
+            'price' => '15.00',
+            'sort_order' => 2,
+        ]);
+
         $this->withSession([
             'cart' => [
                 'items' => [],
-                'shipping_method' => 'dpd_standard',
+                'shipping_method' => (string) $this->freeShipping->id,
                 'payment_method' => 'invoice',
             ],
         ])->patch(route('cart.shipping.update'), [
-            'shipping_method' => 'self_pickup',
+            'shipping_method' => (string) $expressShipping->id,
         ])
             ->assertRedirect()
-            ->assertSessionHas('cart.shipping_method', 'self_pickup');
+            ->assertSessionHas('cart.shipping_method', (string) $expressShipping->id);
     }
 
     public function test_checkout_confirm_redirects_when_cart_is_empty(): void
     {
-        $this->get(route('checkout.confirm'))
+        $customer = Customer::factory()->create();
+
+        $this->actingAs($customer)
+            ->get(route('checkout.confirm'))
             ->assertRedirect(route('checkout.index'));
     }
 
@@ -98,7 +122,7 @@ class CartFlowTest extends TestCase
         $customer = Customer::factory()->create();
         $product = Product::factory()->create(['name' => 'Order Product', 'price' => '10.00']);
 
-        $this->actingAs($customer)
+        $response = $this->actingAs($customer)
             ->withSession([
                 'cart' => [
                     'items' => [
@@ -109,17 +133,21 @@ class CartFlowTest extends TestCase
                             'product_number' => (string) $product->id,
                         ],
                     ],
-                    'shipping_method' => 'self_pickup',
+                    'shipping_method' => (string) $this->freeShipping->id,
                     'payment_method' => 'invoice',
                 ],
             ])->post(route('checkout.submit'), [
                 'agreed_to_terms' => true,
-            ])
-            ->assertRedirect(route('home'));
+            ]);
+
+        $order = Order::query()->first();
+
+        $response->assertRedirect(route('checkout.success', ['order_id' => $order->id]));
 
         $this->assertDatabaseHas('orders', [
             'customer_id' => $customer->id,
             'status' => 'pending',
+            'payment_method' => 'invoice',
             'total_amount' => '20.00',
         ]);
 

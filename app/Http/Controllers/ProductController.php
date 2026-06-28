@@ -22,14 +22,16 @@ class ProductController extends Controller
             default => ['name', 'asc'],
         };
 
-        $products = Product::with(['manufacturer', 'images' => fn ($q) => $q->where('sort_order', 0)])
+        $baseQuery = Product::with(['manufacturer', 'images' => fn ($q) => $q->where('sort_order', 0)])
             ->when($query, fn ($q) => $q->where('name', 'like', "%{$query}%"))
             ->orderBy($column, $direction)
-            ->paginate(24)
-            ->withQueryString();
+            ->orderBy('id');
+
+        $total = $baseQuery->count();
 
         return Inertia::render('Products/Index', [
-            'products' => $products,
+            'products' => Inertia::scroll(fn () => $baseQuery->paginate(24)),
+            'total' => $total,
             'query' => $query->toString(),
             'sort' => $sort,
         ]);

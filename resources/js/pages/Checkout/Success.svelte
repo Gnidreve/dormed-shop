@@ -45,26 +45,20 @@
     <ShopHeader />
 
     <main class="flex-1 mx-auto max-w-3xl px-4 py-12 lg:px-8">
-
         <!-- Success header -->
         <div class="mb-10 flex flex-col items-center text-center">
-            <div class="mb-5 flex size-16 items-center justify-center rounded-full bg-green-100">
+            <div
+                class="mb-5 flex size-16 items-center justify-center rounded-full bg-green-100"
+            >
                 <CheckCircle class="size-8 text-green-600" />
             </div>
             <h1 class="text-2xl font-bold text-gray-900">
                 Vielen Dank für Ihre Bestellung!
             </h1>
             <p class="mt-2 text-sm text-gray-500">
-                Bestellnummer <span class="font-semibold text-gray-700">#{order_id}</span>
-            </p>
-        </div>
-
-        <!-- Mail notice -->
-        <div class="mb-6 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 px-5 py-4">
-            <Mail class="mt-0.5 size-5 shrink-0 text-blue-600" />
-            <p class="text-sm text-blue-800">
-                Eine Bestellbestätigung wird in Kürze an
-                <span class="font-semibold">{customer_email}</span> versendet.
+                Bestellnummer <span class="font-semibold text-gray-700"
+                    >#{order_id}</span
+                >
             </p>
         </div>
 
@@ -78,16 +72,28 @@
             <div class="divide-y">
                 {#each items as item (item.product_number)}
                     <div class="flex items-center gap-4 px-6 py-4">
-                        <div class="flex size-12 shrink-0 items-center justify-center rounded border bg-gray-50">
+                        <div
+                            class="flex size-12 shrink-0 items-center justify-center rounded border bg-gray-50"
+                        >
                             <div class="size-7 rounded bg-gray-200"></div>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="truncate text-sm font-semibold text-gray-900">{item.name}</p>
-                            <p class="text-xs text-gray-400">Nr. {item.product_number}</p>
+                            <p
+                                class="truncate text-sm font-semibold text-gray-900"
+                            >
+                                {item.name}
+                            </p>
+                            <p class="text-xs text-gray-400">
+                                Nr. {item.product_number}
+                            </p>
                         </div>
                         <div class="text-right">
-                            <p class="text-sm font-semibold text-gray-900">{formatPrice(item.line_total)}</p>
-                            <p class="text-xs text-gray-400">{item.quantity} × {formatPrice(item.unit_price)}</p>
+                            <p class="text-sm font-semibold text-gray-900">
+                                {formatPrice(item.line_total)}
+                            </p>
+                            <p class="text-xs text-gray-400">
+                                {item.quantity} × {formatPrice(item.unit_price)}
+                            </p>
                         </div>
                     </div>
                 {/each}
@@ -110,14 +116,27 @@
                     <span>{formatPrice(vat_amount)}</span>
                 </div>
                 <Separator class="my-2" />
-                <div class="flex justify-between text-base font-bold text-gray-900">
+                <div
+                    class="flex justify-between text-base font-bold text-gray-900"
+                >
                     <span>Gesamt</span>
                     <span>{formatPrice(total)}</span>
                 </div>
             </div>
         </div>
 
-        <!-- Actions -->
+        <!-- Mail notice -->
+        <div
+            class="mb-6 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 px-5 py-4"
+        >
+            <Mail class="mt-0.5 size-5 shrink-0 text-blue-600" />
+            <p class="text-sm text-blue-800">
+                Eine Bestellbestätigung wird in Kürze an
+                <span class="font-semibold">{customer_email}</span> versendet.
+            </p>
+        </div>
+
+        <!-- Actions
         <div class="mt-6 flex flex-col gap-3 sm:flex-row">
             <Button
                 variant="outline"
@@ -134,10 +153,13 @@
                     </Link>
                 {/snippet}
             </Button>
-        </div>
+        </div> -->
 
         <p class="mt-6 text-center text-xs text-gray-400">
-            Bei Fragen erreichen Sie uns unter <a href="tel:023011886000" class="hover:underline">02301 - 188600</a>
+            Bei Fragen erreichen Sie uns unter <a
+                href="tel:023011886000"
+                class="hover:underline">02301 - 188600</a
+            >
         </p>
     </main>
 

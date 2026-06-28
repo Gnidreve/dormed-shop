@@ -5,6 +5,7 @@ namespace App\Support\Cart;
 use App\Contracts\CartStore;
 use App\Models\Product;
 use App\Models\Setting;
+use App\Models\ShippingMethod;
 use Illuminate\Support\Collection;
 
 class CartService
@@ -156,7 +157,7 @@ class CartService
     {
         $this->persist([
             'items' => [],
-            'shipping_method' => (string) collect(config('shop.cart.shipping_methods', []))->pluck('id')->first(),
+            'shipping_method' => (string) (ShippingMethod::orderBy('sort_order')->value('id') ?? ''),
             'payment_method' => (string) collect(config('shop.cart.payment_methods', []))->pluck('id')->first(),
             'shipping_address' => self::DEFAULT_ADDRESS,
             'billing_address' => null,
@@ -208,16 +209,17 @@ class CartService
 
     private function shippingMethods(string $selectedId): array
     {
-        return collect(config('shop.cart.shipping_methods', []))
+        return ShippingMethod::orderBy('sort_order')
+            ->get()
             ->values()
-            ->map(function (array $method, int $index) use ($selectedId): array {
-                $methodId = (string) $method['id'];
-                $priceCents = $this->amountToCents($method['price']);
+            ->map(function (ShippingMethod $method, int $index) use ($selectedId): array {
+                $methodId = (string) $method->id;
+                $priceCents = $this->amountToCents($method->price);
 
                 return [
                     'id' => $methodId,
-                    'label' => $method['label'],
-                    'description' => $method['description'] ?? null,
+                    'label' => $method->name,
+                    'description' => $method->description,
                     'price' => $this->formatAmount($priceCents),
                     'price_cents' => $priceCents,
                     'selected' => $methodId === $selectedId || ($selectedId === '' && $index === 0),
@@ -230,13 +232,14 @@ class CartService
     {
         $methods = [];
         $index = 0;
+        $activeProvider = Setting::get('payment.provider') ?? 'invoice';
+        $providers = config('shop.cart.providers', []);
 
-        $activeProvider = Setting::get('payment.provider') ?? 'stripe';
+        // Invoice is always available; active gateway (paypal/stripe) is shown additionally.
+        $visibleProviders = array_unique(array_filter(['invoice', $activeProvider]));
 
-        foreach (config('shop.cart.providers', []) as $provider => $config) {
-            if ($provider !== $activeProvider) {
-                continue;
-            }
+        foreach ($visibleProviders as $provider) {
+            $config = $providers[$provider] ?? [];
 
             foreach ($config['methods'] ?? [] as $method) {
                 $methodId = (string) $method['id'];
@@ -271,7 +274,7 @@ class CartService
     private function state(): array
     {
         $rawState = $this->store->get();
-        $shippingMethodIds = collect(config('shop.cart.shipping_methods', []))->pluck('id')->map(fn ($id) => (string) $id)->all();
+        $shippingMethodIds = ShippingMethod::orderBy('sort_order')->pluck('id')->map(fn ($id) => (string) $id)->all();
         $paymentMethodIds = collect($this->paymentMethods(''))->pluck('id')->map(fn ($id) => (string) $id)->all();
 
         return [

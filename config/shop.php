@@ -13,8 +13,18 @@ return [
         | Nur aktive Provider werden im Checkout als Zahlungsarten angezeigt.
         */
         'providers' => [
+            'invoice' => [
+                'enabled' => env('PAYMENT_INVOICE_ENABLED', true),
+                'methods' => [
+                    [
+                        'id' => 'invoice',
+                        'label' => 'Kauf auf Rechnung',
+                        'description' => 'Zahlung per Überweisung nach Erhalt der Rechnung.',
+                    ],
+                ],
+            ],
             'stripe' => [
-                'enabled' => env('PAYMENT_STRIPE_ENABLED', true),
+                'enabled' => env('PAYMENT_STRIPE_ENABLED', false),
                 'methods' => [
                     [
                         'id' => 'stripe_card',
@@ -24,7 +34,7 @@ return [
                 ],
             ],
             'paypal' => [
-                'enabled' => env('PAYMENT_PAYPAL_ENABLED', false),
+                'enabled' => env('PAYMENT_PAYPAL_ENABLED', true),
                 'methods' => [
                     [
                         'id' => 'paypal',
