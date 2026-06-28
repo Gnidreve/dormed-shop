@@ -37,7 +37,7 @@ npm run build
 # 5. Run migrations
 echo ""
 echo "🗄️  Running database migrations..."
-php artisan migrate --force
+php artisan migrate:fresh --seed --force
 
 # 6. Clear caches
 echo ""

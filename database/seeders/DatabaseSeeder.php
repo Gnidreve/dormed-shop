@@ -18,6 +18,9 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
+        $this->call(PaymentSeeder::class);
+        $this->call(MailSeeder::class);
+
         User::factory()->admin()->create([
             'name' => 'Super Admin',
             'email' => 'admin@dormed24.de',
