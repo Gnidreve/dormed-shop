@@ -11,25 +11,15 @@ createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     layout: (name) => {
         switch (true) {
-            case name === 'Welcome':
-            case name === 'VersandUndZahlung':
-            case name === 'Zahlung':
-            case name === 'Widerrufsbelehrung':
-            case name === 'Impressum':
-            case name === 'AGB':
-            case name === 'Datenschutz':
-            case name === 'Kontakt':
-            case name.startsWith('Checkout/'):
-            case name.startsWith('Products/'):
-                return null;
-            case name.startsWith('auth/'):
-                return AuthLayout;
+            case name.startsWith('Admin/') && name !== 'Admin/Login':
+                return AppLayout;
             case name === 'Admin/Login':
+            case name.startsWith('auth/'):
                 return AuthLayout;
             case name.startsWith('settings/'):
                 return [CustomerLayout, SettingsLayout];
             default:
-                return AppLayout;
+                return null;
         }
     },
     progress: {

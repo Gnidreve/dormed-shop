@@ -4,6 +4,7 @@
     import Plus from 'lucide-svelte/icons/plus';
     import ShoppingCart from 'lucide-svelte/icons/shopping-cart';
     import X from 'lucide-svelte/icons/x';
+    import AppFooter from '@/components/AppFooter.svelte';
     import AppHead from '@/components/AppHead.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
     import { Button } from '@/components/ui/button';
@@ -41,9 +42,10 @@
 
 <AppHead title="Warenkorb" />
 
+<div class="flex min-h-screen flex-col bg-gray-50">
 <ShopHeader />
 
-<main class="min-h-screen bg-gray-50">
+<main class="flex-1">
     <div class="mx-auto max-w-7xl px-4 py-8 lg:px-8">
         <h1 class="mb-6 text-3xl font-bold text-gray-900">Warenkorb</h1>
 
@@ -239,3 +241,6 @@
         </div>
     </div>
 </main>
+
+<AppFooter />
+</div>

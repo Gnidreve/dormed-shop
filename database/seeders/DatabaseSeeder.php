@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Address;
 use App\Models\Category;
 use App\Models\Customer;
 use App\Models\Manufacturer;
@@ -23,28 +22,28 @@ class DatabaseSeeder extends Seeder
 
         User::factory()->admin()->create([
             'name' => 'Super Admin',
-            'email' => 'admin@dormed24.de',
+            'email' => 'mail@dormed.de',
         ]);
 
         $customer = Customer::factory()->create([
             'name' => 'Max Mustermann',
-            'email' => 'test@example.com',
+            'email' => 'l.everding@web.de',
             'password' => Hash::make('password'),
         ]);
 
         $customer->addresses()->create([
-            'type'         => 'shipping',
-            'is_default'   => true,
-            'salutation'   => 'Herr',
-            'first_name'   => 'Max',
-            'last_name'    => 'Mustermann',
-            'company'      => 'Dormed GmbH',
-            'street'       => 'Musterstraße',
+            'type' => 'shipping',
+            'is_default' => true,
+            'salutation' => 'Herr',
+            'first_name' => 'Max',
+            'last_name' => 'Mustermann',
+            'company' => 'Dormed GmbH',
+            'street' => 'Musterstraße',
             'house_number' => '12',
-            'zip'          => '10115',
-            'city'         => 'Berlin',
-            'country'      => 'DE',
-            'phone'        => '+49 30 123456',
+            'zip' => '10115',
+            'city' => 'Berlin',
+            'country' => 'DE',
+            'phone' => '+49 30 123456',
         ]);
 
         $categories = collect([

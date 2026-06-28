@@ -2,6 +2,7 @@
     import { Link, page, router } from '@inertiajs/svelte';
     import ChevronLeft from 'lucide-svelte/icons/chevron-left';
     import AddressForm from '@/components/AddressForm.svelte';
+    import AppFooter from '@/components/AppFooter.svelte';
     import AppHead from '@/components/AppHead.svelte';
     import PayPalButton from '@/components/PayPalButton.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
@@ -46,14 +47,6 @@
             shippingAddress.zip !== '' &&
             shippingAddress.city !== '',
     );
-
-    function updatePayment(paymentMethod: string) {
-        router.patch(
-            checkout.payment.update.url(),
-            { payment_method: paymentMethod },
-            { preserveScroll: true, preserveState: true },
-        );
-    }
 
     function handleAddressUpdate(
         event: CustomEvent<{ prefix: string; key: string; value: string }>,
@@ -159,9 +152,10 @@
 
 <AppHead title="Bestellung abschließen" />
 
+<div class="flex min-h-screen flex-col bg-gray-50">
 <ShopHeader />
 
-<main class="min-h-screen bg-gray-50">
+<main class="flex-1">
     <div class="mx-auto max-w-7xl px-4 py-8 lg:px-8">
         <Link
             href={checkout.index.url()}
@@ -270,115 +264,6 @@
                     {/if}
                 </div>
 
-                <!-- Zahlungsart -->
-                <div class="rounded-lg border bg-white p-5">
-                    <h2 class="mb-2 font-bold text-gray-900">Zahlungsart</h2>
-                    <Separator class="mb-4" />
-                    <div class="flex flex-col gap-3">
-                        {#each cart.payment_methods as method (method.id)}
-                            <label
-                                class="flex cursor-pointer items-start gap-3"
-                            >
-                                <input
-                                    type="radio"
-                                    name="payment"
-                                    value={method.id}
-                                    checked={method.selected}
-                                    onchange={() => updatePayment(method.id)}
-                                    class="mt-0.5 accent-[#0d1f44]"
-                                />
-                                <span class="text-sm">
-                                    <span class="font-semibold text-gray-900">
-                                        {method.label}
-                                    </span>
-                                    {#if method.description}
-                                        <br />
-                                        <span class="text-gray-500"
-                                            >{method.description}</span
-                                        >
-                                    {/if}
-                                </span>
-                            </label>
-                        {/each}
-                    </div>
-                </div>
-
-                <!-- Produkttabelle -->
-                <div class="overflow-hidden rounded-lg border bg-white">
-                    <table class="w-full text-sm">
-                        <thead class="border-b bg-gray-50">
-                            <tr>
-                                <th
-                                    class="px-5 py-3 text-left font-semibold text-gray-700"
-                                >
-                                    Produkt
-                                </th>
-                                <th
-                                    class="px-4 py-3 text-center font-semibold text-gray-700"
-                                >
-                                    Anzahl
-                                </th>
-                                <th
-                                    class="px-4 py-3 text-right font-semibold text-gray-700"
-                                >
-                                    MwSt.-Anteil
-                                </th>
-                                <th
-                                    class="px-5 py-3 text-right font-semibold text-gray-700"
-                                >
-                                    Summe
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y">
-                            {#each cart.items as item (item.product_id)}
-                                <tr>
-                                    <td class="px-5 py-4">
-                                        <div class="flex items-center gap-3">
-                                            <div
-                                                class="flex size-14 shrink-0 items-center justify-center rounded border bg-gray-50"
-                                            >
-                                                <div
-                                                    class="size-8 rounded bg-gray-200"
-                                                ></div>
-                                            </div>
-                                            <div>
-                                                <Link
-                                                    href={item.product_url}
-                                                    class="font-semibold text-[#1a6bbf] hover:underline"
-                                                >
-                                                    {item.name}
-                                                </Link>
-                                                <p
-                                                    class="text-xs text-gray-400"
-                                                >
-                                                    Produkt-Nr.: {item.product_number}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-4 text-center">
-                                        {item.quantity}
-                                    </td>
-                                    <td
-                                        class="px-4 py-4 text-right text-gray-600"
-                                    >
-                                        {formatPrice(
-                                            (Number(item.line_total) *
-                                                cart.vat_rate) /
-                                                (100 + cart.vat_rate),
-                                        )}
-                                    </td>
-                                    <td
-                                        class="px-5 py-4 text-right font-semibold"
-                                    >
-                                        {formatPrice(item.line_total)}*
-                                    </td>
-                                </tr>
-                            {/each}
-                        </tbody>
-                    </table>
-                </div>
             </div>
 
             <div class="w-full lg:w-80 xl:w-88">
@@ -494,3 +379,6 @@
         </div>
     </div>
 </main>
+
+<AppFooter />
+</div>

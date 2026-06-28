@@ -45,8 +45,6 @@
         { label: 'Alle Produkte', href: '/products' },
     ];
 
-    const staticNavEnd: { label: string; href: string }[] = [];
-
     const auth = $derived(page.props.auth);
     const cart = $derived(page.props.cart as Cart);
 
@@ -259,14 +257,6 @@
                                     {cat.name}
                                 </Link>
                             {/each}
-                            {#each staticNavEnd as item (item.label)}
-                                <Link
-                                    href={item.href}
-                                    class="rounded-md px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-accent hover:text-[#1a3a5c]"
-                                >
-                                    {item.label}
-                                </Link>
-                            {/each}
                         </nav>
                     </SheetContent>
                 </Sheet>
@@ -427,14 +417,6 @@
                         class="border-b-2 border-transparent px-4 py-3 text-sm font-medium text-gray-600 transition-colors hover:border-[#1a6bbf] hover:text-[#1a3a5c]"
                     >
                         {cat.name}
-                    </Link>
-                {/each}
-                {#each staticNavEnd as item (item.label)}
-                    <Link
-                        href={item.href}
-                        class="border-b-2 border-transparent px-4 py-3 text-sm font-medium text-gray-600 transition-colors hover:border-[#1a6bbf] hover:text-[#1a3a5c]"
-                    >
-                        {item.label}
                     </Link>
                 {/each}
             </nav>

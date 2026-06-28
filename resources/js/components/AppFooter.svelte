@@ -1,6 +1,7 @@
 <script lang="ts">
     import Mail from 'lucide-svelte/icons/mail';
     import Phone from 'lucide-svelte/icons/phone';
+    import Printer from 'lucide-svelte/icons/printer';
 </script>
 
 <footer class="mt-auto border-t bg-white">
@@ -8,17 +9,22 @@
         <div class="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
             <!-- Company info -->
             <div>
+                <img src="/logo.svg" alt="dormed 24" class="mb-4 h-8 w-auto" />
                 <p class="text-sm font-bold text-[#1a3a5c]">
                     dormed24.de, ein Angebot der Dormed medizinische Systeme GmbH
                 </p>
                 <p class="mt-3 text-sm text-muted-foreground">Unterstützung und Beratung unter:</p>
                 <p class="mt-2 flex items-center gap-2 text-sm font-bold text-[#1a3a5c]">
-                    <Phone class="size-4 text-gray-400" />
+                    <Phone class="size-4 shrink-0 text-gray-400" />
                     <a href="tel:+492301188600" class="hover:text-[#1a6bbf]">02301 – 188600</a>
                 </p>
-                <p class="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
-                    <Mail class="size-4 shrink-0" />
-                    <a href="mailto:mail@dormed.de" class="text-[#1a6bbf] hover:underline">mail@dormed.de</a>
+                <p class="mt-1 flex items-center gap-2 text-sm font-bold text-[#1a3a5c]">
+                    <Printer class="size-4 shrink-0 text-gray-400" />
+                    <span>02301 / 188-620</span>
+                </p>
+                <p class="mt-1 flex items-center gap-2 text-sm font-bold text-[#1a3a5c]">
+                    <Mail class="size-4 shrink-0 text-gray-400" />
+                    <a href="mailto:mail@dormed.de" class="hover:text-[#1a6bbf]">mail@dormed.de</a>
                 </p>
             </div>
 
@@ -50,6 +56,9 @@
                         <a href="/zahlung" class="text-sm text-[#1a6bbf] hover:underline">
                             Zahlung
                         </a>
+                    </li>
+                    <li>
+                        <a href="/faq" class="text-sm text-[#1a6bbf] hover:underline">FAQ</a>
                     </li>
                 </ul>
             </div>
