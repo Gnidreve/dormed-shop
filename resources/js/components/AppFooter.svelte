@@ -5,7 +5,7 @@
 
 <footer class="mt-auto border-t bg-white">
     <div class="mx-auto max-w-7xl px-4 py-10 lg:px-8">
-        <div class="grid grid-cols-1 gap-10 sm:grid-cols-3">
+        <div class="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
             <!-- Company info -->
             <div>
                 <p class="text-sm font-bold text-[#1a3a5c]">
@@ -20,6 +20,21 @@
                     <Mail class="size-4 shrink-0" />
                     <a href="mailto:mail@dormed.de" class="text-[#1a6bbf] hover:underline">mail@dormed.de</a>
                 </p>
+            </div>
+
+            <!-- Leistungen -->
+            <div>
+                <p class="text-sm font-bold text-[#1a3a5c]">Leistungen</p>
+                <ul class="mt-3 space-y-2">
+                    <li class="text-sm text-muted-foreground">Beratung</li>
+                    <li class="text-sm text-muted-foreground">Finanzierung &amp; Leasing</li>
+                    <li class="text-sm text-muted-foreground">Lieferung &amp; Installation</li>
+                    <li class="text-sm text-muted-foreground">Wartung &amp; Reparatur</li>
+                    <li class="text-sm text-muted-foreground">Netzwerkanbindung</li>
+                    <li class="text-sm text-muted-foreground">Schulung &amp; Einweisung</li>
+                    <li class="text-sm text-muted-foreground">Garantie &amp; Versicherung</li>
+                    <li class="text-sm text-muted-foreground">Inzahlungnahme</li>
+                </ul>
             </div>
 
             <!-- Informationen -->
@@ -54,6 +69,9 @@
                     </li>
                     <li>
                         <a href="/widerrufsbelehrung" class="text-sm text-[#1a6bbf] hover:underline">Widerrufsbelehrung</a>
+                    </li>
+                    <li>
+                        <a href="https://dormed.de/kontakt" target="_blank" rel="noopener noreferrer" class="text-sm text-[#1a6bbf] hover:underline">Kontakt</a>
                     </li>
                 </ul>
             </div>
