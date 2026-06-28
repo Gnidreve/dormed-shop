@@ -46,6 +46,8 @@ Route::middleware('ensure.admin')->prefix('admin')->name('admin.')->group(functi
     Route::delete('/manufacturers/{manufacturer}', [ManufacturerController::class, 'destroy'])->name('manufacturers.destroy');
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
+    Route::post('/orders/{order}/refund', [OrderController::class, 'refund'])->name('orders.refund');
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::get('/settings/general', [SettingController::class, 'showGeneral'])->name('settings.general');
     Route::get('/settings/mail', [SettingController::class, 'showMail'])->name('settings.mail');

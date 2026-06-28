@@ -55,8 +55,9 @@ Seiten ohne Layout müssen `<ShopHeader>` selbst einbinden.
 | --------------------- | ----------------------------------------- |
 | `routes/web.php`      | Home (`/`), lädt die anderen Routedateien |
 | `routes/products.php` | `GET /products`, `GET /products/search`   |
-| `routes/checkout.php` | `GET /checkout`, `GET /checkout/confirm`  |
-| `routes/admin.php`    | Admin-Login/Logout + Dashboard            |
+| `routes/checkout.php` | Cart, `checkout/confirm`, `checkout/submit`, `checkout/success`, Stripe-Webhook |
+| `routes/paypal.php`   | PayPal createOrder/captureOrder/after-payment/webhook |
+| `routes/admin.php`    | Admin inkl. Bestell-Aktionen (`orders.status`, `orders.refund`) + Settings |
 | `routes/settings.php` | Profil + Sicherheitseinstellungen (Kunde) |
 
 ---
@@ -107,17 +108,9 @@ resources/js/
 
 ---
 
-## Platzhalter-Daten (`resources/js/data/cart.json`)
+## Cart/Checkout-Daten
 
-Source of Truth für Cart/Checkout bis die echte API steht. Enthält:
-
-- `items[]` — Produkte mit SKU, Preis, Menge, Lieferzeitraum, Bild-URL
-- `shippingMethods[]` — Versandoptionen mit Preis und `selected`-Flag
-- `paymentMethods[]` — Zahlungsarten mit Beschreibung und `selected`-Flag
-- `vatRate` — MwSt-Satz (19)
-- `customer` — Lieferadresse, Rechnungsadresse
-
-Alle drei Seiten (`CartSheet`, `Checkout/Index`, `Checkout/Confirm`) importieren diese Datei direkt für späteren API-Austausch.
+Der Cart läuft server-seitig über **`App\Support\Cart\CartService`** (Store via `CartStore`-Contract). `CartService::cart()` liefert das vollständige Cart-Array (Items, Versand-/Zahlungsarten, Adressen, Summen) und wird in `HandleInertiaRequests` als shared Prop `cart` verteilt. `resources/js/data/cart.json` ist nur noch Altlast/Referenz, **nicht** die Source of Truth.
 
 ---
 
@@ -196,12 +189,28 @@ Nicht importiert, können nach Designfreigabe gelöscht werden.
 
 ---
 
+## Zahlungen (Payments)
+
+Drei Bezahlarten, ein gemeinsamer Order-/Mail-Pfad über **`App\Support\Orders\OrderManager`**:
+
+| Bezahlart | Flow | Order-Status nach Abschluss |
+| --------- | ---- | --------------------------- |
+| Rechnung (`invoice`) | `CheckoutController::submitInvoice` | bleibt `pending` (Zahlung per Überweisung) |
+| Stripe (`stripe`) | `CheckoutController::submitStripe` → Stripe Checkout → Webhook | `paid` (via `StripeWebhookController`) |
+| PayPal (`paypal`) | `PayPalController` (JS-SDK, createOrder/captureOrder) | `paid` (nach Capture) |
+
+Regeln:
+
+- **`OrderManager` ist die einzige Stelle**, die aus dem Cart eine Order baut (`createFromCart`), Bestätigungsmails versendet (`sendConfirmations`) und „bezahlt"-Übergänge idempotent macht (`markPaid`). Neue Gateways hier andocken, nicht in den Controllern duplizieren.
+- **Aktiver Gateway** = Admin-Setting `payment.provider` (`paypal`|`stripe`); Invoice ist immer zusätzlich verfügbar. Die `methods`-Labels liegen in `config/shop.php`.
+- **Sandbox/Live** = `App\Support\PaymentMode`. Setting `payment.mode` (sandbox|live) gewinnt, sonst Fallback auf `APP_ENV` (production = live). Im Admin unter Einstellungen → Zahlungsarten umschaltbar.
+- **Secrets** liegen verschlüsselt in `settings` (`Setting::$encryptedKeys`), env dient nur als Fallback.
+- **Benachrichtigungs-Empfänger** = Setting `shop.notification_emails` (kommagetrennt), Fallback `mail.admin_address` → `mail.from.address`.
+- **Admin-Bestellaktionen**: Status setzen + PayPal-Refund unter `Admin/Orders/Show` (`orders.status`, `orders.refund`).
+
 ## Noch nicht gebaut
 
-- Produktdetailseite (`/products/{id}`)
-- Cart-Persistenz (aktuell nur `cart.json`)
-- Bestellabschluss-Backend (`/checkout/confirm` Button ohne Action)
-- Warenkorb-Seite (`/warenkorb`, verlinkt im CartSheet-Footer)
-- Rechtsseiten (`/agb`, `/widerrufsbelehrung`)
-- Admin-Produkt- und Bestellverwaltung
-- Hersteller-Verwaltung
+- Produktdetailseite-Ausbau (`/products/{id}`)
+- Eigenes Stripe-`Payment`-Record (Stripe schreibt aktuell nur `stripe_*` auf die Order)
+- Stripe-Success-Seite verifiziert den Zahlungsstatus noch nicht serverseitig (siehe `TODO.md`)
+- Wartungsmodus (siehe `TODO.md`)

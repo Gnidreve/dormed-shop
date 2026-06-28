@@ -2,11 +2,14 @@
 
 namespace Tests\Feature\Cart;
 
+use App\Mail\NewOrderMail;
+use App\Mail\OrderConfirmationMail;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ShippingMethod;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class CartFlowTest extends TestCase
@@ -14,6 +17,24 @@ class CartFlowTest extends TestCase
     use RefreshDatabase;
 
     private ShippingMethod $freeShipping;
+
+    /**
+     * A complete shipping address that satisfies the checkout address guard.
+     *
+     * @return array<string, string>
+     */
+    private function completeAddress(): array
+    {
+        return [
+            'first_name' => 'Erika',
+            'last_name' => 'Mustermann',
+            'street' => 'Musterstraße',
+            'house_number' => '1',
+            'zip' => '44135',
+            'city' => 'Dortmund',
+            'country' => 'DE',
+        ];
+    }
 
     protected function setUp(): void
     {
@@ -119,6 +140,8 @@ class CartFlowTest extends TestCase
 
     public function test_authenticated_customer_can_place_an_order(): void
     {
+        Mail::fake();
+
         $customer = Customer::factory()->create();
         $product = Product::factory()->create(['name' => 'Order Product', 'price' => '10.00']);
 
@@ -135,6 +158,7 @@ class CartFlowTest extends TestCase
                     ],
                     'shipping_method' => (string) $this->freeShipping->id,
                     'payment_method' => 'invoice',
+                    'shipping_address' => $this->completeAddress(),
                 ],
             ])->post(route('checkout.submit'), [
                 'agreed_to_terms' => true,
@@ -152,5 +176,39 @@ class CartFlowTest extends TestCase
         ]);
 
         $this->assertSame(1, Order::query()->count());
+
+        // Both the customer confirmation and the admin notification go out.
+        Mail::assertSent(OrderConfirmationMail::class);
+        Mail::assertSent(NewOrderMail::class);
+    }
+
+    public function test_order_submit_requires_a_complete_shipping_address(): void
+    {
+        Mail::fake();
+
+        $customer = Customer::factory()->create();
+        $product = Product::factory()->create(['name' => 'Guarded Product', 'price' => '10.00']);
+
+        $this->actingAs($customer)
+            ->withSession([
+                'cart' => [
+                    'items' => [
+                        $product->id => [
+                            'quantity' => 1,
+                            'unit_price' => '10.00',
+                            'name' => $product->name,
+                            'product_number' => (string) $product->id,
+                        ],
+                    ],
+                    'shipping_method' => (string) $this->freeShipping->id,
+                    'payment_method' => 'invoice',
+                ],
+            ])->post(route('checkout.submit'), [
+                'agreed_to_terms' => true,
+            ])
+            ->assertSessionHasErrors('shipping_address');
+
+        $this->assertSame(0, Order::query()->count());
+        Mail::assertNothingSent();
     }
 }

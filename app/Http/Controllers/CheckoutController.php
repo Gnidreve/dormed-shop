@@ -4,16 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Cart\UpdateCartPaymentMethodRequest;
 use App\Http\Requests\Checkout\PlaceOrderRequest;
-use App\Mail\NewOrderMail;
-use App\Mail\OrderConfirmationMail;
 use App\Models\Order;
 use App\Models\Setting;
 use App\Support\Cart\CartService;
+use App\Support\Orders\OrderManager;
 use App\Support\PaymentMode;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
 use Stripe\StripeClient;
@@ -48,6 +45,7 @@ class CheckoutController extends Controller
 
     public function __construct(
         private readonly CartService $cartService,
+        private readonly OrderManager $orderManager,
     ) {}
 
     public function confirm(Request $request): Response|RedirectResponse
@@ -160,6 +158,10 @@ class CheckoutController extends Controller
             return to_route('checkout.index');
         }
 
+        if (! $this->cartService->isAddressComplete()) {
+            return back()->withErrors(['shipping_address' => 'Bitte vervollständigen Sie Ihre Lieferadresse.']);
+        }
+
         $paymentMethodId = $cart['selected_payment_method']['id'] ?? '';
 
         if ($paymentMethodId === 'invoice') {
@@ -171,31 +173,12 @@ class CheckoutController extends Controller
 
     private function submitInvoice(PlaceOrderRequest $request, array $cart): RedirectResponse
     {
-        $order = $this->createOrder($request, $cart, 'invoice');
+        $order = $this->orderManager->createFromCart($request->user(), $cart, 'invoice');
 
-        $customer = $request->user();
-
-        try {
-            Mail::to($customer->email)->send(new OrderConfirmationMail($order, $customer));
-        } catch (\Throwable $e) {
-            Log::channel('mail')->error('Order confirmation mail failed', [
-                'order_id' => $order->id,
-                'error' => $e->getMessage(),
-            ]);
-        }
-
-        // Notify admin
-        try {
-            $adminRecipients = array_filter([
-                Setting::get('mail.admin_address') ?? config('mail.from.address'),
-            ]);
-            Mail::to($adminRecipients)->send(new NewOrderMail($order, $cart, $customer));
-        } catch (\Throwable $e) {
-            Log::channel('mail')->error('Admin order notification failed after invoice order', [
-                'order_id' => $order->id,
-                'error' => $e->getMessage(),
-            ]);
-        }
+        // Invoice stays "pending" until payment arrives by bank transfer, but the
+        // customer still gets the confirmation (incl. bank details) and the admin
+        // gets notified immediately.
+        $this->orderManager->sendConfirmations($order);
 
         $this->cartService->clear();
 
@@ -204,7 +187,7 @@ class CheckoutController extends Controller
 
     private function submitStripe(PlaceOrderRequest $request, array $cart): mixed
     {
-        $order = $this->createOrder($request, $cart, 'stripe');
+        $order = $this->orderManager->createFromCart($request->user(), $cart, 'stripe');
 
         $shippingAmount = (float) ($cart['shipping_total'] ?? 0);
 
@@ -250,31 +233,6 @@ class CheckoutController extends Controller
         return Inertia::location($session->url);
     }
 
-    private function createOrder(PlaceOrderRequest $request, array $cart, string $paymentMethod): Order
-    {
-        $order = Order::query()->create([
-            'customer_id' => $request->user()->id,
-            'status' => 'pending',
-            'payment_method' => $paymentMethod,
-            'is_test' => ! PaymentMode::isLive(),
-            'total_amount' => $cart['total'],
-            'shipping_amount' => (float) ($cart['shipping_total'] ?? 0),
-            'shipping_address' => $this->cartService->getShippingAddress(),
-            'billing_address' => $this->cartService->getBillingAddress(),
-        ]);
-
-        foreach ($cart['items'] as $item) {
-            $order->items()->create([
-                'product_id' => $item['product_id'],
-                'product_name' => $item['name'],
-                'unit_price' => $item['unit_price'],
-                'quantity' => $item['quantity'],
-            ]);
-        }
-
-        return $order;
-    }
-
     public function success(Request $request): Response|RedirectResponse
     {
         $sessionId = $request->query('session_id');
@@ -305,29 +263,16 @@ class CheckoutController extends Controller
             return to_route('home');
         }
 
-        $vatRate = (int) config('shop.cart.vat_rate', 19);
-        $totalCents = (int) round((float) $order->total_amount * 100);
-        $shippingCents = (int) round((float) $order->shipping_amount * 100);
-        $subtotalCents = $totalCents - $shippingCents;
-        $netTotalCents = (int) round($totalCents / (1 + ($vatRate / 100)));
-        $vatAmountCents = $totalCents - $netTotalCents;
-
-        $items = $order->items->map(fn ($item): array => [
-            'name' => $item->product_name,
-            'product_number' => $item->product_id ?? $item->id,
-            'quantity' => $item->quantity,
-            'unit_price' => number_format((float) $item->unit_price, 2, '.', ''),
-            'line_total' => number_format((float) $item->unit_price * $item->quantity, 2, '.', ''),
-        ])->all();
+        $summary = $this->orderManager->summaryFromOrder($order);
 
         return Inertia::render('Checkout/Success', [
             'order_id' => $order->id,
-            'items' => $items,
-            'subtotal' => number_format($subtotalCents / 100, 2, '.', ''),
-            'shipping_total' => number_format($shippingCents / 100, 2, '.', ''),
-            'vat_rate' => $vatRate,
-            'vat_amount' => number_format($vatAmountCents / 100, 2, '.', ''),
-            'total' => number_format($totalCents / 100, 2, '.', ''),
+            'items' => $summary['items'],
+            'subtotal' => $summary['subtotal'],
+            'shipping_total' => $summary['shipping_total'],
+            'vat_rate' => $summary['vat_rate'],
+            'vat_amount' => $summary['vat_amount'],
+            'total' => $summary['total'],
             'customer_email' => $order->customer->email,
             'shipping_address' => $order->shipping_address,
             'billing_address' => $order->billing_address,

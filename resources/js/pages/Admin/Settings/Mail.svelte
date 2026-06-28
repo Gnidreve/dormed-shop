@@ -31,6 +31,7 @@
             'mail.smtp_port': settings['mail.smtp_port'] ?? '',
             'mail.smtp_user': settings['mail.smtp_user'] ?? '',
             'mail.smtp_password': '',
+            'shop.notification_emails': settings['shop.notification_emails'] ?? '',
         },
     });
 
@@ -99,6 +100,14 @@
                 </Label>
                 <Input id="smtp_password" type="password" placeholder={hasSensitive['mail.smtp_password'] ? '••••••••' : ''} bind:value={form.settings['mail.smtp_password']} />
             </div>
+        </div>
+
+        <div class="rounded-lg border bg-card p-5 flex flex-col gap-1.5">
+            <Label for="notification_emails">Benachrichtigungs-Empfänger</Label>
+            <Input id="notification_emails" placeholder="bestellungen@dormed.de, info@dormed.de" bind:value={form.settings['shop.notification_emails']} />
+            <p class="text-xs text-muted-foreground">
+                Empfänger der Bestell-Benachrichtigung (mehrere durch Komma getrennt). Leer = Absenderadresse.
+            </p>
         </div>
 
         <div class="flex justify-end gap-2">

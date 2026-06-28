@@ -8,7 +8,11 @@
 </script>
 
 <script lang="ts">
+    import { router } from '@inertiajs/svelte';
+    import { Loader2 } from 'lucide-svelte';
+    import { toast } from 'svelte-sonner';
     import AppHead from '@/components/AppHead.svelte';
+    import { Button } from '@/components/ui/button';
     import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
     import { Separator } from '@/components/ui/separator';
     import * as Table from '@/components/ui/table';
@@ -57,7 +61,18 @@
         completed: 'Abgeschlossen',
         cancelled: 'Storniert',
         failed: 'Fehlgeschlagen',
+        refunded: 'Rückerstattet',
     };
+
+    const statusOptions: { value: string; label: string }[] = [
+        { value: 'pending', label: 'Ausstehend' },
+        { value: 'processing', label: 'In Bearbeitung' },
+        { value: 'paid', label: 'Bezahlt' },
+        { value: 'completed', label: 'Abgeschlossen' },
+        { value: 'cancelled', label: 'Storniert' },
+        { value: 'failed', label: 'Fehlgeschlagen' },
+        { value: 'refunded', label: 'Rückerstattet' },
+    ];
 
     const paymentStatusLabels: Record<string, string> = {
         CREATED: 'Erstellt',
@@ -66,6 +81,83 @@
         FAILED: 'Fehlgeschlagen',
         REFUNDED: 'Rückerstattet',
     };
+
+    let selectedStatus = $state(order.status);
+    let notifyCustomer = $state(false);
+    let savingStatus = $state(false);
+    let refunding = $state(false);
+
+    const willMarkPaid = $derived(selectedStatus === 'paid' && order.status !== 'paid');
+    const canRefund = $derived(order.payments.some((p) => p.status === 'COMPLETED'));
+
+    function xsrfToken(): string {
+        return decodeURIComponent(
+            document.cookie
+                .split('; ')
+                .find((r) => r.startsWith('XSRF-TOKEN='))
+                ?.split('=')[1] ?? '',
+        );
+    }
+
+    async function sendAction(url: string, method: 'PATCH' | 'POST', body?: unknown) {
+        const res = await fetch(url, {
+            method,
+            headers: {
+                'Content-Type': 'application/json',
+                'X-XSRF-TOKEN': xsrfToken(),
+                Accept: 'application/json',
+            },
+            body: body ? JSON.stringify(body) : undefined,
+        });
+        const data = await res.json().catch(() => ({}));
+
+        return { ok: res.ok, data };
+    }
+
+    async function saveStatus() {
+        savingStatus = true;
+
+        try {
+            const { ok, data } = await sendAction(`/admin/orders/${order.id}/status`, 'PATCH', {
+                status: selectedStatus,
+                notify: willMarkPaid ? notifyCustomer : false,
+            });
+
+            if (ok) {
+                toast.success(data.message ?? 'Status aktualisiert.');
+                router.reload({ only: ['order'] });
+            } else {
+                toast.error(data.message ?? 'Status konnte nicht aktualisiert werden.');
+            }
+        } catch {
+            toast.error('Verbindungsfehler.');
+        } finally {
+            savingStatus = false;
+        }
+    }
+
+    async function refund() {
+        if (!confirm('Diese PayPal-Zahlung wirklich vollständig erstatten?')) {
+            return;
+        }
+
+        refunding = true;
+
+        try {
+            const { ok, data } = await sendAction(`/admin/orders/${order.id}/refund`, 'POST');
+
+            if (ok) {
+                toast.success(data.message ?? 'Zahlung erstattet.');
+                router.reload({ only: ['order'] });
+            } else {
+                toast.error(data.message ?? 'Erstattung fehlgeschlagen.');
+            }
+        } catch {
+            toast.error('Verbindungsfehler.');
+        } finally {
+            refunding = false;
+        }
+    }
 
     function formatAddress(a: AddressSnapshot): string {
         if (!a) {
@@ -97,7 +189,7 @@ return '—';
         </div>
         <span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium
             {order.status === 'paid' || order.status === 'completed' ? 'bg-green-100 text-green-700'
-            : order.status === 'cancelled' || order.status === 'failed' ? 'bg-red-100 text-red-700'
+            : order.status === 'cancelled' || order.status === 'failed' || order.status === 'refunded' ? 'bg-red-100 text-red-700'
             : order.status === 'processing' ? 'bg-blue-100 text-blue-700'
             : 'bg-yellow-100 text-yellow-700'}">
             {statusLabels[order.status] ?? order.status}
@@ -167,6 +259,46 @@ return '—';
             </CardContent>
         </Card>
     </div>
+
+    <!-- Aktionen -->
+    <Card>
+        <CardHeader>
+            <CardTitle>Aktionen</CardTitle>
+        </CardHeader>
+        <CardContent class="flex flex-col gap-4">
+            <div class="flex flex-wrap items-end gap-3">
+                <div class="flex flex-col gap-1.5">
+                    <label for="order-status" class="text-sm font-medium">Status</label>
+                    <select
+                        id="order-status"
+                        bind:value={selectedStatus}
+                        class="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                    >
+                        {#each statusOptions as opt (opt.value)}
+                            <option value={opt.value}>{opt.label}</option>
+                        {/each}
+                    </select>
+                </div>
+                <Button onclick={saveStatus} disabled={savingStatus || selectedStatus === order.status}>
+                    {#if savingStatus}<Loader2 class="size-4 animate-spin" />{/if}
+                    Status speichern
+                </Button>
+                {#if canRefund}
+                    <Button variant="destructive" onclick={refund} disabled={refunding}>
+                        {#if refunding}<Loader2 class="size-4 animate-spin" />{/if}
+                        Zahlung erstatten
+                    </Button>
+                {/if}
+            </div>
+
+            {#if willMarkPaid}
+                <label class="flex items-center gap-2 text-sm text-muted-foreground">
+                    <input type="checkbox" bind:checked={notifyCustomer} class="accent-primary" />
+                    Kunde per E-Mail benachrichtigen (Bestellbestätigung senden)
+                </label>
+            {/if}
+        </CardContent>
+    </Card>
 
     <!-- Adressen -->
     <div class="grid gap-6 md:grid-cols-2">

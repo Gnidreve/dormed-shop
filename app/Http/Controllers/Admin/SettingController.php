@@ -206,6 +206,8 @@ class SettingController extends Controller
             'mail.smtp_port' => $raw->get('mail.smtp_port', ''),
             'mail.smtp_user' => $raw->get('mail.smtp_user', ''),
             'mail.smtp_password' => '',
+            'shop.notification_emails' => $raw->get('shop.notification_emails', ''),
+            'payment.mode' => $raw->get('payment.mode', PaymentMode::current()),
             'payment.provider' => $raw->get('payment.provider', 'stripe'),
             'stripe.sandbox.publishable_key' => $raw->get('stripe.sandbox.publishable_key', ''),
             'stripe.sandbox.secret_key' => '',

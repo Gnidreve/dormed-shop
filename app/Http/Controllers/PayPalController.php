@@ -3,23 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Checkout\PlaceOrderRequest;
-use App\Models\Order;
 use App\Models\Payment;
 use App\Services\PayPalService;
 use App\Support\Cart\CartService;
+use App\Support\Orders\OrderManager;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
-use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
-use Stripe\StripeClient;
 
 class PayPalController extends Controller
 {
     public function __construct(
         private readonly PayPalService $payPalService,
         private readonly CartService $cartService,
+        private readonly OrderManager $orderManager,
     ) {}
 
     /**
@@ -36,33 +36,16 @@ class PayPalController extends Controller
             return response()->json(['error' => 'Warenkorb ist leer.'], 400);
         }
 
-        $shippingAmount = (float) ($cart['shipping_total'] ?? 0);
-        $shippingAddress = $this->cartService->getShippingAddress();
-        $billingAddress = $this->cartService->getBillingAddress();
-
-        /** @var Order $order */
-        $order = Order::query()->create([
-            'customer_id' => $request->user()->id,
-            'status' => 'pending',
-            'total_amount' => $cart['total'],
-            'shipping_amount' => $shippingAmount,
-            'shipping_address' => $shippingAddress,
-            'billing_address' => $billingAddress,
-        ]);
-
-        foreach ($cart['items'] as $item) {
-            $order->items()->create([
-                'product_id' => $item['product_id'],
-                'product_name' => $item['name'],
-                'unit_price' => $item['unit_price'],
-                'quantity' => $item['quantity'],
-            ]);
+        if (! $this->cartService->isAddressComplete()) {
+            return response()->json(['error' => 'Bitte vervollständigen Sie Ihre Lieferadresse.'], 422);
         }
+
+        $order = $this->orderManager->createFromCart($request->user(), $cart, 'paypal');
 
         try {
             $response = $this->payPalService->createOrder(
                 amount: (float) $cart['total'],
-                address: $shippingAddress,
+                address: $cart['shipping_address'] ?? null,
             );
 
             if (! isset($response['id'])) {
@@ -74,10 +57,10 @@ class PayPalController extends Controller
                 ], 500);
             }
 
-            // Save a payment record immediately with CREATED status
+            // Save a payment record immediately with CREATED status. The cart is
+            // intentionally NOT cleared here — only after a successful capture —
+            // so an aborted PayPal approval leaves the cart intact.
             $this->payPalService->recordPayment($order, $response, 'CREATED');
-
-            $this->cartService->clear();
 
             return response()->json([
                 'id' => $response['id'],
@@ -143,7 +126,8 @@ class PayPalController extends Controller
                     'response_data' => $response,
                 ]);
 
-                $payment->order->update(['status' => 'paid']);
+                $this->orderManager->markPaid($payment->order);
+                $this->cartService->clear();
             } else {
                 $payment->update([
                     'status' => 'FAILED',
@@ -183,7 +167,7 @@ class PayPalController extends Controller
      *
      * Verifies the webhook signature, then updates the payment and order status.
      */
-    public function webhook(Request $request): \Illuminate\Http\Response
+    public function webhook(Request $request): Response
     {
         // Verify webhook authenticity
         if (! $this->payPalService->verifyWebhook($request)) {
@@ -254,7 +238,8 @@ class PayPalController extends Controller
                     'response_data' => $response,
                 ]);
 
-                $payment->order->update(['status' => 'paid']);
+                $this->orderManager->markPaid($payment->order);
+                $this->cartService->clear();
 
                 return to_route('checkout.success');
             }
@@ -323,7 +308,7 @@ class PayPalController extends Controller
                 'paypal_capture_id' => $captureId,
                 'response_data' => $resource,
             ]);
-            $payment->order->update(['status' => 'paid']);
+            $this->orderManager->markPaid($payment->order);
         }
     }
 

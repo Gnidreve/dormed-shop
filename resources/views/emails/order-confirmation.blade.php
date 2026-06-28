@@ -31,16 +31,23 @@
                     </td>
                 </tr>
 
+                @php $isInvoice = ($order->payment_method ?? 'invoice') === 'invoice'; @endphp
+
                 {{-- Intro --}}
                 <tr>
                     <td style="padding:16px 24px;border-bottom:1px solid #f3f4f6;background:#f9fafb;">
                         <p style="margin:0;font-size:14px;color:#374151;">
                             Hallo {{ $customer->name }},<br><br>
-                            wir haben Ihre Bestellung erhalten und bitten Sie, den Gesamtbetrag per Überweisung auf folgendes Konto zu überweisen. Nach Zahlungseingang wird Ihre Bestellung umgehend bearbeitet.
+                            @if($isInvoice)
+                                wir haben Ihre Bestellung erhalten und bitten Sie, den Gesamtbetrag per Überweisung auf folgendes Konto zu überweisen. Nach Zahlungseingang wird Ihre Bestellung umgehend bearbeitet.
+                            @else
+                                vielen Dank für Ihre Bestellung – Ihre Zahlung ist bei uns eingegangen. Ihre Bestellung wird nun bearbeitet und schnellstmöglich versandt.
+                            @endif
                         </p>
                     </td>
                 </tr>
 
+                @if($isInvoice)
                 {{-- Bankverbindung --}}
                 <tr>
                     <td style="padding:20px 24px;border-bottom:1px solid #f3f4f6;">
@@ -70,6 +77,7 @@
                         <p style="margin:12px 0 0;font-size:12px;color:#9ca3af;">Bitte geben Sie immer die Bestellnummer als Verwendungszweck an.</p>
                     </td>
                 </tr>
+                @endif
 
                 {{-- Bestellübersicht --}}
                 <tr>

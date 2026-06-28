@@ -158,7 +158,7 @@ class CartService
         $this->persist([
             'items' => [],
             'shipping_method' => (string) (ShippingMethod::orderBy('sort_order')->value('id') ?? ''),
-            'payment_method' => (string) collect(config('shop.cart.payment_methods', []))->pluck('id')->first(),
+            'payment_method' => (string) (collect($this->paymentMethods(''))->first()['id'] ?? ''),
             'shipping_address' => self::DEFAULT_ADDRESS,
             'billing_address' => null,
         ]);

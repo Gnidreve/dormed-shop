@@ -9,12 +9,12 @@ return [
         |--------------------------------------------------------------------------
         | Payment Providers
         |--------------------------------------------------------------------------
-        | Jeder Provider kann per .env aktiviert/deaktiviert werden.
-        | Nur aktive Provider werden im Checkout als Zahlungsarten angezeigt.
+        | Invoice ist immer verfügbar. Welcher Gateway (paypal/stripe) zusätzlich
+        | angeboten wird, steuert das Admin-Setting `payment.provider`
+        | (siehe CartService::paymentMethods()).
         */
         'providers' => [
             'invoice' => [
-                'enabled' => env('PAYMENT_INVOICE_ENABLED', true),
                 'methods' => [
                     [
                         'id' => 'invoice',
@@ -24,7 +24,6 @@ return [
                 ],
             ],
             'stripe' => [
-                'enabled' => env('PAYMENT_STRIPE_ENABLED', false),
                 'methods' => [
                     [
                         'id' => 'stripe_card',
@@ -34,7 +33,6 @@ return [
                 ],
             ],
             'paypal' => [
-                'enabled' => env('PAYMENT_PAYPAL_ENABLED', true),
                 'methods' => [
                     [
                         'id' => 'paypal',

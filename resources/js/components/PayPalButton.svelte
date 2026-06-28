@@ -6,7 +6,7 @@
     let {
         total: _total = 0,
         clientId = '',
-        disabled: _disabled = false,
+        disabled = false,
     }: {
         total?: number;
         clientId?: string;
@@ -60,6 +60,13 @@ return;
                     label: 'paypal',
                 },
                 createOrder: async (): Promise<string> => {
+                    if (disabled) {
+                        errorMessage =
+                            'Bitte akzeptieren Sie die AGB und vervollständigen Sie Ihre Lieferadresse.';
+
+                        throw new Error(errorMessage);
+                    }
+
                     isProcessing = true;
                     errorMessage = null;
 
@@ -70,7 +77,9 @@ return;
                             'X-CSRF-TOKEN': getCsrfToken(),
                             Accept: 'application/json',
                         },
-                        body: JSON.stringify({ agreed_to_terms: true }),
+                        // The PayPal button can't be truly disabled after render, so the
+                        // guard above blocks unconfirmed orders; agreement is real here.
+                        body: JSON.stringify({ agreed_to_terms: !disabled }),
                     });
 
                     const data = await response.json();
