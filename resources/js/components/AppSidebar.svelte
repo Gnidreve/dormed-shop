@@ -14,7 +14,6 @@
     import type { Snippet } from 'svelte';
     import AppLogo from '@/components/AppLogo.svelte';
     import NavAdmin from '@/components/NavAdmin.svelte';
-    import NavCustomer from '@/components/NavCustomer.svelte';
     import NavGroup from '@/components/NavGroup.svelte';
     import NavMain from '@/components/NavMain.svelte';
     import {
@@ -83,7 +82,6 @@
 
     <SidebarFooter>
         <NavAdmin />
-        <NavCustomer />
     </SidebarFooter>
 </Sidebar>
 {@render children?.()}

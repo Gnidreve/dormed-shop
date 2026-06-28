@@ -4,7 +4,7 @@
     import ShopHeader from '@/components/ShopHeader.svelte';
 </script>
 
-<AppHead title="Versand" />
+<AppHead title="Versand und Zahlung" description="Informationen zu Versandkosten, Lieferzeiten und Abholung bei dormed24 – Medizintechnik schnell und zuverlässig geliefert." />
 
 <div class="flex min-h-screen flex-col bg-white">
     <ShopHeader />

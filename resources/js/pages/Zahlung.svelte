@@ -4,7 +4,7 @@
     import ShopHeader from '@/components/ShopHeader.svelte';
 </script>
 
-<AppHead title="Zahlung" />
+<AppHead title="Zahlungsarten" description="Akzeptierte Zahlungsmethoden im dormed24-Shop: PayPal, Kreditkarte und Kauf auf Rechnung." />
 
 <div class="flex min-h-screen flex-col bg-white">
     <ShopHeader />

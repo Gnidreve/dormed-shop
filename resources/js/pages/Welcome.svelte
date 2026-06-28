@@ -97,7 +97,7 @@
     ] as const;
 </script>
 
-<AppHead title="Willkommen" />
+<AppHead title="Willkommen" description="Verlässliche Medizintechnik für Praxis, MVZ und Klinik – direkt bestellen mit Beratung, Einweisung und Gewährleistung. Ihr Partner für Diagnostik, Monitoring und Zubehör." />
 
 <div class="min-h-screen bg-white">
     <ShopHeader />

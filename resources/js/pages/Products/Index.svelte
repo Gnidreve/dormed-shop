@@ -43,7 +43,7 @@
     }
 </script>
 
-<AppHead title={query ? `Suchergebnisse für „${query}"` : 'Produkte'} />
+<AppHead title={query ? `Suchergebnisse für „${query}"` : 'Produkte'} description={query ? `Suchergebnisse für „${query}" im dormed24-Sortiment – Medizintechnik für Praxis und Klinik.` : 'Unser gesamtes Sortiment an Medizintechnik, Diagnostik, Monitoring und Verbrauchsmaterial – direkt online bestellen.'} />
 
 <div class="flex min-h-screen flex-col bg-gray-50">
     <ShopHeader />

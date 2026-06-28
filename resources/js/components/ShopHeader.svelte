@@ -7,11 +7,13 @@
     import Package from 'lucide-svelte/icons/package';
     import Search from 'lucide-svelte/icons/search';
     import Settings from 'lucide-svelte/icons/settings';
+    import ShoppingCart from 'lucide-svelte/icons/shopping-cart';
     import User from 'lucide-svelte/icons/user';
     import UserPlus from 'lucide-svelte/icons/user-plus';
     import X from 'lucide-svelte/icons/x';
     import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
-    import CartSheet from '@/components/CartSheet.svelte';
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    import CartSheet from '@/components/CartSheet.svelte'; // benötigt für auskommentierte Sidebar-Variante unten
     import CustomerInfo from '@/components/CustomerInfo.svelte';
     import TestModeBanner from '@/components/TestModeBanner.svelte';
     import { Button } from '@/components/ui/button';
@@ -29,6 +31,7 @@
     import { formatPrice } from '@/lib/currency';
     import { toUrl } from '@/lib/utils';
     import { logout } from '@/routes';
+    import cartRoutes from '@/routes/cart';
     import customerRoutes from '@/routes/customer';
     import { edit as editProfile } from '@/routes/profile';
     import type { Cart, Customer } from '@/types';
@@ -268,7 +271,30 @@
                     </SheetContent>
                 </Sheet>
 
-                <CartSheet {cart} />
+                <!-- Direktlink zum Warenkorb (aktiv) -->
+                <Button variant="ghost" class="gap-2 px-3" asChild>
+                    {#snippet children(props)}
+                        <Link href={cartRoutes.index.url()} class={props.class}>
+                            <span class="text-sm font-medium text-[#1a3a5c]">
+                                {formatPrice(cart.total)}*
+                            </span>
+                            <div class="relative">
+                                <ShoppingCart class="size-5" />
+                                {#if cart.count > 0}
+                                    <span class="absolute -right-2 -top-2 flex size-4 items-center justify-center rounded-full bg-[#1a6bbf] text-[10px] font-bold text-white">
+                                        {cart.count}
+                                    </span>
+                                {/if}
+                            </div>
+                        </Link>
+                    {/snippet}
+                </Button>
+
+                <!--
+                    BEWUSST AUSKOMMENTIERT — Cart-Sidebar-Variante
+                    Zum Aktivieren: diesen Block einkommentieren und den Direktlink-Button oben löschen.
+                    <CartSheet {cart} />
+                -->
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>

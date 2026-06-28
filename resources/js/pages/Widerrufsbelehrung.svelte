@@ -4,7 +4,7 @@
     import ShopHeader from '@/components/ShopHeader.svelte';
 </script>
 
-<AppHead title="Widerrufsbelehrung" />
+<AppHead title="Widerrufsbelehrung" description="Widerrufsrecht und Rückgabebedingungen für Käufe im dormed24-Shop der Dormed medizinische Systeme GmbH." />
 
 <div class="flex min-h-screen flex-col bg-white">
     <ShopHeader />

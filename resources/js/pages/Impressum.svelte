@@ -4,7 +4,7 @@
     import ShopHeader from '@/components/ShopHeader.svelte';
 </script>
 
-<AppHead title="Impressum" />
+<AppHead title="Impressum" description="Impressum und Anbieterkennzeichnung der Dormed medizinische Systeme GmbH, Wilhelm-Röntgen-Straße 4, 59439 Holzwickede." />
 
 <div class="flex min-h-screen flex-col bg-white">
     <ShopHeader />

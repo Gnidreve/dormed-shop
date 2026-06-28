@@ -47,7 +47,7 @@
     ];
 </script>
 
-<AppHead title="Kontakt" />
+<AppHead title="Kontakt" description="Kontaktieren Sie das dormed24-Team für Beratung, Bestellung oder Einweisung. Erreichbar telefonisch und per E-Mail." />
 
 <div class="flex min-h-screen flex-col bg-white">
     <ShopHeader />

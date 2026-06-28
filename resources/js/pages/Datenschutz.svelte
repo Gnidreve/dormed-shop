@@ -4,7 +4,7 @@
     import ShopHeader from '@/components/ShopHeader.svelte';
 </script>
 
-<AppHead title="Datenschutzerklärung" />
+<AppHead title="Datenschutzerklärung" description="Datenschutzerklärung des dormed24-Online-Shops der Dormed medizinische Systeme GmbH." />
 
 <div class="flex min-h-screen flex-col bg-white">
     <ShopHeader />

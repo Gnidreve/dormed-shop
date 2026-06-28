@@ -4,7 +4,7 @@
     import ShopHeader from '@/components/ShopHeader.svelte';
 </script>
 
-<AppHead title="Allgemeine Geschäftsbedingungen" />
+<AppHead title="Allgemeine Geschäftsbedingungen" description="AGB der Dormed medizinische Systeme GmbH für den Online-Shop dormed24.de." />
 
 <div class="flex min-h-screen flex-col bg-white">
     <ShopHeader />

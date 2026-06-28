@@ -47,7 +47,7 @@
     }
 </script>
 
-<AppHead title={category.name} />
+<AppHead title={category.name} description={category.description ?? `${category.name} – Medizintechnik im dormed24-Sortiment direkt online bestellen.`} />
 
 <div class="flex min-h-screen flex-col bg-gray-50">
     <ShopHeader />

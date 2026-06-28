@@ -91,6 +91,59 @@
     );
     const displayedPrice = $derived(selectedVariant ? selectedVariant.price : product.price);
 
+    const metaDescription = $derived(
+        product.description
+            ? product.description.replace(/\n+/g, ' ').trim().slice(0, 160)
+            : null,
+    );
+
+    const productSchema = $derived.by(() => {
+        const schema: Record<string, unknown> = {
+            '@context': 'https://schema.org/',
+            '@type': 'Product',
+            name: product.name,
+            ...(product.description ? { description: product.description } : {}),
+            ...(product.images.length > 0 ? { image: product.images.map((img) => img.url) } : {}),
+            ...(product.manufacturer
+                ? { brand: { '@type': 'Brand', name: product.manufacturer.name } }
+                : {}),
+        };
+
+        if (hasVariants && product.variants.length > 0) {
+            const prices = product.variants.map((v) => parseFloat(v.price));
+            schema.offers = {
+                '@type': 'AggregateOffer',
+                priceCurrency: 'EUR',
+                lowPrice: Math.min(...prices).toFixed(2),
+                highPrice: Math.max(...prices).toFixed(2),
+                offerCount: product.variants.length,
+                offers: product.variants.map((v) => ({
+                    '@type': 'Offer',
+                    name: v.label,
+                    price: parseFloat(v.price).toFixed(2),
+                    priceCurrency: 'EUR',
+                    availability: 'https://schema.org/InStock',
+                    itemCondition: 'https://schema.org/NewCondition',
+                })),
+            };
+        } else {
+            schema.offers = {
+                '@type': 'Offer',
+                price: parseFloat(product.price).toFixed(2),
+                priceCurrency: 'EUR',
+                availability: 'https://schema.org/InStock',
+                itemCondition: 'https://schema.org/NewCondition',
+            };
+        }
+
+        return JSON.stringify(schema);
+    });
+
+    // Split closing tag to prevent Svelte parser from treating it as end of <script> block
+    const jsonLdHtml = $derived(
+        `<script type="application/ld+json">${productSchema}<` + `/script>`,
+    );
+
     function starLabel(stars: number): string {
         return `${stars} Stern${stars === 1 ? '' : 'e'}`;
     }
@@ -110,7 +163,17 @@
     }
 </script>
 
-<AppHead title={product.name} />
+<AppHead
+    title={product.name}
+    description={metaDescription}
+    ogImage={product.images[0]?.url ?? null}
+    ogType="product"
+/>
+
+<svelte:head>
+    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+    {@html jsonLdHtml}
+</svelte:head>
 
 <div class="flex min-h-screen flex-col bg-white">
     <ShopHeader />
