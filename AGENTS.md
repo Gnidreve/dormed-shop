@@ -1,5 +1,11 @@
 # dormed-shop — Agent Context
 
+## IDENTITY
+
+- **Name:** Dormed Shop Bot
+- **Creature:** Assistent und DevOps-Ingenieur
+- **Language:** Deutsch
+
 > **Datenbankschema:** [`database/SCHEMA.md`](database/SCHEMA.md) — vollständige Tabellenstruktur, Spalten, Indizes und Fremdschlüssel. Muss bei jeder Schemaänderung aktualisiert werden. Immer lesen bevor Migrationen oder Modelle erstellt werden.
 
 Ablösung für Shopware. Medical equipment online shop für dormed 24 (Medizintechnik). Gebaut mit Laravel 13 + Inertia v3 + Svelte 5.
@@ -15,10 +21,10 @@ B2B/B2C-Shop für Medizintechnik (Ultraschallsysteme, Zubehör, Verbrauchsmateri
 
 ## Auth: Zwei unabhängige Guards
 
-| Guard   | Model      | Tabelle     | Login-Route    | Middleware      |
-|---------|------------|-------------|----------------|-----------------|
-| `web`   | `Customer` | `customers` | `/login`       | `auth` (Fortify)|
-| `admin` | `User`     | `users`     | `/admin/login` | `ensure.admin`  |
+| Guard   | Model      | Tabelle     | Login-Route    | Middleware       |
+| ------- | ---------- | ----------- | -------------- | ---------------- |
+| `web`   | `Customer` | `customers` | `/login`       | `auth` (Fortify) |
+| `admin` | `User`     | `users`     | `/admin/login` | `ensure.admin`   |
 
 - `Customer` — Shop-Kunden; unterstützt Passkeys + 2FA via Fortify
 - `User` — interne Admin-Nutzer; eigener `LoginController`, kein Fortify
@@ -29,15 +35,15 @@ B2B/B2C-Shop für Medizintechnik (Ultraschallsysteme, Zubehör, Verbrauchsmateri
 
 ## Layout-Auflösung (`resources/js/app.ts`)
 
-| Seitenmuster       | Layout                          |
-|--------------------|---------------------------------|
-| `Welcome`          | keins (standalone)              |
-| `Checkout/*`       | keins (standalone)              |
-| `Products/*`       | keins (standalone)              |
-| `auth/*`           | `AuthLayout`                    |
-| `Admin/Login`      | `AuthLayout`                    |
-| `settings/*`       | `AppLayout` + `SettingsLayout`  |
-| alles andere       | `AppLayout` (Admin)             |
+| Seitenmuster  | Layout                         |
+| ------------- | ------------------------------ |
+| `Welcome`     | keins (standalone)             |
+| `Checkout/*`  | keins (standalone)             |
+| `Products/*`  | keins (standalone)             |
+| `auth/*`      | `AuthLayout`                   |
+| `Admin/Login` | `AuthLayout`                   |
+| `settings/*`  | `AppLayout` + `SettingsLayout` |
+| alles andere  | `AppLayout` (Admin)            |
 
 Seiten ohne Layout müssen `<ShopHeader>` selbst einbinden.
 
@@ -45,25 +51,25 @@ Seiten ohne Layout müssen `<ShopHeader>` selbst einbinden.
 
 ## Routen-Überblick
 
-| Datei                   | Routen                                            |
-|-------------------------|---------------------------------------------------|
-| `routes/web.php`        | Home (`/`), lädt die anderen Routedateien         |
-| `routes/products.php`   | `GET /products`, `GET /products/search`           |
-| `routes/checkout.php`   | `GET /checkout`, `GET /checkout/confirm`          |
-| `routes/admin.php`      | Admin-Login/Logout + Dashboard                    |
-| `routes/settings.php`   | Profil + Sicherheitseinstellungen (Kunde)         |
+| Datei                 | Routen                                    |
+| --------------------- | ----------------------------------------- |
+| `routes/web.php`      | Home (`/`), lädt die anderen Routedateien |
+| `routes/products.php` | `GET /products`, `GET /products/search`   |
+| `routes/checkout.php` | `GET /checkout`, `GET /checkout/confirm`  |
+| `routes/admin.php`    | Admin-Login/Logout + Dashboard            |
+| `routes/settings.php` | Profil + Sicherheitseinstellungen (Kunde) |
 
 ---
 
 ## Modelle & Datenbank
 
-| Model          | Tabelle        | Hinweise                                    |
-|----------------|----------------|---------------------------------------------|
-| `Customer`     | `customers`    | Shop-Auth, Fortify, Passkeys, 2FA           |
-| `User`         | `users`        | Nur Admin-Auth                              |
-| `Product`      | `products`     | Hat `manufacturer_id` FK                   |
-| `Manufacturer` | `manufacturers`|                                             |
-| `Order`        | `orders`       | FK zu `customers`                           |
+| Model          | Tabelle         | Hinweise                          |
+| -------------- | --------------- | --------------------------------- |
+| `Customer`     | `customers`     | Shop-Auth, Fortify, Passkeys, 2FA |
+| `User`         | `users`         | Nur Admin-Auth                    |
+| `Product`      | `products`      | Hat `manufacturer_id` FK          |
+| `Manufacturer` | `manufacturers` |                                   |
+| `Order`        | `orders`        | FK zu `customers`                 |
 
 ---
 
@@ -104,6 +110,7 @@ resources/js/
 ## Platzhalter-Daten (`resources/js/data/cart.json`)
 
 Source of Truth für Cart/Checkout bis die echte API steht. Enthält:
+
 - `items[]` — Produkte mit SKU, Preis, Menge, Lieferzeitraum, Bild-URL
 - `shippingMethods[]` — Versandoptionen mit Preis und `selected`-Flag
 - `paymentMethods[]` — Zahlungsarten mit Beschreibung und `selected`-Flag
@@ -117,12 +124,14 @@ Alle drei Seiten (`CartSheet`, `Checkout/Index`, `Checkout/Confirm`) importieren
 ## Frontend-Konventionen
 
 ### Svelte 5 Runes (zwingend)
+
 - `let { prop } = $props()` statt `export let prop`
 - `$state()`, `$derived()`, `$effect()` statt `$:`
 - `onclick=` statt `on:click`
 - `{#snippet name(args)}` + `{@render name()}` statt `slot`
 
 ### shadcn-svelte Regeln
+
 - `gap-*` nicht `space-y-*` / `space-x-*`
 - `size-*` wenn Breite = Höhe (z.B. `size-4` statt `w-4 h-4`)
 - `Sheet`, `Dialog`, `Drawer` brauchen immer einen `Title` (ggf. `class="sr-only"`)
@@ -130,22 +139,26 @@ Alle drei Seiten (`CartSheet`, `Checkout/Index`, `Checkout/Confirm`) importieren
 - `cn()` aus `@/lib/utils` für bedingte Klassen
 
 ### Navigation
+
 - Interne Links immer mit `<Link>` aus `@inertiajs/svelte`, nie `<a>`
 - Ausnahme: externe Links oder reine Anker (`tel:`, `mailto:`, `#section`)
 
 ### Wayfinder
+
 - Controller-Routen: `import * as ProductController from '@/actions/App/Http/Controllers/ProductController'`
 - Named Routes: `import { logout } from '@/routes'`
 - URL auflösen: `toUrl(editProfile())` aus `@/lib/utils`
 
 ### Brand-Farben (Shop-Frontend)
-| Name       | Wert       | Verwendung                    |
-|------------|------------|-------------------------------|
-| Navy       | `#0d1f44`  | Primäre CTAs, Hintergrundtext |
-| Blue       | `#1a6bbf`  | Links, Icons, Akzente         |
-| Dark blue  | `#1a3a5c`  | Sekundärtext, Nav-Hover       |
+
+| Name      | Wert      | Verwendung                    |
+| --------- | --------- | ----------------------------- |
+| Navy      | `#0d1f44` | Primäre CTAs, Hintergrundtext |
+| Blue      | `#1a6bbf` | Links, Icons, Akzente         |
+| Dark blue | `#1a3a5c` | Sekundärtext, Nav-Hover       |
 
 ### Button-as-Link Muster (asChild)
+
 ```svelte
 <Button asChild class="...">
     {#snippet children(props)}
@@ -155,6 +168,7 @@ Alle drei Seiten (`CartSheet`, `Checkout/Index`, `Checkout/Confirm`) importieren
 ```
 
 ### SheetClose + Link (Sheet schließen + navigieren)
+
 ```svelte
 <SheetClose asChild>
     {#snippet children(closeProps)}
