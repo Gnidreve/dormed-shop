@@ -15,7 +15,7 @@
     const trustItems = [
         {
             icon: PackageCheck,
-            label: 'direkt bestellen',
+            label: 'Einfach direkt bestellen',
         },
         {
             icon: Truck,
@@ -57,17 +57,20 @@
         {
             title: 'Meone Finger-Pulsoximeter',
             price: '46,41 €*',
-            summary: 'USB-C aufladbar, OLED-Display, Spot-Check oder kontinuierliche Überwachung.',
+            summary:
+                'USB-C aufladbar, OLED-Display, Spot-Check oder kontinuierliche Überwachung.',
         },
         {
             title: 'BP2 Blutdruckmessgerät mit 1-Kanal-EKG',
             price: '117,81 €*',
-            summary: 'Kompaktes 2-in-1-Gerät mit EKG-Funktion, App-Anbindung und umfangreichem Zubehör.',
+            summary:
+                'Kompaktes 2-in-1-Gerät mit EKG-Funktion, App-Anbindung und umfangreichem Zubehör.',
         },
         {
             title: 'Wandkasten Metall mit Alarm',
             price: '189,21 €*',
-            summary: 'Robuster Schutz für Defibrillatoren mit akustischem und visuellem Alarmsystem.',
+            summary:
+                'Robuster Schutz für Defibrillatoren mit akustischem und visuellem Alarmsystem.',
         },
     ] as const;
 
@@ -97,7 +100,10 @@
     ] as const;
 </script>
 
-<AppHead title="Willkommen" description="Verlässliche Medizintechnik für Praxis, MVZ und Klinik – direkt bestellen mit Beratung, Einweisung und Gewährleistung. Ihr Partner für Diagnostik, Monitoring und Zubehör." />
+<AppHead
+    title="Willkommen"
+    description="Verlässliche Medizintechnik für Praxis, MVZ und Klinik – direkt bestellen mit Beratung, Einweisung und Gewährleistung. Ihr Partner für Diagnostik, Monitoring und Zubehör."
+/>
 
 <div class="min-h-screen bg-white">
     <ShopHeader />
@@ -118,9 +124,13 @@
         ></div>
 
         <!-- Content -->
-        <div class="relative z-10 mx-auto max-w-7xl px-8 py-16 lg:px-8 lg:py-20">
+        <div
+            class="relative z-10 mx-auto max-w-7xl px-8 py-16 lg:px-8 lg:py-20"
+        >
             <div class="max-w-lg">
-                <h1 class="mb-3 text-3xl font-bold leading-tight text-white lg:text-4xl">
+                <h1
+                    class="mb-3 text-3xl font-bold leading-tight text-white lg:text-4xl"
+                >
                     Wir kümmern uns um Ihre Praxis
                 </h1>
                 <p class="mb-7 text-base text-white/75">
@@ -129,7 +139,9 @@
 
                 <ul class="mb-10 flex flex-col gap-2.5">
                     {#each features as feature (feature)}
-                        <li class="flex items-center gap-2.5 font-semibold text-white">
+                        <li
+                            class="flex items-center gap-2.5 font-semibold text-white"
+                        >
                             <Check class="size-4 shrink-0" />
                             {feature}
                         </li>
@@ -140,10 +152,14 @@
                     href="tel:023011886000"
                     class="group inline-flex items-center gap-4 rounded-xl bg-white/10 px-5 py-3.5 backdrop-blur-sm transition hover:bg-white/20"
                 >
-                    <div class="rounded-full bg-white/20 p-2.5 transition group-hover:bg-white/30">
+                    <div
+                        class="rounded-full bg-white/20 p-2.5 transition group-hover:bg-white/30"
+                    >
                         <Phone class="size-5 text-white" />
                     </div>
-                    <span class="text-2xl font-bold tracking-wide text-white lg:text-3xl">
+                    <span
+                        class="text-2xl font-bold tracking-wide text-white lg:text-3xl"
+                    >
                         02301 – 188/600
                     </span>
                 </a>
@@ -154,11 +170,18 @@
     <!-- Trust bar -->
     <div class="border-b border-t bg-white">
         <div class="mx-auto max-w-7xl px-4 lg:px-8">
-            <div class="grid grid-cols-2 divide-x divide-y lg:grid-cols-4 lg:divide-y-0">
+            <div
+                class="grid grid-cols-2 divide-x divide-y lg:grid-cols-4 lg:divide-y-0"
+            >
                 {#each trustItems as item (item.label)}
                     <div class="flex items-center gap-3 px-6 py-5">
-                        <item.icon class="size-8 shrink-0 text-[#1a6bbf]" strokeWidth={1.5} />
-                        <span class="text-sm font-semibold leading-snug text-[#0d1f44]">
+                        <item.icon
+                            class="size-8 shrink-0 text-[#1a6bbf]"
+                            strokeWidth={1.5}
+                        />
+                        <span
+                            class="text-sm font-semibold leading-snug text-[#0d1f44]"
+                        >
                             {item.label}
                         </span>
                     </div>
@@ -171,21 +194,31 @@
         <div class="mx-auto max-w-7xl px-4 py-12 lg:px-8 lg:py-16">
             <div class="max-w-3xl">
                 <h2 class="text-2xl font-bold text-gray-900 lg:text-3xl">
-                    Einfach registrieren, freischalten lassen und direkt bestellen
+                    Einfach registrieren, freischalten lassen und direkt
+                    bestellen
                 </h2>
-                <p class="mt-3 text-sm leading-6 text-muted-foreground lg:text-base">
-                    Der bisherige Auftritt von dormed24 lebt stark davon, dass neue Kunden schnell
-                    verstehen, wie sie ins Sortiment kommen. Genau dieses Prinzip soll die
-                    Startseite auch unterhalb des Headers sauber fortführen.
+                <p
+                    class="mt-3 text-sm leading-6 text-muted-foreground lg:text-base"
+                >
+                    Der bisherige Auftritt von dormed24 lebt stark davon, dass
+                    neue Kunden schnell verstehen, wie sie ins Sortiment kommen.
+                    Genau dieses Prinzip soll die Startseite auch unterhalb des
+                    Headers sauber fortführen.
                 </p>
             </div>
 
             <div class="mt-8 grid gap-4 md:grid-cols-3">
                 {#each onboardingSteps as step, index (index)}
                     <article class="rounded-xl border bg-white p-6 shadow-sm">
-                        <p class="text-sm font-semibold text-[#1a6bbf]">Schritt {index + 1}</p>
-                        <h3 class="mt-2 text-lg font-semibold text-gray-900">{step.title}</h3>
-                        <p class="mt-3 text-sm leading-6 text-muted-foreground">{step.text}</p>
+                        <p class="text-sm font-semibold text-[#1a6bbf]">
+                            Schritt {index + 1}
+                        </p>
+                        <h3 class="mt-2 text-lg font-semibold text-gray-900">
+                            {step.title}
+                        </h3>
+                        <p class="mt-3 text-sm leading-6 text-muted-foreground">
+                            {step.text}
+                        </p>
                     </article>
                 {/each}
             </div>
@@ -199,10 +232,13 @@
                     <h2 class="text-2xl font-bold text-gray-900 lg:text-3xl">
                         Neu bei dormed24
                     </h2>
-                    <p class="mt-3 text-sm leading-6 text-muted-foreground lg:text-base">
-                        Im aktuellen Live-Shop stehen kompakte Geräte für Diagnostik und
-                        Notfallversorgung sichtbar im Vordergrund. Dieser Bereich greift das auf,
-                        ohne vom restlichen Shop-Design wegzulaufen.
+                    <p
+                        class="mt-3 text-sm leading-6 text-muted-foreground lg:text-base"
+                    >
+                        Im aktuellen Live-Shop stehen kompakte Geräte für
+                        Diagnostik und Notfallversorgung sichtbar im
+                        Vordergrund. Dieser Bereich greift das auf, ohne vom
+                        restlichen Shop-Design wegzulaufen.
                     </p>
                 </div>
                 <Link
@@ -216,16 +252,26 @@
 
             <div class="grid gap-4 md:grid-cols-3">
                 {#each highlightProducts as product (product.title)}
-                    <article class="rounded-xl border bg-white p-6 shadow-sm transition hover:shadow-md">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-[#1a6bbf]">
+                    <article
+                        class="rounded-xl border bg-white p-6 shadow-sm transition hover:shadow-md"
+                    >
+                        <p
+                            class="text-xs font-semibold uppercase tracking-wide text-[#1a6bbf]"
+                        >
                             Produkthighlight
                         </p>
-                        <h3 class="mt-3 text-lg font-semibold text-gray-900">{product.title}</h3>
+                        <h3 class="mt-3 text-lg font-semibold text-gray-900">
+                            {product.title}
+                        </h3>
                         <p class="mt-3 text-sm leading-6 text-muted-foreground">
                             {product.summary}
                         </p>
-                        <div class="mt-5 flex items-center justify-between gap-4 border-t pt-4">
-                            <span class="text-sm font-semibold text-[#1a3a5c]">{product.price}</span>
+                        <div
+                            class="mt-5 flex items-center justify-between gap-4 border-t pt-4"
+                        >
+                            <span class="text-sm font-semibold text-[#1a3a5c]"
+                                >{product.price}</span
+                            >
                             <Link
                                 href={ProductController.index.url()}
                                 class="text-sm font-semibold text-[#1a6bbf] hover:underline"
@@ -251,20 +297,27 @@
 
     <section class="bg-gray-50">
         <div class="mx-auto max-w-7xl px-4 py-12 lg:px-8 lg:py-16">
-            <div class="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+            <div
+                class="grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]"
+            >
                 <div>
                     <h2 class="text-2xl font-bold text-gray-900 lg:text-3xl">
                         Beschaffung für Praxis, MVZ und Klinik
                     </h2>
-                    <p class="mt-3 text-sm leading-6 text-muted-foreground lg:text-base">
-                        Statt einer komplett eigenen Landingpage-Ästhetik bekommt der Shop hier
-                        eher denselben nüchternen Ton wie die anderen Seiten: klare Informationen,
-                        erkennbare Vorteile und direkte Wege in Sortiment oder Kontakt.
+                    <p
+                        class="mt-3 text-sm leading-6 text-muted-foreground lg:text-base"
+                    >
+                        Statt einer komplett eigenen Landingpage-Ästhetik
+                        bekommt der Shop hier eher denselben nüchternen Ton wie
+                        die anderen Seiten: klare Informationen, erkennbare
+                        Vorteile und direkte Wege in Sortiment oder Kontakt.
                     </p>
 
                     <div class="mt-6 grid gap-3">
                         {#each assortmentPillars as pillar (pillar)}
-                            <div class="rounded-lg border bg-white px-4 py-3 text-sm text-gray-700 shadow-sm">
+                            <div
+                                class="rounded-lg border bg-white px-4 py-3 text-sm text-gray-700 shadow-sm"
+                            >
                                 {pillar}
                             </div>
                         {/each}
@@ -272,12 +325,20 @@
                 </div>
 
                 <div class="rounded-xl border bg-white p-6 shadow-sm">
-                    <h3 class="text-lg font-semibold text-gray-900">Beratung und schnelle Wege</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">
+                        Beratung und schnelle Wege
+                    </h3>
                     <div class="mt-5 space-y-5">
                         {#each serviceColumns as column (column.title)}
-                            <div class="border-b pb-5 last:border-b-0 last:pb-0">
-                                <p class="text-sm font-semibold text-[#1a3a5c]">{column.title}</p>
-                                <p class="mt-2 text-sm leading-6 text-muted-foreground">
+                            <div
+                                class="border-b pb-5 last:border-b-0 last:pb-0"
+                            >
+                                <p class="text-sm font-semibold text-[#1a3a5c]">
+                                    {column.title}
+                                </p>
+                                <p
+                                    class="mt-2 text-sm leading-6 text-muted-foreground"
+                                >
                                     {column.text}
                                 </p>
                             </div>

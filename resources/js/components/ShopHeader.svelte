@@ -45,7 +45,7 @@
         { label: 'Alle Produkte', href: '/products' },
     ];
 
-    const staticNavEnd = [{ label: 'Kontakt', href: '/kontakt' }];
+    const staticNavEnd: { label: string; href: string }[] = [];
 
     const auth = $derived(page.props.auth);
     const cart = $derived(page.props.cart as Cart);

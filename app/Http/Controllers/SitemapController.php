@@ -15,7 +15,6 @@ class SitemapController extends Controller
             $staticUrls = [
                 ['loc' => url('/'), 'changefreq' => 'weekly', 'priority' => '1.0'],
                 ['loc' => url('/products'), 'changefreq' => 'daily', 'priority' => '0.9'],
-                ['loc' => url('/kontakt'), 'changefreq' => 'monthly', 'priority' => '0.6'],
                 ['loc' => url('/agb'), 'changefreq' => 'monthly', 'priority' => '0.3'],
                 ['loc' => url('/impressum'), 'changefreq' => 'monthly', 'priority' => '0.3'],
                 ['loc' => url('/datenschutz'), 'changefreq' => 'monthly', 'priority' => '0.3'],
