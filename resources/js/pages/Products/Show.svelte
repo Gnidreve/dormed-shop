@@ -174,6 +174,7 @@
 
                 <!-- Short description -->
                 {#if product.description}
+                    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                     <p class="mb-5 text-sm leading-relaxed text-gray-600">{@html product.description}</p>
                 {/if}
 
@@ -275,6 +276,7 @@
                         </h2>
                         {#if product.description}
                             <div class="prose prose-sm max-w-none text-gray-700">
+                                <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                                 {@html product.description}
                             </div>
                         {:else}
@@ -302,7 +304,7 @@
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-1 text-[#f59e0b]">
-                                        {#each Array.from({ length: 5 }, (_, index) => index + 1) as star}
+                                        {#each Array.from({ length: 5 }, (_, index) => index + 1) as star (star)}
                                             <Star
                                                 class={cn(
                                                     'size-5',
@@ -318,11 +320,11 @@
 
                             {#if ratings.length > 0}
                                 <div class="space-y-4">
-                                    {#each ratings as rating}
+                                    {#each ratings as rating (rating.id)}
                                         <article class="rounded-xl border border-gray-200 bg-white p-6">
                                             <div class="mb-3 flex items-center justify-between gap-4">
                                                 <div class="flex items-center gap-1 text-[#f59e0b]">
-                                                    {#each Array.from({ length: 5 }, (_, index) => index + 1) as star}
+                                                    {#each Array.from({ length: 5 }, (_, index) => index + 1) as star (star)}
                                                         <Star
                                                             class={cn(
                                                                 'size-4',
@@ -364,7 +366,7 @@
                                     <div class="grid gap-2">
                                         <Label for="rating-stars">Sterne</Label>
                                         <div id="rating-stars" class="star-wrapper">
-                                            {#each [1, 2, 3, 4, 5] as star}
+                                            {#each [1, 2, 3, 4, 5] as star (star)}
                                                 <button
                                                     type="button"
                                                     class={cn(

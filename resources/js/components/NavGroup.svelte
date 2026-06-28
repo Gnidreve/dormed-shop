@@ -40,7 +40,6 @@
     <SidebarMenu>
         <SidebarMenuItem>
             <Collapsible bind:open class="group/collapsible w-full">
-                {#snippet children()}
                     <SidebarMenuButton
                         tooltip={title}
                         isActive={isAnyChildActive}
@@ -76,7 +75,6 @@
                             {/each}
                         </ul>
                     {/if}
-                {/snippet}
             </Collapsible>
         </SidebarMenuItem>
     </SidebarMenu>

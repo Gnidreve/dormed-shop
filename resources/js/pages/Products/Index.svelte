@@ -118,12 +118,14 @@
                                     ? 'border-[#1a6bbf] bg-[#1a6bbf] text-white'
                                     : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'}"
                             >
+                                <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                                 {@html link.label}
                             </Link>
                         {:else}
                             <span
                                 class="rounded border border-gray-200 px-3 py-1.5 text-sm text-gray-400"
                             >
+                                <!-- eslint-disable-next-line svelte/no-at-html-tags -->
                                 {@html link.label}
                             </span>
                         {/if}

@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasColumn('product_variants', 'product_id')) {
+            return;
+        }
+
         Schema::table('product_variants', function (Blueprint $table) {
             $table->foreignId('product_id')->after('id')->constrained()->cascadeOnDelete();
             $table->string('label')->after('product_id');

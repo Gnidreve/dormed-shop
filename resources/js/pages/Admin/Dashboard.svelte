@@ -23,7 +23,6 @@
     import { ChartContainer, type ChartConfig } from '@/components/ui/chart';
     import * as Popover from '@/components/ui/popover';
     import { Separator } from '@/components/ui/separator';
-    import PlaceholderPattern from '@/components/PlaceholderPattern.svelte';
     import { scaleUtc } from 'd3-scale';
     import { Area, AreaChart, ChartClipPath } from 'layerchart';
     import { curveNatural } from 'd3-shape';
@@ -35,13 +34,10 @@
 
     let { chartData }: { chartData: ChartEntry[] } = $props();
 
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity
     const allData = $derived(chartData.map((d) => ({ ...d, date: new Date(d.date) })));
 
     const admin = $derived((page.props.auth as any).admin);
-
-    function logout() {
-        router.post(AdminLoginController.logout.url());
-    }
 
     type TimeRange = '7d' | '30d' | '90d' | 'custom';
 

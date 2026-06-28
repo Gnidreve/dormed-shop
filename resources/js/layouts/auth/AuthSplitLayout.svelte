@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Link, page } from '@inertiajs/svelte';
+    import { Link } from '@inertiajs/svelte';
     import type { Snippet } from 'svelte';
     import AppLogoIcon from '@/components/AppLogoIcon.svelte';
     import { home } from '@/routes';
@@ -14,7 +14,6 @@
         children?: Snippet;
     } = $props();
 
-    const name = $derived(page.props.name);
 </script>
 
 <div

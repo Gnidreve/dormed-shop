@@ -4,9 +4,9 @@
     import checkout from '@/routes/checkout';
 
     let {
-        total = 0,
+        total: _total = 0,
         clientId = '',
-        disabled = false,
+        disabled: _disabled = false,
     }: {
         total?: number;
         clientId?: string;

@@ -128,7 +128,7 @@
                 </p>
 
                 <ul class="mb-10 flex flex-col gap-2.5">
-                    {#each features as feature}
+                    {#each features as feature (feature)}
                         <li class="flex items-center gap-2.5 font-semibold text-white">
                             <Check class="size-4 shrink-0" />
                             {feature}
@@ -155,7 +155,7 @@
     <div class="border-b border-t bg-white">
         <div class="mx-auto max-w-7xl px-4 lg:px-8">
             <div class="grid grid-cols-2 divide-x divide-y lg:grid-cols-4 lg:divide-y-0">
-                {#each trustItems as item}
+                {#each trustItems as item (item.label)}
                     <div class="flex items-center gap-3 px-6 py-5">
                         <item.icon class="size-8 shrink-0 text-[#1a6bbf]" strokeWidth={1.5} />
                         <span class="text-sm font-semibold leading-snug text-[#0d1f44]">
@@ -181,7 +181,7 @@
             </div>
 
             <div class="mt-8 grid gap-4 md:grid-cols-3">
-                {#each onboardingSteps as step, index}
+                {#each onboardingSteps as step, index (index)}
                     <article class="rounded-xl border bg-white p-6 shadow-sm">
                         <p class="text-sm font-semibold text-[#1a6bbf]">Schritt {index + 1}</p>
                         <h3 class="mt-2 text-lg font-semibold text-gray-900">{step.title}</h3>
@@ -215,7 +215,7 @@
             </div>
 
             <div class="grid gap-4 md:grid-cols-3">
-                {#each highlightProducts as product}
+                {#each highlightProducts as product (product.title)}
                     <article class="rounded-xl border bg-white p-6 shadow-sm transition hover:shadow-md">
                         <p class="text-xs font-semibold uppercase tracking-wide text-[#1a6bbf]">
                             Produkthighlight
@@ -263,7 +263,7 @@
                     </p>
 
                     <div class="mt-6 grid gap-3">
-                        {#each assortmentPillars as pillar}
+                        {#each assortmentPillars as pillar (pillar)}
                             <div class="rounded-lg border bg-white px-4 py-3 text-sm text-gray-700 shadow-sm">
                                 {pillar}
                             </div>
@@ -274,7 +274,7 @@
                 <div class="rounded-xl border bg-white p-6 shadow-sm">
                     <h3 class="text-lg font-semibold text-gray-900">Beratung und schnelle Wege</h3>
                     <div class="mt-5 space-y-5">
-                        {#each serviceColumns as column}
+                        {#each serviceColumns as column (column.title)}
                             <div class="border-b pb-5 last:border-b-0 last:pb-0">
                                 <p class="text-sm font-semibold text-[#1a3a5c]">{column.title}</p>
                                 <p class="mt-2 text-sm leading-6 text-muted-foreground">

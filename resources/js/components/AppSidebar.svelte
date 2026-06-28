@@ -10,7 +10,6 @@
     import Users from 'lucide-svelte/icons/users';
     import type { Snippet } from 'svelte';
     import AppLogo from '@/components/AppLogo.svelte';
-    import NavFooter from '@/components/NavFooter.svelte';
     import NavMain from '@/components/NavMain.svelte';
     import NavGroup from '@/components/NavGroup.svelte';
     import NavCustomer from '@/components/NavCustomer.svelte';

@@ -220,7 +220,7 @@
                                         {method.label}
                                     </span>
                                     <span class="text-gray-500">
-                                        {' '}- {formatPrice(method.price ?? 0)}*
+                                        — {formatPrice(method.price ?? 0)}*
                                     </span>
                                     {#if method.description}
                                         <br />

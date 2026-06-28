@@ -74,6 +74,7 @@
 
     // --- Image management ---
 
+    // eslint-disable-next-line svelte/prefer-writable-derived
     let images = $state([...product.images]);
     let uploading = $state(false);
     let draggedId = $state<number | null>(null);

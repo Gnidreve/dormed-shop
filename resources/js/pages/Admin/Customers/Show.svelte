@@ -1,5 +1,4 @@
 <script module lang="ts">
-    import { Link } from '@inertiajs/svelte';
     import AppLayout from '@/layouts/app/AppSidebarLayout.svelte';
 
     export const layout = AppLayout;
