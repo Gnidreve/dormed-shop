@@ -1,7 +1,5 @@
 <script lang="ts">
-    import { Link } from '@inertiajs/svelte';
     import CheckCircle from 'lucide-svelte/icons/circle-check-big';
-    import Download from 'lucide-svelte/icons/download';
     import Mail from 'lucide-svelte/icons/mail';
     import AppFooter from '@/components/AppFooter.svelte';
     import AppHead from '@/components/AppHead.svelte';

@@ -23,6 +23,7 @@ class UpdateProductRequest extends FormRequest
             'price' => ['required', 'numeric', 'min:0'],
             'manufacturer_id' => ['nullable', 'integer', 'exists:manufacturers,id'],
             'category_id' => ['nullable', 'integer', 'exists:categories,id'],
+            'is_available' => ['required', 'boolean'],
         ];
     }
 }

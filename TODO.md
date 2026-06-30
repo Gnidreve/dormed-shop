@@ -49,5 +49,73 @@ PayPal schreibt in die `payments`-Tabelle, Stripe nur `stripe_*`-Spalten auf `or
 
 ### 🟢 Nur ein Gateway gleichzeitig (#12) — bewusst so
 Per Design ist immer Invoice + genau **ein** Gateway (PayPal *oder* Stripe) aktiv (Setting `payment.provider`). Falls beide gleichzeitig angeboten werden sollen, müsste `CartService::paymentMethods()` mehrere aktive Provider zulassen und das Admin-Setting auf Mehrfachauswahl umgestellt werden.
+-> Nur PayPal kein Stripe. ich sorge dafür das nicht beides aktiviert ist in env und später Datenbank
+
+---
+
+## UI/UX — Kundenbereich
+
+### 🔴 Kritisch
+
+- ~~**Stripe-Checkout unvollständig**~~ — nur PayPal benötigt, kein Handlungsbedarf
+
+- [✓] **Rechnungs-Download-Button entfernt** — `resources/js/pages/Checkout/Success.svelte`: auskommentierter Block + ungenutzte Imports entfernt
+
+- [✓] **Produktverfügbarkeit** — `is_available` Boolean in DB (`migration`), Model, Admin-Toggle in `Edit.svelte`, dynamische Anzeige + Button-Sperre in `Products/Show.svelte`
+
+### 🟡 Moderat
+
+- [ ] **Produktfilter fehlen** — `resources/js/pages/Products/Index.svelte`: Nur Sortierung vorhanden. Keine Filter nach Preis, Hersteller, Kategorie oder Rating.
+
+- [ ] **Bestelldetails fehlen** — `resources/js/pages/settings/Orders.svelte`: Liste zeigt Bestellungen, aber kein Link zu einer Detailseite. Keine Paginierung.
+-> Keine Pagination. Aber die Detailsseite muss noch implementiert werden
+
+- [ ] **Produkt-Bilder im Warenkorb** — `resources/js/pages/Checkout/Index.svelte`: Bilder sind leere Placeholder-Divs, keine echten Produktbilder.
+
+- [ ] **Registrierung** — `resources/js/pages/auth/Register.svelte`: Kein Passwort-Stärke-Indikator, keine AGB-Akzeptanz-Checkbox.
+
+- [✓] **Kontaktseite gelöscht** — `Kontakt.svelte` entfernt, Footer verlinkt bereits auf `dormed.de/kontakt` (extern)
+
+- ~~**Ähnliche Produkte**~~ — kein Schema vorhanden, kein Handlungsbedarf
+
+### 🟢 Minor (UX)
+
+- [✓] **Labels eingedeutscht** — `settings/Profile.svelte` + `settings/Security.svelte`: alle sichtbaren Texte (Titel, Labels, Platzhalter, Buttons) auf Deutsch
+
+- [ ] **Such-Dropdown: "Keine Ergebnisse"** — `resources/js/components/ShopHeader.svelte`: Kein leerer Zustand wenn Suche nichts findet.
+
+- [ ] **Breadcrumb auf Shop-Seiten** — Keine Orientierungshilfe auf Produkt-Detail- und Kategorie-Seiten.
+
+- [ ] **Bestellzusammenfassung im Checkout** — `resources/js/pages/Checkout/Confirm.svelte`: Produktliste fehlt in der finalen Zusammenfassung (nur Preise sichtbar).
+
+- [ ] **AGB/Datenschutz Versionierung** — `resources/js/pages/AGB.svelte`, `Datenschutz.svelte`: Kein Datum / keine Versionsnummer sichtbar.
+
+---
+
+## UI/UX — Admin-Bereich (Mitarbeiter)
+
+### 🔴 Kritisch
+
+- [ ] **Bestelldetail-Seite fehlt** — `resources/js/pages/Admin/Orders/`: Keine Show-Seite (oder nicht verlinkt). Admin kann Bestellungen nicht im Detail einsehen.
+
+- [ ] **Bulk-Aktionen ohne Funktion** — `resources/js/pages/Admin/Products/Index.svelte`: Checkboxes für Mehrfachauswahl vorhanden, aber keine Aktion dahinter (kein Bulk-Delete, kein Bulk-Update).
+
+### 🟡 Moderat
+
+- [ ] **Bestellungen: kein Status-Filter** — `resources/js/pages/Admin/Orders/Index.svelte`: Kein Filter nach Status (Offen / Bezahlt / Storniert), kein Datum-Filter.
+
+- [ ] **Dashboard: nur Basis-Stats** — `resources/js/pages/Admin/Dashboard.svelte`: Nur 2 Charts (Orders + Revenue). Keine Top-Produkte, keine Top-Kunden, keine Conversion-Rate.
+
+- [ ] **Produkt anlegen fehlt** — `resources/js/pages/Admin/Products/Index.svelte`: Kein "Neues Produkt"-Button sichtbar.
+
+- [ ] **Kategorie-Slug nicht editierbar** — `resources/js/pages/Admin/Categories/Index.svelte`: Slug wird angezeigt aber kann nicht inline bearbeitet werden.
+
+- [ ] **Kunden-Filter** — `resources/js/pages/Admin/Customers/Index.svelte`: Nur Name-Suche. Kein Filter nach Verifizierungs-Status oder Registrierungsdatum.
+
+### 🟢 Minor (UX)
+
+- [ ] **Dashboard: Custom-Date ohne Validierung** — `resources/js/pages/Admin/Dashboard.svelte`: Leere From/To-Felder führen zu keinem Fehler.
+
+- [ ] **Upload-Fehler nicht angezeigt** — `resources/js/pages/Admin/Products/Edit.svelte`: Wenn Bild-Upload fehlschlägt, gibt es kein visuelles Feedback.
 
 ---

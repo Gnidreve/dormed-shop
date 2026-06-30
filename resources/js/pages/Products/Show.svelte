@@ -27,6 +27,7 @@
         name: string;
         description: string | null;
         price: string;
+        is_available: boolean;
         manufacturer: { id: number; name: string } | null;
         images: ProductImage[];
         variants: ProductVariant[];
@@ -296,8 +297,10 @@
 
                 <!-- Availability -->
                 <div class="mb-5 flex items-center gap-2">
-                    <span class="size-2.5 shrink-0 rounded-full bg-green-500"></span>
-                    <span class="text-sm text-gray-700">Sofort verfügbar, Lieferzeit: 1–2 Wochen</span>
+                    <span class="size-2.5 shrink-0 rounded-full {product.is_available ? 'bg-green-500' : 'bg-red-400'}"></span>
+                    <span class="text-sm text-gray-700">
+                        {product.is_available ? 'Sofort verfügbar, Lieferzeit: 1–2 Wochen' : 'Derzeit nicht verfügbar'}
+                    </span>
                 </div>
 
                 <!-- Qty + CTA -->
@@ -322,11 +325,12 @@
                     </div>
 
                     <Button
-                        class="flex-1 bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90"
+                        class="flex-1 bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90 disabled:opacity-50"
                         onclick={addToCart}
+                        disabled={!product.is_available}
                     >
                         <ShoppingCart class="size-4" />
-                        In den Warenkorb
+                        {product.is_available ? 'In den Warenkorb' : 'Nicht verfügbar'}
                     </Button>
                 </div>
             </div>

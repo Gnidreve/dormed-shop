@@ -39,6 +39,7 @@
         price: string;
         manufacturer_id: number | null;
         category_id: number | null;
+        is_available: boolean;
         images: ProductImage[];
         variants: ProductVariant[];
     };
@@ -59,6 +60,7 @@
         price: product.price,
         manufacturer_id: product.manufacturer_id ? String(product.manufacturer_id) : '',
         category_id: product.category_id ? String(product.category_id) : '',
+        is_available: product.is_available,
     });
 
     const selectedManufacturerLabel = $derived(
@@ -306,6 +308,24 @@
                     {/if}
                 </div>
 
+                <div class="flex items-center justify-between rounded-lg border bg-card p-4">
+                    <div>
+                        <p class="text-sm font-medium">Verfügbarkeit</p>
+                        <p class="text-xs text-muted-foreground">Produkt ist im Shop bestellbar</p>
+                    </div>
+                    <button
+                        type="button"
+                        role="switch"
+                        aria-checked={form.is_available}
+                        onclick={() => (form.is_available = !form.is_available)}
+                        class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring {form.is_available ? 'bg-primary' : 'bg-input'}"
+                    >
+                        <span
+                            class="pointer-events-none inline-block size-5 rounded-full bg-white shadow-lg ring-0 transition-transform {form.is_available ? 'translate-x-5' : 'translate-x-0'}"
+                        ></span>
+                    </button>
+                </div>
+
                 <div class="flex gap-3">
                     <Button type="submit" disabled={form.processing}>
                         {form.processing ? 'Speichert…' : 'Speichern'}
@@ -321,7 +341,6 @@
             </form>
         </Tabs.Content>
 
-<<<<<<< HEAD
         <!-- Bilder -->
         <Tabs.Content value="bilder">
             <div class="mt-6 flex max-w-2xl flex-col gap-4">
@@ -331,23 +350,6 @@
                         <p class="text-sm text-muted-foreground">{images.length}/5 Bilder · Reihenfolge per Drag &amp; Drop ändern</p>
                     </div>
                     <label
-=======
-        {#if images.length === 0}
-            <div class="flex h-32 items-center justify-center rounded-lg border border-dashed border-input text-sm text-muted-foreground">
-                Noch keine Bilder hochgeladen
-            </div>
-        {:else}
-            <div role="list" class="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {#each images as image (image.id)}
-                    <!-- svelte-ignore a11y_no_static_element_interactions -->
-                    <div
-                        role="listitem"
-                        draggable="true"
-                        ondragstart={() => onDragStart(image.id)}
-                        ondragover={(e) => onDragOver(e, image.id)}
-                        ondrop={(e) => onDrop(e, image.id)}
-                        ondragend={onDragEnd}
->>>>>>> bd8aed9 (fix: suppress Svelte 5 build warnings and ignore media/inbound)
                         class={cn(
                             'flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-accent',
                             (images.length >= 5 || uploading) && 'pointer-events-none opacity-50',

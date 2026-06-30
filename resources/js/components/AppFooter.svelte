@@ -11,7 +11,7 @@
             <div>
                 <img src="/logo.svg" alt="dormed 24" class="mb-4 h-8 w-auto" />
                 <p class="text-sm font-bold text-[#1a3a5c]">
-                    dormed24.de, ein Angebot der Dormed medizinische Systeme GmbH
+                    ein Angebot der Dormed medizinische Systeme GmbH
                 </p>
                 <p class="mt-3 text-sm text-muted-foreground">Unterstützung und Beratung unter:</p>
                 <p class="mt-2 flex items-center gap-2 text-sm font-bold text-[#1a3a5c]">

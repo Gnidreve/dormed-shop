@@ -15,8 +15,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $name
  * @property string|null $description
  * @property string $price
+ * @property bool $is_available
  */
-#[Fillable(['manufacturer_id', 'category_id', 'name', 'description', 'price'])]
+#[Fillable(['manufacturer_id', 'category_id', 'name', 'description', 'price', 'is_available'])]
 class Product extends Model
 {
     /** @use HasFactory<ProductFactory> */
@@ -26,6 +27,7 @@ class Product extends Model
     {
         return [
             'price' => 'decimal:2',
+            'is_available' => 'boolean',
         ];
     }
 
