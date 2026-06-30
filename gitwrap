@@ -1,6 +1,0 @@
-#!/bin/bash
-export GIT_EXEC_PATH=/workspace/.git-bin/git-core
-export GIT_TEMPLATE_DIR=/workspace/.git-bin/git-core/templates
-export GIT_SSH_COMMAND="ssh -i /workspace/.gitsecret/deploy-key -o StrictHostKeyChecking=accept-new -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
-exec /workspace/git "$@"
-
