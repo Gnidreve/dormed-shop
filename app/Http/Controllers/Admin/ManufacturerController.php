@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreManufacturerRequest;
 use App\Http\Requests\Admin\UpdateManufacturerRequest;
 use App\Models\Manufacturer;
 use Illuminate\Http\RedirectResponse;
@@ -16,6 +17,19 @@ class ManufacturerController extends Controller
         return Inertia::render('Admin/Manufacturers/Index', [
             'manufacturers' => Manufacturer::latest()->paginate(20),
         ]);
+    }
+
+    public function create(): Response
+    {
+        return Inertia::render('Admin/Manufacturers/Create');
+    }
+
+    public function store(StoreManufacturerRequest $request): RedirectResponse
+    {
+        $manufacturer = Manufacturer::create($request->validated());
+
+        return redirect()->route('admin.manufacturers.edit', $manufacturer)
+            ->with('success', 'Hersteller erstellt.');
     }
 
     public function edit(Manufacturer $manufacturer): Response

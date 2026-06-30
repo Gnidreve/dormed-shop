@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreProductRequest;
 use App\Http\Requests\Admin\UpdateProductRequest;
 use App\Models\Category;
 use App\Models\Manufacturer;
@@ -18,6 +19,22 @@ class ProductController extends Controller
         return Inertia::render('Admin/Products/Index', [
             'products' => Product::with('manufacturer')->latest()->paginate(20),
         ]);
+    }
+
+    public function create(): Response
+    {
+        return Inertia::render('Admin/Products/Create', [
+            'manufacturers' => Manufacturer::orderBy('name')->get(['id', 'name']),
+            'categories' => Category::orderBy('name')->get(['id', 'name']),
+        ]);
+    }
+
+    public function store(StoreProductRequest $request): RedirectResponse
+    {
+        $product = Product::create($request->validated());
+
+        return redirect()->route('admin.products.edit', $product)
+            ->with('success', 'Produkt erstellt.');
     }
 
     public function edit(Product $product): Response

@@ -18,8 +18,10 @@
         getSortedRowModel
     } from '@tanstack/table-core';
 import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, SortingState, VisibilityState} from '@tanstack/table-core';
+    import { router } from '@inertiajs/svelte';
     import ChevronDown from 'lucide-svelte/icons/chevron-down';
     import Plus from 'lucide-svelte/icons/plus';
+    import * as AdminManufacturerController from '@/actions/App/Http/Controllers/Admin/ManufacturerController';
     import AppHead from '@/components/AppHead.svelte';
     import { Button } from '@/components/ui/button';
     import { Checkbox } from '@/components/ui/checkbox';
@@ -153,7 +155,7 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
         <h1 class="text-xl font-semibold">Hersteller</h1>
         <div class="flex items-center gap-3">
             <span class="text-sm text-muted-foreground">{manufacturers.total} gesamt</span>
-            <Button>
+            <Button onclick={() => router.visit(AdminManufacturerController.create.url())}>
                 <Plus class="size-4" />
                 Hersteller hinzufügen
             </Button>
