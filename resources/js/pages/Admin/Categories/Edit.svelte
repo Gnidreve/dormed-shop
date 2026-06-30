@@ -21,6 +21,7 @@
 
     let { category }: { category: Category } = $props();
 
+    // svelte-ignore state_referenced_locally
     const form = useForm({
         name: category.name,
         slug: category.slug,

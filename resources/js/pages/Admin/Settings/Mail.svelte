@@ -25,6 +25,7 @@
         hasSensitive: Record<string, boolean>;
     } = $props();
 
+    // svelte-ignore state_referenced_locally
     const form = useForm({
         settings: {
             'mail.smtp_host': settings['mail.smtp_host'] ?? '',

@@ -17,6 +17,7 @@
 
     let { settings }: { settings: Record<string, string> } = $props();
 
+    // svelte-ignore state_referenced_locally
     const form = useForm({
         settings: {
             'shop.name': settings['shop.name'] ?? '',

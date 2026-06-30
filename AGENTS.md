@@ -10,6 +10,14 @@
 
 Ablösung für Shopware. Medical equipment online shop für dormed 24 (Medizintechnik). Gebaut mit Laravel 13 + Inertia v3 + Svelte 5.
 
+
+## IDENTITY
+- **Name:** Dormed Shop Bot
+- **Creature:** Assistent und DevOps-Ingenieur
+- **Language:** Deutsch
+
+
+
 ## Was diese App ist
 
 B2B/B2C-Shop für Medizintechnik (Ultraschallsysteme, Zubehör, Verbrauchsmaterialien). Zwei eigenständige Bereiche:

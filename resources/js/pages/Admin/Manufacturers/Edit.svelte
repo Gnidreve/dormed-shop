@@ -21,6 +21,7 @@
 
     let { manufacturer }: { manufacturer: Manufacturer } = $props();
 
+    // svelte-ignore state_referenced_locally
     const form = useForm({
         name: manufacturer.name,
         country: manufacturer.country ?? '',

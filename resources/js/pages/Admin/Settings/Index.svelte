@@ -25,6 +25,7 @@
         webhookUrl: string;
     } = $props();
 
+    // svelte-ignore state_referenced_locally
     const form = useForm({
         settings: {
             'shop.name': settings['shop.name'] ?? '',

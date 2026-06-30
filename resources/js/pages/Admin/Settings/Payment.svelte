@@ -29,6 +29,7 @@
         paymentMode: 'sandbox' | 'live';
     } = $props();
 
+    // svelte-ignore state_referenced_locally
     const form = useForm({
         settings: {
             'payment.mode': settings['payment.mode'] ?? paymentMode,

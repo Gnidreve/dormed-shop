@@ -20,10 +20,13 @@
     }: { cart: Cart; paypal_client_id?: string | null } = $props();
 
     let agreedToTerms = $state(false);
+    // svelte-ignore state_referenced_locally
     let billingSameAsShipping = $state(cart.billing_address === null);
 
     // Local address state, initialized from cart
+    // svelte-ignore state_referenced_locally
     let shippingAddress = $state<AddressData>({ ...cart.shipping_address });
+    // svelte-ignore state_referenced_locally
     let billingAddress = $state<AddressData | null>(
         cart.billing_address ? { ...cart.billing_address } : null,
     );
