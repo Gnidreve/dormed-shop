@@ -78,6 +78,7 @@ class ProductEditTest extends TestCase
                 'description' => 'A new description.',
                 'price' => '19.99',
                 'manufacturer_id' => $manufacturer->id,
+                'is_available' => true,
             ])
             ->assertRedirect(route('admin.products.index'));
 
@@ -97,6 +98,7 @@ class ProductEditTest extends TestCase
                 'description' => '',
                 'price' => $product->price,
                 'manufacturer_id' => null,
+                'is_available' => true,
             ])
             ->assertRedirect(route('admin.products.index'));
 
