@@ -24,6 +24,10 @@
             'shop.email': settings['shop.email'] ?? '',
             'shop.phone': settings['shop.phone'] ?? '',
             'shop.fax': settings['shop.fax'] ?? '',
+            'shop.bank_account_holder': settings['shop.bank_account_holder'] ?? '',
+            'shop.bank_iban': settings['shop.bank_iban'] ?? '',
+            'shop.bank_bic': settings['shop.bank_bic'] ?? '',
+            'shop.bank_name': settings['shop.bank_name'] ?? '',
         },
     });
 
@@ -33,9 +37,9 @@
     }
 </script>
 
-<AppHead title="Allgemein — Einstellungen — Admin" />
+<AppHead title="Allgemein - Einstellungen - Admin" />
 
-<div class="flex h-full flex-1 flex-col gap-6 p-4 max-w-2xl">
+<div class="max-w-2xl flex h-full flex-1 flex-col gap-6 p-4">
     <h1 class="text-xl font-semibold">Allgemein</h1>
 
     <form onsubmit={submit} class="flex flex-col gap-4">
@@ -58,9 +62,34 @@
             </div>
         </div>
 
+        <div class="rounded-lg border bg-card p-5 flex flex-col gap-4">
+            <div class="flex flex-col gap-1">
+                <h2 class="text-base font-semibold">Bankverbindung</h2>
+                <p class="text-sm text-muted-foreground">
+                    Wird in den Rechnungsdaten fur Bestellbestatigungen verwendet.
+                </p>
+            </div>
+            <div class="flex flex-col gap-1.5">
+                <Label for="shop_bank_account_holder">Kontoinhaber</Label>
+                <Input id="shop_bank_account_holder" bind:value={form.settings['shop.bank_account_holder']} />
+            </div>
+            <div class="flex flex-col gap-1.5">
+                <Label for="shop_bank_iban">IBAN</Label>
+                <Input id="shop_bank_iban" bind:value={form.settings['shop.bank_iban']} />
+            </div>
+            <div class="flex flex-col gap-1.5">
+                <Label for="shop_bank_bic">BIC</Label>
+                <Input id="shop_bank_bic" bind:value={form.settings['shop.bank_bic']} />
+            </div>
+            <div class="flex flex-col gap-1.5">
+                <Label for="shop_bank_name">Bankname</Label>
+                <Input id="shop_bank_name" bind:value={form.settings['shop.bank_name']} />
+            </div>
+        </div>
+
         <div class="flex justify-end gap-2">
             <Button type="submit" disabled={form.processing}>
-                {form.processing ? 'Speichern…' : 'Speichern'}
+                {form.processing ? 'Speichern...' : 'Speichern'}
             </Button>
         </div>
     </form>

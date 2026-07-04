@@ -14,6 +14,10 @@ class ContactsSeeder extends Seeder
             'shop.email' => 'mail@dormed.de',
             'shop.phone' => '02301188600',
             'shop.fax' => '02301188620',
+            'shop.bank_account_holder' => 'Dormed medizinische Systeme GmbH',
+            'shop.bank_iban' => 'DE 0000000...',
+            'shop.bank_bic' => 'FANTASIEBIC',
+            'shop.bank_name' => 'Sparkasse UnnaKamen',
         ];
 
         foreach ($settings as $key => $value) {
