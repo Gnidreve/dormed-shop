@@ -173,6 +173,8 @@ class CartService
         }
 
         $products = Product::query()
+            ->with('manufacturer')
+            ->with(['images' => fn ($query) => $query->where('sort_order', 0)])
             ->whereKey($productIds)
             ->orderBy('name')
             ->get()
@@ -196,10 +198,12 @@ class CartService
                     'name' => (string) ($item['name'] ?? $product?->name ?? 'Produkt nicht verfügbar'),
                     'description' => $product?->description,
                     'product_number' => (string) ($item['product_number'] ?? $productId),
+                    'manufacturer_name' => $product?->manufacturer?->name,
                     'quantity' => $quantity,
                     'unit_price' => $this->formatAmount($unitPriceCents),
                     'line_total' => $this->formatAmount($lineTotalCents),
                     'line_total_cents' => $lineTotalCents,
+                    'image_url' => $product?->images->first()?->url,
                     'product_url' => $product ? route('products.show', $product) : route('products.index'),
                     'is_available' => $product !== null,
                 ];

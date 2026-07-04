@@ -100,9 +100,17 @@
                                         <td class="px-5 py-4">
                                             <div class="flex items-center gap-3">
                                                 <div
-                                                    class="flex size-14 shrink-0 items-center justify-center rounded border bg-gray-50"
+                                                    class="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded border bg-gray-50"
                                                 >
-                                                    <div class="size-8 rounded bg-gray-200"></div>
+                                                    {#if item.image_url}
+                                                        <img
+                                                            src={item.image_url}
+                                                            alt={item.name}
+                                                            class="size-full object-cover object-center"
+                                                        />
+                                                    {:else}
+                                                        <div class="size-8 rounded bg-gray-200"></div>
+                                                    {/if}
                                                 </div>
                                                 <div>
                                                     <Link
@@ -111,9 +119,11 @@
                                                     >
                                                         {item.name}
                                                     </Link>
-                                                    <p class="text-xs text-[#1a6bbf]">
-                                                        Produkt-Nr.: {item.product_number}
-                                                    </p>
+                                                    {#if item.manufacturer_name}
+                                                        <p class="text-xs text-[#1a6bbf]">
+                                                            {item.manufacturer_name}
+                                                        </p>
+                                                    {/if}
                                                 </div>
                                             </div>
                                         </td>

@@ -3,6 +3,8 @@ export type CartItem = {
     name: string;
     description: string | null;
     product_number: string;
+    manufacturer_name: string | null;
+    image_url: string | null;
     quantity: number;
     unit_price: string;
     line_total: string;

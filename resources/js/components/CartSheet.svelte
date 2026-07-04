@@ -92,9 +92,17 @@
                     <div class="mb-4 rounded-lg border bg-white p-3">
                         <div class="flex gap-3">
                             <div
-                                class="flex size-16 shrink-0 items-center justify-center rounded border bg-gray-50"
+                                class="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded border bg-gray-50"
                             >
-                                <ShoppingCart class="size-6 text-gray-300" />
+                                {#if item.image_url}
+                                    <img
+                                        src={item.image_url}
+                                        alt={item.name}
+                                        class="size-full object-cover object-center"
+                                    />
+                                {:else}
+                                    <ShoppingCart class="size-6 text-gray-300" />
+                                {/if}
                             </div>
 
                             <div class="min-w-0 flex-1">
@@ -113,9 +121,11 @@
                                         <X class="size-4" />
                                     </button>
                                 </div>
-                                <p class="mt-0.5 text-xs text-gray-400">
-                                    Produkt-Nr.: {item.product_number}
-                                </p>
+                                {#if item.manufacturer_name}
+                                    <p class="mt-0.5 text-xs text-gray-400">
+                                        {item.manufacturer_name}
+                                    </p>
+                                {/if}
                             </div>
                         </div>
 
