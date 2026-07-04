@@ -1,0 +1,243 @@
+id;parent_id;product_number;active;stock;name;description;price_net;price_gross;purchase_prices_net;purchase_prices_gross;tax_id;tax_rate;tax_name;cover_media_id;cover_media_url;cover_media_title;cover_media_alt;manufacturer_id;manufacturer_name;categories;sales_channel;propertyIds;optionIds
+0195a9f3caa870a882c6c26efbd39db4;;SW10001;1;100;"AOJ-20A | Infrarot-Ohr- und Stirnthermometer";"<p><b>Funktionen &amp; Anwendungen:</b></p>
+<ul>
+    <li><b>Präzise Temperaturmessung:</b> für Stirn und Ohr (32,0–42,9 °C) sowie Objekte (0–100 °C)</li>
+    <li><b>Einfache Anwendung:</b> Ideal auch für schlafende Patienten</li>
+    <li><b>Automatischer Moduswechsel:</b> zwischen Stirn- und Ohrmessung</li>
+</ul>
+
+<p><b>Ausstattung &amp; Features:</b></p>
+<ul>
+    <li><b>LCD-Display:</b> mit 4-Farben-LED-Hintergrundbeleuchtung für klare Ablesbarkeit</li>
+    <li><b>App-Kompatibilität:</b> Verbindung mit der vihealth App zur Datenverwaltung</li>
+    <li><b>Langlebig &amp; zuverlässig:</b> Über 3000 Messungen mit 2x AAA-Batterien</li>
+</ul>";39.99;47.5881;27.19;32.3561;0195903a857073348ae7250001a512bd;19;"Standard rate";0195a9ec30cf7247aaea4fda744f3f1d;"https://dormed24.de/media/8f/89/cd/1742312584/_aoj-20a-360grad-ansicht (1).png?ts=1742312584";;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195a45d04e17163b684468ffccf7b57;0195903ca61071338e3fbc42bb6c843a;;
+0195aa2449227b21a586c05f1a2bd74e;;SW10002;1;98;"BP2 | Blutdruckmessgerät mit 1-Kanal-EKG";"<p><b>Funktion &amp; Anwendung:</b></p>
+<ul>
+    <li><b>Kompakt &amp; mobil:</b> Klein, handlich und leicht einsetzbar</li>
+    <li><b>2-in-1 Funktion:</b> Blutdruckmessgerät mit zusätzlicher 1-Kanal-EKG-Funktion</li>
+    <li><b>Präzise Messung:</b> Manschette für Armumfang 22–42 cm</li>
+    <li><b>Speicherfunktion:</b> Bis zu 50 Blutdruck- &amp; 10 EKG-Messungen</li>
+</ul>
+
+<p><b>Ausstattung &amp; Features:</b></p>
+<ul>
+    <li><b>Wiederaufladbare Li-Ion Batterie:</b> Bis zu 500 Messungen pro Ladung</li>
+    <li><b>Schnelle EKG-Messung:</b> Aufnahmezeit von nur 30 Sekunden</li>
+    <li><b>Umfangreiches Zubehör:</b> Inkl. USB-Kabel, Batterien (AA), Transportbeutel &amp; Tragekordel</li>
+    <li><b>App-Kompatibilität:</b> Datenübertragung &amp; Auswertung mit der vihealth App</li>
+</ul>
+";99;117.81;67.32;80.1108;0195903a857073348ae7250001a512bd;19;"Standard rate";0195aa2b154f7adea5d3afcd4987eb87;https://dormed24.de/media/49/17/8d/1742316706/bp2-angelegt.png?ts=1742316706;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195a45d04e17163b684468ffccf7b57;0195903ca61071338e3fbc42bb6c843a;;
+0195aa2c65cd77fbbeab6bae1af21f8c;;SW10003;1;100;"PC-80B | Notfall-EKG";"<p><b>Funktion &amp; Anwendung:</b></p>
+<ul>
+    <li><b>Herzrhythmus-Überwachung:</b> Unterstützt die Diagnose von Herzproblemen</li>
+    <li><b>Langzeit-Aufzeichnung:</b> Bis zu 10 Stunden kontinuierliche EKG-Daten speichern</li>
+    <li><b>Einfache Bedienung:</b> Intuitive Ein-Knopf-Steuerung</li>
+</ul>
+
+<p><b>Ausstattung &amp; Features:</b></p>
+<ul>
+    <li><b>Hochauflösendes Farbdisplay:</b> Klare und präzise Darstellung</li>
+    <li><b>Wiederaufladbare Li-Ion Batterie:</b> Bis zu 10 Stunden Akkulaufzeit</li>
+    <li><b>Mini-USB-Schnittstelle:</b> Für einfache Datenübertragung</li>
+    <li><b>Kompaktes &amp; tragbares Design:</b> Ideal für den mobilen Einsatz</li>
+    <li><b>Großer Speicher:</b> Platz für bis zu 300 EKG-Aufzeichnungen</li>
+</ul>
+";149;177.31;111.75;132.9825;0195903a857073348ae7250001a512bd;19;"Standard rate";0195aa6e2ef57c9bae6e40559361a7ad;https://dormed24.de/media/89/83/a7/1742321103/pc-80b-frontalansicht.png?ts=1742321103;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195a45d04e17163b684468ffccf7b57;0195903ca61071338e3fbc42bb6c843a;;
+0195aa6e72a07fc4b46f91cfd0929037;;SW10004;1;100;"Hi-Dop | Gefäßdoppler inkl. Sonde";"<p><b>Funktion &amp; Anwendung:</b></p>
+<ul>
+    <li><b>LCD-Display:</b> Zeigt numerische Werte für Pulsfrequenz und Batteriestatus</li>
+    <li><b>Präzises Gefäßscreening:</b> Geeignet für Arterien- und Venendiagnostik</li>
+    <li><b>Batteriebetrieben:</b> 2x AA-Batterien für flexiblen Einsatz</li>
+</ul>
+
+<p><b>Ausstattung &amp; Features:</b></p>
+<ul>
+    <li><b>Inklusive Sonden:</b> Verfügbar mit 4 MHz, 8 MHz oder Kombinationen</li>
+    <li><b>Kopfhöreranschluss:</b> 3,5 mm Anschluss für präzise Auswertung</li>
+    <li><b>Standardzubehör:</b> 2x AA-Batterien &amp; 1x Ultraschallgel</li>
+    <li><b>Hinweis:</b> <span style=""color:#FF0000;"">Keine KV-Abrechnung möglich!</span></li>
+</ul>
+";159;189.21;108.12;128.6628;0195903a857073348ae7250001a512bd;19;"Standard rate";0195aa8009217488b5ebbe5f371567be;https://dormed24.de/media/93/de/c7/1742322273/hi-dop-frontalansicht.png?ts=1742322273;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195a45d04e17163b684468ffccf7b57;0195903ca61071338e3fbc42bb6c843a;;
+0195ada46657757a84027cf900d8ebc4;;SW10008;1;100;"BT-410 LED Stirnleuchte ";"<p><b>Funktion &amp; technische Daten:</b></p>
+<ul>
+    <li><b>Lichtquelle:</b> LED mit dauerhaft heller Ausleuchtung</li>
+    <li><b>Lichtleistung:</b> 15.000 Lux</li>
+    <li><b>Farbtemperatur:</b> 6.000 Kelvin</li>
+    <li><b>LED-Lebensdauer:</b> ca. 50.000 Stunden</li>
+    <li><b>Akkubetrieb:</b> Bis zu 4 Stunden Laufzeit</li>
+    <li><b>Gewicht:</b> 223 g inkl. Akku</li>
+    <li><b>Tragekomfort:</b> Verstellbares Kopfband für stabilen Sitz</li>
+</ul>
+";159;189.21;119.25;141.9075;0195903a857073348ae7250001a512bd;19;"Standard rate";0195af0048dc78008b8c41257ecb69c6;https://dormed24.de/media/70/03/c5/1742397789/bt-410-led-frontalansicht.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195a45d04e17163b684468ffccf7b57;0195903ca61071338e3fbc42bb6c843a;;
+0195adae6b6c7df891184e1ae49c806e;;SW10009;1;100;"Lupenbrille (BT-410 LED)";"<p></p><ul><li><b>Kompatibilität:</b> Für Stirnleuchte BT-410 LED</li><li><b>Vergrößerung:</b> Ermöglicht eine detailgenaue Betrachtung</li><li><b>Befestigung:</b> Anpassbare Halterung zur Fixierung an der Stirnleuchte</li></ul>
+";45;53.55;39;46.41;0195903a857073348ae7250001a512bd;19;"Standard rate";0195af0048dd7540aef236b873d6bd2a;https://dormed24.de/media/09/63/20/1742397789/lupenbrille-bt-410-led.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195a45d04e17163b684468ffccf7b57;0195903ca61071338e3fbc42bb6c843a;;
+0195adb357187e82a3ab479f8ca4a801;;SW10010;1;100;"Akku Li-ion 4,2V (BT-410 LED)";"<p></p><ul><li><b>Akkutyp:</b> Lithium-Ionen-Akku mit 4,2V</li><li><b>Kompatibilität:</b> Passend für die Stirnleuchte BT-410 LED</li><li><b>Betriebsdauer:</b> Unterstützt bis zu 4 Stunden Leuchtdauer</li></ul>
+
+
+";39;46.41;29.25;34.8075;0195903a857073348ae7250001a512bd;19;"Standard rate";0195af0048db79d5b653925b5b4da399;https://dormed24.de/media/1a/69/13/1742397789/akku-li-ion-4,2v-frontansicht.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195a45d04e17163b684468ffccf7b57;0195903ca61071338e3fbc42bb6c843a;;
+0195adb9346f7e8b8ad350c65d6f2796;;SW10011;1;100;"Astral Light (BT-410 LED)";"<p></p><ul><li><b>Zusatzbeleuchtung:</b> Ergänzendes Lichtmodul für die Stirnleuchte</li><li><b>Kompatibilität:</b> Speziell für BT-410 LED konzipiert</li><li><b>Montage:</b> Einfache Befestigung an der Leuchte</li></ul>
+
+
+";39;46.41;29.25;34.8075;0195903a857073348ae7250001a512bd;19;"Standard rate";0195af0048dc78008b8c4124d7f2b7a9;https://dormed24.de/media/ed/da/66/1742397789/astral-light-frontansicht.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195a45d04e17163b684468ffccf7b57;0195903ca61071338e3fbc42bb6c843a;;
+0195adbc28fd7d4d9a01168af0aa9df4;;SW10012;1;100;"Netzteil (410 LED)";"<p></p><ul><li><b>Kompatibilität:</b> Netzteil für die Stirnleuchte BT-410 LED</li><li><b>Spannung:</b> Passend für die Akku-Ladeeinheit</li><li><b>Anschluss:</b> Standardstecker für direkte Stromversorgung</li></ul>
+
+
+";49;58.31;36.75;43.7325;0195903a857073348ae7250001a512bd;19;"Standard rate";0195af0048de7d06a0e160f6d3c54cdd;https://dormed24.de/media/09/24/b6/1742397792/netzteil-frontansicht.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195a45d04e17163b684468ffccf7b57;0195903ca61071338e3fbc42bb6c843a;;
+0195adc0ccb576ea9454e14063efad5c;;SW10013;1;100;"Meone | Finger-Pulsoximeter";"<p><b>Funktion &amp; technische Daten:</b></p>
+<ul>
+    <li><b>Stromversorgung:</b> USB-C aufladbar</li>
+    <li><b>Akkulaufzeit:</b> Li-Ion Batterie mit bis zu 48 Stunden</li>
+    <li><b>Display:</b> OLED, in 4 Richtungen einstellbar</li>
+    <li><b>Konnektivität:</b> Kompatibel mit vihealth App</li>
+    <li><b>Messmodus:</b> Spot-Check oder kontinuierliche Überwachung</li>
+    <li><b>Bewegungskompensation:</b> Anti-Motion-Technologie</li>
+    <li><b>Alarmfunktion:</b> Audio- &amp; visuelle Signale</li>
+</ul>
+";39;46.41;26.52;31.5588;0195903a857073348ae7250001a512bd;19;"Standard rate";0195af0048dd7540aef236b9e287e6c6;https://dormed24.de/media/c0/86/55/1742397793/meone-finger-pulsoximeter-app.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195b2aacabd72d9ab832e3800ff99e6;0195903ca61071338e3fbc42bb6c843a;;
+0195ade1dcc77e34885f190e0a06cdce;;SW10015;1;100;"Palmcare ECO | Handpulsoximeter-Thermometer";"<p><b>Funktion &amp; technische Daten:</b></p>
+<ul>
+    <li><b>Display:</b> 3,5"" LCD Farb-Display</li>
+    <li><b>Messfunktionen:</b> SpO₂-Messung &amp; Körpertemperatur</li>
+    <li><b>Zusätzliche Sensoren:</b> Integriertes Fieberthermometer, SpO₂-Sensor für Erwachsene</li>
+    <li><b>Stromversorgung:</b> Akku mit 20 Stunden Laufzeit bei voller Ladung</li>
+    <li><b>Datenaufzeichnung:</b> Bis zu 500 Stunden SpO₂-Datenspeicher</li>
+    <li><b>Automatisches Display:</b> Dreht sich je nach Halteposition</li>
+    <li><b>Konnektivität:</b> Kompatibel mit vihealth App</li>
+    <li><b>Ladestation:</b> Im Lieferumfang enthalten</li>
+</ul>
+";249;296.31;169.32;201.4908;0195903a857073348ae7250001a512bd;19;"Standard rate";0195af0048de7d06a0e160f7cb49a391;https://dormed24.de/media/f5/72/2d/1742397791/palmcare-eco-handpulsoximeter-thermometer.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195b2aacabd72d9ab832e3800ff99e6;0195903ca61071338e3fbc42bb6c843a;;
+0195ade792637f1296b10e5d76721963;;SW10016;1;100;"SpO₂ Fingerclip Erwachsene";"<p></p><ul><li><b>Kompatibilität:</b> Passend für Palmcare ECO und weitere Pulsoximeter</li><li><b>Messbereich:</b> Erfassung der Sauerstoffsättigung (SpO₂) und Pulsrate</li><li><b>Sensorart:</b> Fingerclip-Sensor für Erwachsene</li><li><b>Anschluss:</b> Standard-SpO₂-Schnittstelle</li></ul>
+
+
+
+";69;82.11;51.75;61.5825;0195903a857073348ae7250001a512bd;19;"Standard rate";0195af0048e07d5295ffb9e095ca644b;https://dormed24.de/media/76/35/03/1742397789/spo2-fingerclip-erwachsene.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195b2aacabd72d9ab832e3800ff99e6;0195903ca61071338e3fbc42bb6c843a;;
+0195adead0e3769594b766a7b6aeb778;;SW10017;1;100;"SpO₂ Softtouchsensor Erwachsene";"<p></p><ul><li><b>Kompatibilität:</b> Passend für Palmcare ECO und weitere Pulsoximeter</li><li><b>Messbereich:</b> Erfassung der Sauerstoffsättigung (SpO₂) und Pulsrate</li><li><b>Sensorart:</b> Softtouch-Sensor für Erwachsene</li><li><b>Anschluss:</b> Standard-SpO₂-Schnittstelle</li></ul>
+
+
+
+";69;82.11;51.75;61.5825;0195903a857073348ae7250001a512bd;19;"Standard rate";0195af0048e17cf2849a5f15ed9748bc;https://dormed24.de/media/3b/f1/8d/1742397790/spo2-softtouch-sensor-erwachsene.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195b2aacabd72d9ab832e3800ff99e6;0195903ca61071338e3fbc42bb6c843a;;
+0195aded2b6d7853863f985756bde6c1;;SW10018;1;100;"SpO₂ Fingerclip Kinder";"<p></p><ul><li><b>Kompatibilität:</b> Passend für Palmcare ECO und weitere Pulsoximeter</li><li><b>Messbereich:</b> Erfassung der Sauerstoffsättigung (SpO₂) und Pulsrate</li><li><b>Sensorart:</b> Fingerclip-Sensor für Kinder</li><li><b>Anschluss:</b> Standard-SpO₂-Schnittstelle</li></ul>
+
+
+
+
+";69;82.11;51.75;61.5825;0195903a857073348ae7250001a512bd;19;"Standard rate";0195af0048e07d5295ffb9e106279739;https://dormed24.de/media/97/e9/ae/1742397789/spo2-fingerclip-kinder.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195b2aacabd72d9ab832e3800ff99e6;0195903ca61071338e3fbc42bb6c843a;;
+0195adf134e97855a8f24333d6d584bc;;SW10019;1;100;"SpO₂ Softtouchsensor Kinder";"<p></p><ul><li><b>Kompatibilität:</b> Passend für Palmcare ECO und weitere Pulsoximeter</li><li><b>Messbereich:</b> Erfassung der Sauerstoffsättigung (SpO₂) und Pulsrate</li><li><b>Sensorart:</b> Softtouch-Sensor für Kinder</li><li><b>Anschluss:</b> Standard-SpO₂-Schnittstelle</li></ul>
+
+
+";69;82.11;51.75;61.5825;0195903a857073348ae7250001a512bd;19;"Standard rate";0195af0048e17cf2849a5f16d21e9a37;https://dormed24.de/media/4a/9e/81/1742397793/spo2-softtouchsensor-kinder-frontansicht.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195b2aacabd72d9ab832e3800ff99e6;0195903ca61071338e3fbc42bb6c843a;;
+0195adf4a5d174b69a7805ae03c77d96;;SW10020;1;100;"SpO₂ Y-Ohr-/Wrapsensor";"<p></p><ul><li><b>Kompatibilität:</b> Passend für Palmcare ECO und weitere Pulsoximeter</li><li><b>Messbereich:</b> Erfassung der Sauerstoffsättigung (SpO₂) und Pulsrate</li><li><b>Sensorart:</b> Y-Sensor zur Messung am Ohr oder als Wrapsensor</li><li><b>Anschluss:</b> Standard-SpO₂-Schnittstelle</li></ul>
+
+
+
+";69;82.11;51.75;61.5825;0195903a857073348ae7250001a512bd;19;"Standard rate";0195af0048e2752cafb3c16099d8a33e;https://dormed24.de/media/2f/d1/94/1742397795/spo2-y-ohr-wrapsensor-frontansicht.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195b2aacabd72d9ab832e3800ff99e6;0195903ca61071338e3fbc42bb6c843a;;
+0195ae0203b97ff292a7353bbe294254;;SW10021;1;100;"SpO₂ Wrapsensor Einweg (10-er Pack)";"<p></p><ul><li><b>Kompatibilität:</b> Passend für Palmcare ECO und weitere Pulsoximeter</li><li><b>Messbereich:</b> Erfassung der Sauerstoffsättigung (SpO₂) und Pulsrate</li><li><b>Sensorart:</b> Einweg-Wrapsensor (10 Stück)</li><li><b>Anschluss:</b> Standard-SpO₂-Schnittstelle</li></ul>
+
+
+
+";79.9;95.081;59.9;71.281;0195903a857073348ae7250001a512bd;19;"Standard rate";0195af0048e2752cafb3c15f909b4e13;https://dormed24.de/media/c0/5a/0e/1742397794/spo2-y-ohr-wrapsensor-einweg.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195b2aacabd72d9ab832e3800ff99e6;0195903ca61071338e3fbc42bb6c843a;;
+0195ae0cfdff7da69956d358b68e884c;;SW10022;1;100;"SpO₂ Verlängerungskabel DEC8";"<p></p><ul><li><b>Kompatibilität:</b> Passend für Palmcare ECO und weitere Pulsoximeter</li><li><b>Verwendung:</b> Verlängerung für SpO₂-Sensoren</li><li><b>Länge:</b> Standardmaß für flexible Anwendung</li><li><b>Anschluss:</b> DEC8-Schnittstelle</li></ul>
+
+
+
+";69.9;83.181;51.75;61.5825;0195903a857073348ae7250001a512bd;19;"Standard rate";0195af0048e17cf2849a5f18a8922588;https://dormed24.de/media/33/fa/5b/1742397790/spo2-verlangerungskabel-dec8.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195b2aacabd72d9ab832e3800ff99e6;0195903ca61071338e3fbc42bb6c843a;;
+0195ae16cc4d78858f634382aba45e8e;;SW10023;1;100;"SpO₂ Thermometer-Schutzkappen (VPE/30 Stk.)";"<p></p><ul><li><b>Kompatibilität:</b> Passend für Palmcare ECO</li><li><b>Verwendung:</b> Schutzkappen für Thermometer-Funktion</li><li><b>Verpackungseinheit:</b> 30 Stück</li><li><b>Material:</b> Hygienischer Einweggebrauch</li></ul>
+
+
+";4.99;5.9381;3.74;4.4506;0195903a857073348ae7250001a512bd;19;"Standard rate";0195af0048e17cf2849a5f17ac190300;https://dormed24.de/media/88/d1/6f/1742397793/spo2-thermometer-schutzkappen-frontansicht.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195b2aacabd72d9ab832e3800ff99e6;0195903ca61071338e3fbc42bb6c843a;;
+0195ae2af63e7cefa465ec002e5c5017;;SW10024;1;100;"PalmCare Pro Netzteil";"<p></p><ul><li><b>Kompatibilität:</b> Passend für Palmcare ECO und Palmcare Pro</li><li><b>Stromversorgung:</b> Netzteil zur direkten Stromversorgung</li><li><b>Anschluss:</b> Standard-Ladeanschluss</li><li><b>Verwendung:</b> Ersatz- oder Zweitnetzteil</li></ul>
+
+
+";69;82.11;51.75;61.5825;0195903a857073348ae7250001a512bd;19;"Standard rate";0195af0048e07d5295ffb9dfa4095836;https://dormed24.de/media/3a/e4/71/1742397792/palmcare-pronetzteil.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195b2aacabd72d9ab832e3800ff99e6;0195903ca61071338e3fbc42bb6c843a;;
+0195ae2d774f7a67aa97ada3a3e40ccc;;SW10025;1;100;"PalmCare Pro Stativbefestigung";"<p></p><ul><li><b>Kompatibilität:</b> Passend für Palmcare ECO und Palmcare Pro</li><li><b>Verwendung:</b> Fixierung des Geräts auf einem Stativ</li><li><b>Material:</b> Robuste und langlebige Konstruktion</li><li><b>Befestigung:</b> Schraubmechanismus für sicheren Halt</li></ul>
+
+
+
+";19.9;23.681;14.93;17.7667;0195903a857073348ae7250001a512bd;19;"Standard rate";0195adaa231178f19cc6e834d98c0788;https://dormed24.de/media/bf/58/72/1742397474/palmcare-pro-stativbefestigung.png?ts=1742398395;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195b2aacabd72d9ab832e3800ff99e6;0195903ca61071338e3fbc42bb6c843a;;
+0195af29a25974d0a9d1e1aa71f3ae5d;;SW10014;1;100;"Palmcare Pro Hand-Pulsoximeter (Farb-Display)";"<p><b>Funktion &amp; technische Daten:</b></p>
+<ul>
+    <li><b>Display:</b> 3"" LCD Farb-Display</li>
+    <li><b>Messparameter:</b> SpO₂, Pulsrate, Alarmlimits, Pulswelle, Perfusionsindex, Batteriestatus, Alarmstatus</li>
+    <li><b>Speicher:</b> Trendaufzeichnung</li>
+    <li><b>Nutzergruppen:</b> Geeignet für Erwachsene, Kinder &amp; Säuglinge</li>
+    <li><b>Stromversorgung:</b> 4 x AA-Batterien</li>
+    <li><b>Alarm:</b> Einstellbare Grenzwerte, akustische &amp; optische Signale</li>
+    <li><b>Zubehör:</b> SpO₂-Sensor für Erwachsene, Schutzhülle, 4 x AA-Batterien</li>
+</ul>
+";249;296.31;169.32;201.4908;0195903a857073348ae7250001a512bd;19;"Standard rate";0195af0048df74e8814a8c151486b2ca;https://dormed24.de/media/e3/cd/e2/1742397794/palmcare-pro-hand-pulsoximeter-frontansicht.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195b2aacabd72d9ab832e3800ff99e6;0195903ca61071338e3fbc42bb6c843a;;
+0195afb687c876b0a46925f356f68ce3;;SW10026;1;100;"Biolight M860 | SpO₂ + NiBP";"<p><b>Funktion &amp; technische Daten:</b></p>
+<ul>
+    <li><b>Messfunktionen:</b> Handheld-Monitor zur SpO₂- und NiBP-Messung</li>
+    <li><b>Display:</b> 4,3"" Farb-Touchscreen</li>
+    <li><b>Speicher:</b> Trendaufzeichnung &amp; Werteübersicht exportierbar</li>
+    <li><b>Stromversorgung:</b> Akkubetrieben</li>
+    <li><b>Sicherheitsmerkmale:</b> Defibrillationsschutz</li>
+    <li><b>Zubehör:</b>
+        <ul>
+            <li>SpO₂ Fingerclip</li>
+            <li>USB-Kabel</li>
+            <li>Netzadapter</li>
+            <li>NiBP-Manschette (Umfang 25-35 cm)</li>
+            <li>Gebrauchsanweisung in Deutsch</li>
+        </ul>
+    </li>
+</ul>
+";575;684.25;431.25;513.1875;0195903a857073348ae7250001a512bd;19;"Standard rate";019595bbe6e0791db43a6de233cf69e7;https://dormed24.de/media/15/65/07/1741973902/blt-m860.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195b2aacabd72d9ab832e3800ff99e6;0195903ca61071338e3fbc42bb6c843a;;
+0195b2ac7f70715592d15963b8290d6d;;SW10027;1;100;"4 MHz Sonde (Hi-Dop)";"<ul>
+    <li><strong>Frequenz:</strong> 4 MHz</li>
+    <li><strong>Kompatibilität: </strong>Hi-Dop Gefäßdoppler</li>
+</ul>
+";69;82.11;51.75;61.5825;0195903a857073348ae7250001a512bd;19;"Standard rate";0195af0048dd7540aef236b7e24af5cd;https://dormed24.de/media/d3/65/94/1742397790/hi-dop-sonden.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195b2aacabd72d9ab832e3800ff99e6;0195903ca61071338e3fbc42bb6c843a;;
+0195b2b0582a7374a9a7267e4d8a1f60;;SW10028;1;100;"5 MHz Sonde (Hi-Dop)";"<ul>
+    <li><strong>Frequenz:</strong> 5 MHz</li>
+    <li><strong>Kompatibilität:</strong> Hi-Dop Gefäßdoppler</li>
+</ul>";69;82.11;51.75;61.5825;0195903a857073348ae7250001a512bd;19;"Standard rate";0195af0048dd7540aef236b7e24af5cd;https://dormed24.de/media/d3/65/94/1742397790/hi-dop-sonden.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";;0195903ca61071338e3fbc42bb6c843a;;
+0195b2b22c6879d3b398013d627e899c;;SW10029;1;100;"8 MHz Sonde (Hi-Dop)";"<ul>
+    <li><strong>Frequenz:</strong> 8 MHz</li>
+    <li><strong>Kompatibilität: </strong>Hi-Dop Gefäßdoppler</li>
+</ul>
+";69;82.11;51.75;61.5825;0195903a857073348ae7250001a512bd;19;"Standard rate";0195af0048dd7540aef236b7e24af5cd;https://dormed24.de/media/d3/65/94/1742397790/hi-dop-sonden.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";;0195903ca61071338e3fbc42bb6c843a;;
+0195b380392178b1a7eeb462eabad5b6;;SW10030;1;100;"Multifunktionsdefibrillator/Monitor - defiMaster Standard";"<ul><li><strong>3/5-Ableitungs-EKG-Funktionen</strong> mit Zusatzfunktionen: SpO₂ (Nellcor) &amp; Schrittmacher</li>
+  <li><strong>Vier verschiedene Modus-Arten:</strong> Defibrillation, Monitor, AED, Stimulation</li>
+  <li><strong>Leistungsbereich:</strong> 1 bis 360 Joule, Patientensicherheit durch automatische Energieanpassung</li>
+  <li><strong>Patientenimpedanz:</strong> 25~200 Ohm, automatische Erkennung</li>
+  <li><strong>8,4""-TFT-LCD Display (800 x 600)</strong> für klare Darstellung der Messwerte</li>
+  <li><strong>Integrierter Drucker</strong> zur Dokumentation der Patientenüberwachung</li>
+  <li><strong>Akku:</strong> Hochleistungs-Li-Ionen-Batterie (14,5V, 6600mAh) für mobile Einsätze</li>
+  <li><strong>Standard-Zubehör:</strong> Pads, Batterie, Druckerpapier, EKG-Kabel, SpO₂-Sensor</li>
+  <li><strong>Optionale Tasche</strong> für den sicheren Transport erhältlich</li>
+</ul>
+";5900;7021;4425;5265.75;0195903a857073348ae7250001a512bd;19;"Standard rate";019595bbe6e173beb7b86884578bc282;https://dormed24.de/media/57/27/d2/1741973903/defimaster-me-pad.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195b38436c57a89918a343107ddfb91;0195903ca61071338e3fbc42bb6c843a;;
+0195b38497557706846ac215e5c34190;;SW10031;1;100;"Wandhalterung ME PAD";"<h2><span style=""font-size:16px;font-weight:normal;letter-spacing:0px;"">Die Wandhalterung ME PAD ermöglicht eine sichere und leicht zugängliche Aufbewahrung des ME PAD Defibrillators im Innenbereich.</span></h2>
+<ul>
+    <li>Passend für: ME PAD Defibrillator</li>
+    <li>Montage: Zur festen Installation an der Wand</li>
+    <li>Material: Robuste Metallkonstruktion</li>
+    <li>Inklusive: Schraubensatz für einfache Befestigung</li>
+    <li>Einsatzbereich: Innenräume</li></ul>
+";99;117.81;74.25;88.3575;0195903a857073348ae7250001a512bd;19;"Standard rate";019595bbe6e27a6bb6103e3ba3224201;https://dormed24.de/media/c5/0c/62/1741973902/wandhalterung-me-pad.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195b38436c57a89918a343107ddfb91;0195903ca61071338e3fbc42bb6c843a;;
+0195b39462be7f4b9dbd7806989b25f5;;SW10032;1;100;"ME PAD | Vollautomatischer Externer Defibrillator";"<h2><span style=""font-size:16px;font-weight:normal;letter-spacing:0px;"">Der ME PAD ist ein vollautomatischer Defibrillator für den schnellen und sicheren Einsatz in Notfallsituationen.</span></h2>
+<ul>
+    <li><b>Herstellergarantie:</b> 5 Jahre</li>
+    <li><b>Stand-by-Zeit:</b> Bis zu 5 Jahre oder bis zu 200 Schocks</li>
+    <li><b>Automatische Lautstärkeanpassung:</b> Optimale Verständlichkeit in jeder Umgebung</li>
+    <li><b>Militärstandard:</b> Erfüllt MIL-STD-810G / IP 55</li>
+    <li><b>Kindernotfallmodus:</b> Automatische Umschaltung für Patienten unter 25 kg ohne Elektrodenwechsel</li>
+    <li><b>Standard-Zubehör:</b> 1 x Erwachsenen-Elektrodenpaar, 1 x Transporttasche, 1 x Batterie</li></ul>
+";1049;1248.31;713.32;848.8508;0195903a857073348ae7250001a512bd;19;"Standard rate";019595bbe6e173beb7b8688574fb02d7;https://dormed24.de/media/4a/a3/cf/1741973902/me-pad.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195b38436c57a89918a343107ddfb91;0195903ca61071338e3fbc42bb6c843a;;
+0195b397124976309a7c4c27b6604096;;SW10033;1;99;"Wandkasten Metall mit Alarm (Innenbereich)";"<h2><span style=""font-size:16px;font-weight:normal;letter-spacing:0px;"">Der Wandkasten aus Metall bietet sicheren Schutz für Defibrillatoren und ist mit akustischem und visuellem Alarm ausgestattet.</span></h2>
+<ul>
+    <li><b>Material:</b> Robustes Metallgehäuse</li>
+    <li><b>Alarmsystem:</b> Akustischer und visueller Alarm für erhöhte Sicherheit</li>
+    <li><b>Kompatibilität:</b> Passend für ME PAD &amp; ECO-AED</li>
+    <li><b>Abmessungen:</b> 
+        <ul>
+            <li>Breite: 37 cm</li>
+            <li>Höhe: 37 cm (44 cm mit Lampe)</li>
+            <li>Tiefe: 17 cm</li>
+        </ul>
+    </li>
+    <li><b>Gewicht:</b> 4,5 kg +/- 0,5 kg</li></ul>
+";159;189.21;119.25;141.9075;0195903a857073348ae7250001a512bd;19;"Standard rate";019595bbe6e27a6bb6103e3c548f1165;https://dormed24.de/media/dd/44/54/1741973901/wandkasten-me-pad.png?ts=1742399711;;;0195a457699276a1bd008adbd0886fd4;"medical ECONET";0195b38436c57a89918a343107ddfb91;0195903ca61071338e3fbc42bb6c843a;;
+019ed0ae3a2a7e94a154b161accff6cb;;SW100023;1;0;Ultraschallgel;;6.5;7.735;0;0;0195903a857073348ae7250001a512bd;19;"Standard rate";;;;;;;019ed0aa325773a2a89d1b8a81622229;0195903ca61071338e3fbc42bb6c843a;;

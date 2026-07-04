@@ -5,26 +5,327 @@ namespace Database\Seeders;
 use App\Models\Category;
 use App\Models\Manufacturer;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 class ProductSeeder extends Seeder
 {
     use WithoutModelEvents;
 
+    private const CSV_PATH = '_SHOPWARE-EXPORTS/aktuellen produkte.csv';
+
+    private const BASE_CATEGORIES = [
+        ['name' => 'Ultraschallsysteme', 'slug' => 'ultraschallsysteme', 'description' => null],
+        ['name' => 'Zubehoer', 'slug' => 'zubehoer', 'description' => null],
+        ['name' => 'Verbrauchsartikel', 'slug' => 'verbrauchsartikel', 'description' => null],
+    ];
+
     public function run(): void
     {
-        $categories = collect([
-            ['name' => 'Ultraschallsysteme', 'slug' => 'ultraschallsysteme', 'description' => null],
-            ['name' => 'Zubehör', 'slug' => 'zubehoer', 'description' => null],
-            ['name' => 'Verbrauchsartikel', 'slug' => 'verbrauchsartikel', 'description' => null],
-        ])->map(fn (array $data) => Category::create($data));
+        $rows = $this->readCsvRows(base_path(self::CSV_PATH));
 
-        $manufacturers = Manufacturer::factory(5)->create();
+        if ($rows === []) {
+            $this->command?->warn('Keine Produktdaten in der CSV gefunden.');
 
-        Product::factory(30)->recycle($manufacturers)->make()->each(function ($product) use ($categories) {
-            $product->category_id = $categories->random()->id;
-            $product->save();
-        });
+            return;
+        }
+
+        // Seeder soll bei wiederholten Runs denselben Showcase-Stand herstellen.
+        Storage::disk('public')->deleteDirectory('products');
+        ProductVariant::query()->delete();
+        Product::query()->delete();
+        Manufacturer::query()->delete();
+        Category::query()->delete();
+
+        $categories = collect(self::BASE_CATEGORIES)
+            ->mapWithKeys(fn (array $category) => [
+                $category['slug'] => Category::create($category),
+            ]);
+
+        $accessoryCategoryId = $categories['zubehoer']->id ?? null;
+
+        foreach ($rows as $row) {
+            $manufacturer = $this->resolveManufacturer($row['manufacturer_name'] ?? null);
+
+            $product = Product::create([
+                'manufacturer_id' => $manufacturer?->id,
+                'category_id' => $accessoryCategoryId,
+                'name' => trim((string) ($row['name'] ?? '')),
+                'description' => $this->nullableString($row['description'] ?? null),
+                'price' => $this->decimal($row['price_gross'] ?? null),
+                'is_available' => (bool) ((int) ($row['active'] ?? 0)),
+            ]);
+
+            $this->seedCoverImage($product, $row['cover_media_url'] ?? null);
+        }
+
+        $manualProductCount = $this->seedManualProducts($categories);
+
+        $this->command?->info(sprintf('%d Produkte aus Shopware-CSV importiert und ergaenzt.', count($rows) + $manualProductCount));
+    }
+
+    /**
+     * @return list<array<string, string|null>>
+     */
+    private function readCsvRows(string $path): array
+    {
+        if (! is_file($path)) {
+            throw new \RuntimeException("CSV-Datei nicht gefunden: {$path}");
+        }
+
+        $handle = fopen($path, 'rb');
+
+        if ($handle === false) {
+            throw new \RuntimeException("CSV-Datei konnte nicht geoeffnet werden: {$path}");
+        }
+
+        try {
+            $header = fgetcsv($handle, 0, ';');
+
+            if ($header === false) {
+                return [];
+            }
+
+            $header = array_map(function ($value) {
+                $value = (string) $value;
+
+                return preg_replace('/^\xEF\xBB\xBF/', '', $value) ?? $value;
+            }, $header);
+
+            $rows = [];
+
+            while (($data = fgetcsv($handle, 0, ';')) !== false) {
+                if ($data === [null] || $data === []) {
+                    continue;
+                }
+
+                $row = [];
+
+                foreach ($header as $index => $column) {
+                    $row[$column] = $data[$index] ?? null;
+                }
+
+                if (blank($row['name'] ?? null)) {
+                    continue;
+                }
+
+                $rows[] = $row;
+            }
+
+            return $rows;
+        } finally {
+            fclose($handle);
+        }
+    }
+
+    private function resolveManufacturer(?string $name): ?Manufacturer
+    {
+        $name = $this->nullableString($name);
+
+        if ($name === null) {
+            return null;
+        }
+
+        return Manufacturer::firstOrCreate([
+            'name' => $name,
+        ]);
+    }
+
+    /**
+     * @param \Illuminate\Support\Collection<string, Category> $categories
+     */
+    private function seedManualProducts($categories): int
+    {
+        $manufacturer = Manufacturer::firstOrCreate([
+            'name' => 'Sony',
+        ]);
+
+        $categoryId = $categories['verbrauchsartikel']->id ?? null;
+
+        $this->createManualProduct(
+            manufacturer: $manufacturer,
+            categoryId: $categoryId,
+            name: 'Druckpapier UPP-110HG',
+            description: 'Das UPP-110HG von Sony ist ein medizinisches Druckpapier fuer den Einsatz in der medizinischen Bildgebung. Es wird hauptsaechlich in der Ultraschalluntersuchung verwendet und ermoeglicht die Erstellung von Ausdrucken im Format A6 Typ V. Dieses Verbrauchsmaterial erfuellt die Anforderungen von medizinischen Fachkraeften, die Drucksysteme zur Wiedergabe diagnostischer Bilder einsetzen.',
+            imageUrl: 'https://d17eythm3w95tp.cloudfront.net/media/201275/conversions/upp-110hg-medium.png'
+        );
+
+        $this->createManualProduct(
+            manufacturer: $manufacturer,
+            categoryId: $categoryId,
+            name: 'Druckerpapier UPP-110S',
+            description: "A6-Standarddruckerpapier (Typ I) fuer den Schwarzweissdruck mit den Druckerserien UP-899 / 898 / 897.\n\nDieses Produkt ist verfuegbar in Einheiten von zehn Rollen pro Karton.\n\nHauptsaechlich verwendet bei Ultraschallanwendungen sowie in der Zahnmedizin und der Mikroskopie.\n\nRollenmasse\n110 mm (B) x 20 m\n\nBestelleinheit\n10 Rollen\n\nDruckmenge\n217 Druckseiten (mit UP-895CE)",
+            imageUrl: 'https://www.sony.com/image/6b41ecf23ba7ac1ebb1759c330667006?fmt=jpeg&wid=558&hei=336'
+        );
+
+        $mindrayManufacturer = Manufacturer::firstOrCreate([
+            'name' => 'Mindray',
+        ]);
+
+        $portableUltrasound = Product::create([
+            'manufacturer_id' => $mindrayManufacturer->id,
+            'category_id' => $categories['ultraschallsysteme']->id ?? null,
+            'name' => 'tragbares Ultraschallgeraet mindray MU7',
+            'description' => "Mindray MU7 - leichtes Sonographiegeraet fuer mobile Einsaetze mit starker Bildgebung und ausdauerndem Akkubetrieb\n\nDas mindray MU7 ist ein portables Ultraschallgeraet fuer Praxen und mobile Einsatzbereiche, in denen Flexibilitaet, Zuverlaessigkeit und einfache Bedienung entscheidend sind. Mit einem Gewicht von nur rund 2 kg, einer Akkulaufzeit von mehr als 4 Stunden und einer robusten, stossfesten Bauweise eignet sich dieses Sonographiegeraet besonders fuer wechselnde Untersuchungsorte und den taeglichen Einsatz im Praxisalltag. Die nano ZST+ Plattform unterstuetzt eine leistungsfaehige Bildverarbeitung, waehrend Funktionen wie iTouch, iWorks und Smart Track den Workflow spuergbar erleichtern. Das 13,3-Zoll-Touchdisplay, das versiegelte Bedienfeld und die integrierte WLAN-Funktion machen das MU7 zu einem durchdachten Ultraschallgeraet fuer Anwender, die mobil arbeiten und dabei nicht auf Komfort verzichten moechten.\n\nWas zeichnet das MU7 Ultraschallgeraet besonders aus?\n\nBesonders mobil im Praxisalltag: Mit nur rund 2 kg laesst sich das Ultraschallgeraet bequem transportieren und flexibel an verschiedenen Einsatzorten nutzen.\n\nMehr Unabhaengigkeit im Arbeitsablauf: Der Li-Ionen-Akku ermoeglicht einen netzunabhaengigen Betrieb von bis zu 4 Stunden. Das ist ideal fuer Hausbesuche, flexible Raumwechsel oder kurze Untersuchungen ohne festen Geraeteplatz.\n\nEinfach und effizient zu bedienen: Das MU7 kombiniert Touchdisplay, physische Tasten und Tastatur. Individuell anpassbare Kurzbefehle helfen dabei, Untersuchungen schneller und strukturierter durchzufuehren.\n\nZuverlaessige Bildqualitaet im Alltag: Die nano ZST+ Plattform sowie Funktionen wie iTouch, PSH, iBeam und iClear unterstuetzen eine klare Bilddarstellung und eine schnelle Bildoptimierung.\n\nPraxisgerecht und hygienisch: Das versiegelte Bedienfeld erleichtert Reinigung und Desinfektion und unterstuetzt damit einen sicheren Einsatz im medizinischen Alltag.\n\nGut in bestehende Ablaeufe integrierbar: Mit DICOM, WLAN, Netzwerkanschluss, HDMI und 3 USB 3.0 Ports laesst sich das Sonographiegeraet gut in bestehende Praxisstrukturen einbinden.\n\nKV-anmeldefaehig\n\nDas mindray MU7 Ultraschallgeraet erfuellt die wichtigen Voraussetzungen fuer die Anmeldung im KV-Umfeld und ist damit auch fuer niedergelassene Praxen eine interessante mobile Loesung. Die konkrete Genehmigung erfolgt durch die jeweils zustaendige KV.",
+            'price' => $this->decimal(4390),
+            'is_available' => true,
+        ]);
+
+        $portableUltrasound->variants()->create([
+            'label' => 'ohne Geraetewagen',
+            'price' => $this->decimal(4390),
+            'sort_order' => 0,
+            'is_default' => true,
+        ]);
+
+        $portableUltrasound->variants()->create([
+            'label' => 'mit Geraetewagen',
+            'price' => $this->decimal(5390),
+            'sort_order' => 1,
+            'is_default' => false,
+        ]);
+
+        $this->seedProductImages($portableUltrasound, [
+            'https://static.wixstatic.com/media/30d618_1b23e23af3a34977867a130bbcc6d5c4~mv2.webp/v1/fill/w_638,h_551,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/30d618_1b23e23af3a34977867a130bbcc6d5c4~mv2.webp',
+            'https://static.wixstatic.com/media/30d618_c7a6dee259f14c6caa4f71249c0d2120~mv2.webp/v1/fill/w_638,h_551,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/30d618_c7a6dee259f14c6caa4f71249c0d2120~mv2.webp',
+        ]);
+
+        return 3;
+    }
+
+    private function createManualProduct(
+        Manufacturer $manufacturer,
+        ?int $categoryId,
+        string $name,
+        string $description,
+        string $imageUrl,
+    ): void {
+        $product = Product::create([
+            'manufacturer_id' => $manufacturer->id,
+            'category_id' => $categoryId,
+            'name' => $name,
+            'description' => $description,
+            'price' => $this->decimal(10),
+            'is_available' => true,
+        ]);
+
+        $product->variants()->create([
+            'label' => '1er Pack',
+            'price' => $this->decimal(10),
+            'sort_order' => 0,
+            'is_default' => true,
+        ]);
+
+        $product->variants()->create([
+            'label' => '12er Pack',
+            'price' => $this->decimal(100),
+            'sort_order' => 1,
+            'is_default' => false,
+        ]);
+
+        $this->seedCoverImage($product, $imageUrl);
+    }
+
+    private function seedCoverImage(Product $product, ?string $url): void
+    {
+        $url = $this->nullableString($url);
+
+        if ($url === null) {
+            return;
+        }
+
+        try {
+            $response = Http::timeout(30)->retry(2, 500)->get($url);
+        } catch (\Throwable $e) {
+            $this->command?->warn("Bilddownload fehlgeschlagen fuer {$product->name}: {$e->getMessage()}");
+
+            return;
+        }
+
+        if (! $response->successful()) {
+            $this->command?->warn("Bilddownload fehlgeschlagen fuer {$product->name}: HTTP {$response->status()}");
+
+            return;
+        }
+
+        $extension = $this->guessExtension($url, $response->header('Content-Type'));
+        $path = sprintf('products/%d/cover.%s', $product->id, $extension);
+
+        Storage::disk('public')->put($path, $response->body());
+
+        $product->images()->create([
+            'path' => $path,
+            'sort_order' => 0,
+        ]);
+    }
+
+    /**
+     * @param list<string> $urls
+     */
+    private function seedProductImages(Product $product, array $urls): void
+    {
+        foreach ($urls as $index => $url) {
+            $url = $this->nullableString($url);
+
+            if ($url === null) {
+                continue;
+            }
+
+            try {
+                $response = Http::timeout(30)->retry(2, 500)->get($url);
+            } catch (\Throwable $e) {
+                $this->command?->warn("Bilddownload fehlgeschlagen fuer {$product->name}: {$e->getMessage()}");
+
+                continue;
+            }
+
+            if (! $response->successful()) {
+                $this->command?->warn("Bilddownload fehlgeschlagen fuer {$product->name}: HTTP {$response->status()}");
+
+                continue;
+            }
+
+            $extension = $this->guessExtension($url, $response->header('Content-Type'));
+            $path = sprintf('products/%d/image-%d.%s', $product->id, $index + 1, $extension);
+
+            Storage::disk('public')->put($path, $response->body());
+
+            $product->images()->create([
+                'path' => $path,
+                'sort_order' => $index,
+            ]);
+        }
+    }
+
+    private function guessExtension(string $url, ?string $contentType): string
+    {
+        $path = parse_url($url, PHP_URL_PATH) ?: '';
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+        if (in_array($extension, ['jpg', 'jpeg', 'png', 'webp', 'gif'], true)) {
+            return $extension === 'jpeg' ? 'jpg' : $extension;
+        }
+
+        return match ($contentType) {
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            'image/gif' => 'gif',
+            default => 'jpg',
+        };
+    }
+
+    private function decimal(mixed $value): string
+    {
+        return number_format((float) $value, 2, '.', '');
+    }
+
+    private function nullableString(mixed $value): ?string
+    {
+        $value = is_string($value) ? trim($value) : null;
+
+        return $value === '' ? null : $value;
     }
 }
