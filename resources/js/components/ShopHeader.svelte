@@ -35,6 +35,7 @@
         id: number;
         name: string;
         price: string;
+        image_url: string | null;
     };
 
     let query = $state('');
@@ -173,8 +174,16 @@
                                             onclick={() => (isOpen = false)}
                                         >
                                             <div
-                                                class="size-9 shrink-0 rounded bg-gray-100"
-                                            ></div>
+                                                class="size-9 shrink-0 overflow-hidden rounded bg-gray-100"
+                                            >
+                                                {#if product.image_url}
+                                                    <img
+                                                        src={product.image_url}
+                                                        alt={product.name}
+                                                        class="size-full object-cover object-center"
+                                                    />
+                                                {/if}
+                                            </div>
                                             <span
                                                 class="flex-1 truncate text-sm"
                                             >

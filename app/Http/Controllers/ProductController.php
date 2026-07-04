@@ -79,10 +79,17 @@ class ProductController extends Controller
             return response()->json(['results' => [], 'total' => 0]);
         }
 
-        $results = Product::where('name', 'like', "%{$query}%")
+        $results = Product::with(['images' => fn ($q) => $q->where('sort_order', 0)])
+            ->where('name', 'like', "%{$query}%")
             ->orderBy('name')
             ->limit(5)
-            ->get(['id', 'name', 'price']);
+            ->get(['id', 'name', 'price'])
+            ->map(fn (Product $product) => [
+                'id' => $product->id,
+                'name' => $product->name,
+                'price' => $product->price,
+                'image_url' => $product->images->first()?->url,
+            ]);
 
         $total = Product::where('name', 'like', "%{$query}%")->count();
 
