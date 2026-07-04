@@ -253,7 +253,7 @@
                                         type="button"
                                         onclick={() => (activeImageIndex = i)}
                                         class={cn(
-                                            'aspect-square overflow-hidden rounded-2xl border bg-[#f6f7f8] p-1.5 transition-colors',
+                                            'aspect-square overflow-hidden rounded-2xl border bg-[#f6f7f8] transition-colors',
                                             activeImageIndex === i
                                                 ? 'border-[#0d1f44]'
                                                 : 'border-gray-200 hover:border-gray-300',
