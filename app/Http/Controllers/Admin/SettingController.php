@@ -10,19 +10,14 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
-use Stripe\Exception\AuthenticationException;
-use Stripe\StripeClient;
 
 class SettingController extends Controller
 {
     private const SENSITIVE_KEYS = [
-        'stripe.sandbox.secret_key',
-        'stripe.sandbox.webhook_secret',
-        'stripe.live.secret_key',
-        'stripe.live.webhook_secret',
         'mail.smtp_password',
         'paypal.sandbox.client_secret',
         'paypal.live.client_secret',
@@ -59,44 +54,7 @@ class SettingController extends Controller
             'hasSensitive' => collect(self::SENSITIVE_KEYS)
                 ->mapWithKeys(fn ($k) => [$k => Setting::get($k) !== null])
                 ->all(),
-            'stripeWebhookUrl' => route('stripe.webhook'),
             'paymentMode' => PaymentMode::current(),
-        ]);
-    }
-
-    public function index(): Response
-    {
-        $raw = Setting::all(['key', 'value'])->pluck('value', 'key');
-
-        $settings = [
-            'shop.name' => $raw->get('shop.name', ''),
-            'shop.email' => $raw->get('shop.email', ''),
-            'shop.phone' => $raw->get('shop.phone', ''),
-            'shop.fax' => $raw->get('shop.fax', ''),
-            'shop.bank_account_holder' => $raw->get('shop.bank_account_holder', ''),
-            'shop.bank_iban' => $raw->get('shop.bank_iban', ''),
-            'shop.bank_bic' => $raw->get('shop.bank_bic', ''),
-            'shop.bank_name' => $raw->get('shop.bank_name', ''),
-            'mail.smtp_host' => $raw->get('mail.smtp_host', ''),
-            'mail.smtp_port' => $raw->get('mail.smtp_port', ''),
-            'mail.smtp_user' => $raw->get('mail.smtp_user', ''),
-            'mail.smtp_password' => '',
-            'stripe.publishable_key' => $raw->get('stripe.publishable_key', ''),
-            'stripe.secret_key' => '',
-            'stripe.webhook_secret' => '',
-        ];
-
-        foreach (self::SENSITIVE_KEYS as $key) {
-            $decrypted = Setting::get($key);
-            $settings[$key] = $decrypted ? '••••••••' : '';
-        }
-
-        return Inertia::render('Admin/Settings/Index', [
-            'settings' => $settings,
-            'hasSensitive' => collect(self::SENSITIVE_KEYS)
-                ->mapWithKeys(fn ($k) => [$k => Setting::get($k) !== null])
-                ->all(),
-            'webhookUrl' => route('stripe.webhook'),
         ]);
     }
 
@@ -108,7 +66,7 @@ class SettingController extends Controller
         ]);
 
         foreach ($data['settings'] as $key => $value) {
-            if (in_array($key, self::SENSITIVE_KEYS, true) && $value === '••••••••') {
+            if (in_array($key, self::SENSITIVE_KEYS, true) && ($value === '••••••••' || $value === '')) {
                 continue;
             }
 
@@ -139,29 +97,9 @@ class SettingController extends Controller
 
             return response()->json(['message' => "Testmail an {$smtpUser} versendet."]);
         } catch (\Throwable $e) {
-            return response()->json(['message' => 'Fehler: '.$e->getMessage()], 422);
-        }
-    }
+            Log::error('SMTP connection test failed', ['exception' => $e]);
 
-    public function checkStripe(): JsonResponse
-    {
-        $key = PaymentMode::isLive()
-            ? Setting::get('stripe.live.secret_key')
-            : Setting::get('stripe.sandbox.secret_key');
-
-        if (! $key) {
-            return response()->json(['message' => 'Kein Secret Key konfiguriert.'], 422);
-        }
-
-        try {
-            $stripe = new StripeClient($key);
-            $stripe->balance->retrieve();
-
-            return response()->json(['message' => 'Verbindung erfolgreich.']);
-        } catch (AuthenticationException) {
-            return response()->json(['message' => 'Ungültiger API-Key.'], 422);
-        } catch (\Throwable $e) {
-            return response()->json(['message' => 'Fehler: '.$e->getMessage()], 422);
+            return response()->json(['message' => 'SMTP-Verbindung fehlgeschlagen. Prüfen Sie die Konfiguration.'], 422);
         }
     }
 
@@ -218,13 +156,7 @@ class SettingController extends Controller
             'mail.smtp_password' => '',
             'shop.notification_emails' => $raw->get('shop.notification_emails', ''),
             'payment.mode' => $raw->get('payment.mode', PaymentMode::current()),
-            'payment.provider' => $raw->get('payment.provider', 'stripe'),
-            'stripe.sandbox.publishable_key' => $raw->get('stripe.sandbox.publishable_key', ''),
-            'stripe.sandbox.secret_key' => '',
-            'stripe.sandbox.webhook_secret' => '',
-            'stripe.live.publishable_key' => $raw->get('stripe.live.publishable_key', ''),
-            'stripe.live.secret_key' => '',
-            'stripe.live.webhook_secret' => '',
+            'payment.provider' => $raw->get('payment.provider', 'paypal'),
             'paypal.sandbox.client_id' => $raw->get('paypal.sandbox.client_id', ''),
             'paypal.sandbox.merchant_id' => $raw->get('paypal.sandbox.merchant_id', ''),
             'paypal.sandbox.client_secret' => '',

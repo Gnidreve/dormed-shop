@@ -139,6 +139,34 @@ class CheckoutFlowTest extends TestCase
         $this->assertSame(0, Order::query()->count());
     }
 
+    public function test_submit_rejects_non_invoice_payment_methods(): void
+    {
+        $customer = Customer::factory()->create();
+        $shipping = ShippingMethod::factory()->create(['price' => '0.00']);
+        $product = Product::factory()->create(['price' => '10.00']);
+
+        $this->actingAs($customer)
+            ->withSession([
+                'cart' => [
+                    'items' => [
+                        $product->id => [
+                            'quantity' => 1,
+                            'unit_price' => '10.00',
+                            'name' => $product->name,
+                            'product_number' => (string) $product->id,
+                        ],
+                    ],
+                    'shipping_method' => (string) $shipping->id,
+                    'payment_method' => 'paypal',
+                    'shipping_address' => $this->completeAddress(),
+                ],
+            ])
+            ->post(route('checkout.submit'), ['agreed_to_terms' => true])
+            ->assertSessionHasErrors('payment_method');
+
+        $this->assertSame(0, Order::query()->count());
+    }
+
     public function test_success_page_renders_for_own_order(): void
     {
         $customer = Customer::factory()->create();

@@ -13,36 +13,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
-use Stripe\StripeClient;
 
 class CheckoutController extends Controller
 {
-    private const ADDRESS_FIELDS = [
-        'shipping_address.company',
-        'shipping_address.salutation',
-        'shipping_address.first_name',
-        'shipping_address.last_name',
-        'shipping_address.street',
-        'shipping_address.house_number',
-        'shipping_address.address_line2',
-        'shipping_address.zip',
-        'shipping_address.city',
-        'shipping_address.country',
-        'shipping_address.phone',
-        'billing_same_as_shipping',
-        'billing_address.company',
-        'billing_address.salutation',
-        'billing_address.first_name',
-        'billing_address.last_name',
-        'billing_address.street',
-        'billing_address.house_number',
-        'billing_address.address_line2',
-        'billing_address.zip',
-        'billing_address.city',
-        'billing_address.country',
-        'billing_address.phone',
-    ];
-
     public function __construct(
         private readonly CartService $cartService,
         private readonly OrderManager $orderManager,
@@ -150,7 +123,7 @@ class CheckoutController extends Controller
         return back();
     }
 
-    public function submit(PlaceOrderRequest $request): mixed
+    public function submit(PlaceOrderRequest $request): RedirectResponse
     {
         $cart = $this->cartService->cart();
 
@@ -162,17 +135,12 @@ class CheckoutController extends Controller
             return back()->withErrors(['shipping_address' => 'Bitte vervollständigen Sie Ihre Lieferadresse.']);
         }
 
-        $paymentMethodId = $cart['selected_payment_method']['id'] ?? '';
-
-        if ($paymentMethodId === 'invoice') {
-            return $this->submitInvoice($request, $cart);
+        // PayPal payments run through the PayPal JS SDK and PayPalController;
+        // this endpoint only finalizes invoice ("Kauf auf Rechnung") orders.
+        if (($cart['selected_payment_method']['id'] ?? '') !== 'invoice') {
+            return back()->withErrors(['payment_method' => 'Diese Zahlungsart wird über PayPal abgeschlossen.']);
         }
 
-        return $this->submitStripe($request, $cart);
-    }
-
-    private function submitInvoice(PlaceOrderRequest $request, array $cart): RedirectResponse
-    {
         $order = $this->orderManager->createFromCart($request->user(), $cart, 'invoice');
 
         // Invoice stays "pending" until payment arrives by bank transfer, but the
@@ -185,68 +153,14 @@ class CheckoutController extends Controller
         return to_route('checkout.success', ['order_id' => $order->id]);
     }
 
-    private function submitStripe(PlaceOrderRequest $request, array $cart): mixed
-    {
-        $order = $this->orderManager->createFromCart($request->user(), $cart, 'stripe');
-
-        $shippingAmount = (float) ($cart['shipping_total'] ?? 0);
-
-        $lineItems = collect($cart['items'])->map(fn (array $item): array => [
-            'price_data' => [
-                'currency' => 'eur',
-                'product_data' => ['name' => $item['name']],
-                'unit_amount' => (int) round((float) $item['unit_price'] * 100),
-            ],
-            'quantity' => $item['quantity'],
-        ])->all();
-
-        if ($shippingAmount > 0) {
-            $shippingLabel = $cart['selected_shipping_method']['label'] ?? 'Versand';
-            $lineItems[] = [
-                'price_data' => [
-                    'currency' => 'eur',
-                    'product_data' => ['name' => $shippingLabel],
-                    'unit_amount' => (int) round($shippingAmount * 100),
-                ],
-                'quantity' => 1,
-            ];
-        }
-
-        $stripeKey = PaymentMode::isLive()
-            ? Setting::get('stripe.live.secret_key')
-            : Setting::get('stripe.sandbox.secret_key');
-        $stripe = new StripeClient($stripeKey ?? config('services.stripe.key'));
-
-        $session = $stripe->checkout->sessions->create([
-            'mode' => 'payment',
-            'line_items' => $lineItems,
-            'customer_email' => $request->user()->email,
-            'metadata' => ['order_id' => $order->id],
-            'success_url' => route('checkout.success').'?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => route('checkout.index'),
-        ]);
-
-        $order->update(['stripe_checkout_session_id' => $session->id]);
-
-        $this->cartService->clear();
-
-        return Inertia::location($session->url);
-    }
-
     public function success(Request $request): Response|RedirectResponse
     {
-        $sessionId = $request->query('session_id');
         $paypalOrderId = $request->query('paypal_order_id');
         $orderId = $request->query('order_id');
 
         $order = null;
 
-        if ($sessionId) {
-            $order = Order::query()
-                ->with(['items', 'customer'])
-                ->where('stripe_checkout_session_id', $sessionId)
-                ->first();
-        } elseif ($paypalOrderId) {
+        if ($paypalOrderId) {
             $order = Order::query()
                 ->with(['items', 'customer'])
                 ->whereHas('payments', fn ($q) => $q->where('paypal_order_id', $paypalOrderId))

@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Mail;
 
 /**
  * Central place for turning a cart into an order and for the post-payment
- * notification flow. Used by every payment gateway (invoice, PayPal, Stripe)
+ * notification flow. Used by every payment method (invoice, PayPal)
  * so order creation and confirmation mails behave identically everywhere.
  */
 class OrderManager

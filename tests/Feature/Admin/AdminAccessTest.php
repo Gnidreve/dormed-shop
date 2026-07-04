@@ -24,7 +24,8 @@ class AdminAccessTest extends TestCase
             'customers index' => ['admin.customers.index'],
             'categories index' => ['admin.categories.index'],
             'manufacturers index' => ['admin.manufacturers.index'],
-            'settings index' => ['admin.settings.index'],
+            'settings general' => ['admin.settings.general'],
+            'settings payment' => ['admin.settings.payment'],
         ];
     }
 
@@ -42,6 +43,15 @@ class AdminAccessTest extends TestCase
         $this->actingAs($admin, 'admin')
             ->get(route($routeName))
             ->assertOk();
+    }
+
+    public function test_settings_index_redirects_to_general(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin, 'admin')
+            ->get(route('admin.settings.index'))
+            ->assertRedirect('/admin/settings/general');
     }
 
     public function test_customer_session_does_not_grant_admin_access(): void

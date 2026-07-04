@@ -41,16 +41,6 @@ class AppServiceProvider extends ServiceProvider
     protected function configureFromDatabase(): void
     {
         try {
-            $stripeKey = Setting::get('stripe.secret_key');
-            if ($stripeKey) {
-                config(['services.stripe.key' => $stripeKey]);
-            }
-
-            $stripePubKey = Setting::get('stripe.publishable_key');
-            if ($stripePubKey) {
-                config(['services.stripe.publishable_key' => $stripePubKey]);
-            }
-
             $smtpHost = Setting::get('mail.smtp_host');
             if ($smtpHost) {
                 config([

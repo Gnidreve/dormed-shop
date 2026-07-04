@@ -54,7 +54,7 @@ Route::middleware('ensure.admin')->prefix('admin')->name('admin.')->group(functi
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.status');
     Route::post('/orders/{order}/refund', [OrderController::class, 'refund'])->name('orders.refund');
-    Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+    Route::redirect('/settings', '/admin/settings/general')->name('settings.index');
     Route::get('/settings/general', [SettingController::class, 'showGeneral'])->name('settings.general');
     Route::get('/settings/mail', [SettingController::class, 'showMail'])->name('settings.mail');
     Route::get('/settings/payment', [SettingController::class, 'showPayment'])->name('settings.payment');
@@ -63,7 +63,6 @@ Route::middleware('ensure.admin')->prefix('admin')->name('admin.')->group(functi
     Route::post('/settings/shipping', [ShippingMethodController::class, 'store'])->name('settings.shipping.store');
     Route::put('/settings/shipping/{shippingMethod}', [ShippingMethodController::class, 'update'])->name('settings.shipping.update');
     Route::delete('/settings/shipping/{shippingMethod}', [ShippingMethodController::class, 'destroy'])->name('settings.shipping.destroy');
-    Route::get('/settings/stripe/check', [SettingController::class, 'checkStripe'])->name('settings.stripe.check');
-    Route::get('/settings/mail/check', [SettingController::class, 'checkMail'])->name('settings.mail.check');
-    Route::get('/settings/paypal/check', [SettingController::class, 'checkPayPal'])->name('settings.paypal.check');
+    Route::post('/settings/mail/check', [SettingController::class, 'checkMail'])->name('settings.mail.check');
+    Route::post('/settings/paypal/check', [SettingController::class, 'checkPayPal'])->name('settings.paypal.check');
 });

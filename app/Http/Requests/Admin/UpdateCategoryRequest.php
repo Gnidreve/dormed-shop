@@ -10,7 +10,7 @@ class UpdateCategoryRequest extends FormRequest
     /** Top-level URL segments reserved by other routes — slugs must not collide. */
     private const RESERVED_SLUGS = [
         'admin', 'products', 'checkout', 'warenkorb', 'customer',
-        'settings', 'stripe', 'versand', 'impressum', 'agb',
+        'settings', 'paypal', 'versand', 'impressum', 'agb',
         'datenschutz', 'zahlung', 'widerrufsbelehrung', 'hilfe', 'kontakt',
     ];
 

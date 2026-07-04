@@ -18,7 +18,12 @@ class UpdateCartPaymentMethodRequest extends FormRequest
             'payment_method' => [
                 'required',
                 'string',
-                Rule::in(collect(config('shop.cart.payment_methods', []))->pluck('id')->all()),
+                Rule::in(
+                    collect(config('shop.cart.providers', []))
+                        ->flatMap(fn (array $provider) => $provider['methods'] ?? [])
+                        ->pluck('id')
+                        ->all(),
+                ),
             ],
         ];
     }

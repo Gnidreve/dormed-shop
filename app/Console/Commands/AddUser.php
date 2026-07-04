@@ -21,7 +21,7 @@ class AddUser extends Command
                 return 'Bitte eine gueltige E-Mail-Adresse eingeben.';
             }
 
-            if (Customer::where('email', $value)->exists()) {
+            if (Customer::query()->where('email', $value)->exists()) {
                 return 'Diese E-Mail-Adresse ist bereits vergeben.';
             }
 

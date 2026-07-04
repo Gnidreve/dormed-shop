@@ -54,6 +54,7 @@
                     ?.split('=')[1] ?? '',
             );
             const res = await fetch('/admin/settings/mail/check', {
+                method: 'POST',
                 headers: { 'X-XSRF-TOKEN': token, Accept: 'application/json' },
             });
             const data = await res.json();

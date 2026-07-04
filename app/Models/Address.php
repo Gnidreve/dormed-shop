@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property int $id
  * @property int $customer_id
- * @property string $type  (shipping|billing|both)
+ * @property string $type (shipping|billing|both)
  * @property string|null $company
  * @property string|null $salutation
  * @property string $first_name
@@ -54,7 +54,7 @@ class Address extends Model
     }
 
     /**
-     * Normiertes Address-Array für Order-Snapshots / PayPal / Stripe.
+     * Normiertes Address-Array für Order-Snapshots / PayPal.
      */
     public function toAddressArray(): array
     {

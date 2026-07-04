@@ -67,13 +67,6 @@ class HandleInertiaRequests extends Middleware
             'navCategories' => Inertia::always(
                 fn () => Category::orderBy('name')->get(['id', 'name', 'slug']),
             ),
-            'stripeKey' => (function () {
-                $key = PaymentMode::isLive()
-                    ? Setting::get('stripe.live.publishable_key')
-                    : Setting::get('stripe.sandbox.publishable_key');
-
-                return $key ?? config('services.stripe.publishable_key');
-            })(),
             'sandbox' => ! PaymentMode::isLive(),
         ];
     }

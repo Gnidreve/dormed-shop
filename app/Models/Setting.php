@@ -15,12 +15,6 @@ class Setting extends Model
     protected $fillable = ['key', 'value'];
 
     protected static array $encryptedKeys = [
-        'stripe.secret_key',
-        'stripe.webhook_secret',
-        'stripe.sandbox.secret_key',
-        'stripe.sandbox.webhook_secret',
-        'stripe.live.secret_key',
-        'stripe.live.webhook_secret',
         'mail.smtp_password',
         'paypal.sandbox.client_secret',
         'paypal.live.client_secret',
@@ -29,7 +23,7 @@ class Setting extends Model
 
     public static function get(string $key, ?string $default = null): ?string
     {
-        $value = static::find($key)?->value ?? $default;
+        $value = static::query()->find($key)?->value ?? $default;
 
         if ($value !== null && in_array($key, static::$encryptedKeys, true)) {
             try {

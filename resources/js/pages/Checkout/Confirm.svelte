@@ -41,7 +41,6 @@
     const selectedProvider = $derived(selectedPayment?.provider ?? null);
     const isInvoice = $derived(selectedProvider === 'invoice');
     const isPayPal = $derived(selectedProvider === 'paypal');
-    const isStripe = $derived(selectedProvider === 'stripe');
 
     const addressComplete = $derived(
         shippingAddress.first_name !== '' &&
@@ -402,20 +401,6 @@
                                 <p class="mt-3 text-sm text-gray-500">
                                     Sie werden zu PayPal weitergeleitet, um die
                                     Zahlung zu bestätigen.
-                                </p>
-                            {:else if isStripe}
-                                <Button
-                                    class="mt-6 w-full bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90 disabled:opacity-50"
-                                    disabled={!agreedToTerms ||
-                                        cart.is_empty ||
-                                        !addressComplete}
-                                    onclick={submitOrder}
-                                >
-                                    Zahlungspflichtig bestellen
-                                </Button>
-                                <p class="mt-3 text-sm text-gray-500">
-                                    Sie werden zur sicheren Zahlung über Stripe
-                                    weitergeleitet.
                                 </p>
                             {:else}
                                 <p class="mt-3 text-sm text-gray-500">

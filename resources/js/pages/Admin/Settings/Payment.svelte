@@ -9,7 +9,7 @@
 
 <script lang="ts">
     import { useForm } from '@inertiajs/svelte';
-    import { Copy, Check, Info, Loader2 } from 'lucide-svelte';
+    import { Loader2 } from 'lucide-svelte';
     import { toast } from 'svelte-sonner';
     import * as AdminSettingController from '@/actions/App/Http/Controllers/Admin/SettingController';
     import AppHead from '@/components/AppHead.svelte';
@@ -20,12 +20,10 @@
     let {
         settings,
         hasSensitive,
-        stripeWebhookUrl,
         paymentMode,
     }: {
         settings: Record<string, string>;
         hasSensitive: Record<string, boolean>;
-        stripeWebhookUrl: string;
         paymentMode: 'sandbox' | 'live';
     } = $props();
 
@@ -33,13 +31,7 @@
     const form = useForm({
         settings: {
             'payment.mode': settings['payment.mode'] ?? paymentMode,
-            'payment.provider': settings['payment.provider'] ?? 'stripe',
-            'stripe.sandbox.publishable_key': settings['stripe.sandbox.publishable_key'] ?? '',
-            'stripe.sandbox.secret_key': hasSensitive['stripe.sandbox.secret_key'] ? '••••••••' : '',
-            'stripe.sandbox.webhook_secret': hasSensitive['stripe.sandbox.webhook_secret'] ? '••••••••' : '',
-            'stripe.live.publishable_key': settings['stripe.live.publishable_key'] ?? '',
-            'stripe.live.secret_key': hasSensitive['stripe.live.secret_key'] ? '••••••••' : '',
-            'stripe.live.webhook_secret': hasSensitive['stripe.live.webhook_secret'] ? '••••••••' : '',
+            'payment.provider': settings['payment.provider'] ?? 'paypal',
             'paypal.sandbox.client_id': settings['paypal.sandbox.client_id'] ?? '',
             'paypal.sandbox.client_secret': hasSensitive['paypal.sandbox.client_secret'] ? '••••••••' : '',
             'paypal.sandbox.merchant_id': settings['paypal.sandbox.merchant_id'] ?? '',
@@ -52,9 +44,8 @@
     });
 
     const isSandbox = $derived(form.settings['payment.mode'] === 'sandbox');
+    const paypalActive = $derived(form.settings['payment.provider'] === 'paypal');
 
-    let copiedStripe = $state(false);
-    let checkingStripe = $state(false);
     let checkingPayPal = $state(false);
 
     function submit(e: SubmitEvent) {
@@ -62,24 +53,8 @@
         form.put(AdminSettingController.update.url());
     }
 
-    async function copyStripeWebhookUrl() {
-        try {
-            await navigator.clipboard.writeText(stripeWebhookUrl);
-        } catch {
-            const el = document.createElement('textarea');
-            el.value = stripeWebhookUrl;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-        }
-
-        copiedStripe = true;
-        setTimeout(() => (copiedStripe = false), 2000);
-    }
-
-    async function fetchCheck(url: string, label: string, setLoading: (v: boolean) => void) {
-        setLoading(true);
+    async function checkPayPal() {
+        checkingPayPal = true;
 
         try {
             const token = decodeURIComponent(
@@ -88,7 +63,8 @@
                     .find((r) => r.startsWith('XSRF-TOKEN='))
                     ?.split('=')[1] ?? '',
             );
-            const res = await fetch(url, {
+            const res = await fetch('/admin/settings/paypal/check', {
+                method: 'POST',
                 headers: { 'X-XSRF-TOKEN': token, Accept: 'application/json' },
             });
             const data = await res.json();
@@ -99,18 +75,10 @@
                 toast.error(data.message);
             }
         } catch {
-            toast.error(`${label}: Verbindungsfehler`);
+            toast.error('PayPal: Verbindungsfehler');
         } finally {
-            setLoading(false);
+            checkingPayPal = false;
         }
-    }
-
-    function checkStripe() {
-        fetchCheck('/admin/settings/stripe/check', 'Stripe', (v) => (checkingStripe = v));
-    }
-
-    function checkPayPal() {
-        fetchCheck('/admin/settings/paypal/check', 'PayPal', (v) => (checkingPayPal = v));
     }
 </script>
 
@@ -144,121 +112,24 @@
             </div>
         </div>
 
-        <!-- Provider-Auswahl -->
+        <!-- Angebotene Zahlungsarten -->
         <div class="rounded-lg border bg-card p-5 flex flex-col gap-3">
-            <p class="text-sm font-medium">Aktiver Zahlungsanbieter</p>
-            <p class="text-xs text-muted-foreground -mt-1">Nur einer der beiden Anbieter ist jeweils aktiv.</p>
+            <p class="text-sm font-medium">Angebotene Zahlungsarten</p>
+            <p class="text-xs text-muted-foreground -mt-1">Kauf auf Rechnung ist immer verfügbar.</p>
             <div class="flex gap-3">
                 <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="payment_provider" value="stripe" class="accent-primary" bind:group={form.settings['payment.provider']} />
-                    <span class="text-sm font-medium">Stripe</span>
+                    <input type="radio" name="payment_provider" value="paypal" class="accent-primary" bind:group={form.settings['payment.provider']} />
+                    <span class="text-sm font-medium">PayPal + Rechnung</span>
                 </label>
                 <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="payment_provider" value="paypal" class="accent-primary" bind:group={form.settings['payment.provider']} />
-                    <span class="text-sm font-medium">PayPal</span>
+                    <input type="radio" name="payment_provider" value="invoice" class="accent-primary" bind:group={form.settings['payment.provider']} />
+                    <span class="text-sm font-medium">Nur Rechnung</span>
                 </label>
             </div>
         </div>
 
-        <!-- Stripe-Felder -->
-        {#if form.settings['payment.provider'] === 'stripe'}
-        <div class="rounded-lg border bg-card p-5 flex flex-col gap-4">
-            <p class="text-sm font-semibold">Stripe</p>
-
-            {#if isSandbox}
-            <div class="flex flex-col gap-3 rounded-md bg-muted/40 p-4">
-                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Sandbox-Zugangsdaten</p>
-                <div class="flex flex-col gap-1.5">
-                    <Label for="stripe_publishable_key">Publishable Key</Label>
-                    <Input id="stripe_publishable_key" placeholder="pk_test_…" bind:value={form.settings['stripe.sandbox.publishable_key']} />
-                </div>
-                <div class="flex flex-col gap-1.5">
-                    <Label for="stripe_secret_key">
-                        Secret Key
-                        {#if hasSensitive['stripe.sandbox.secret_key']}
-                            <span class="text-xs text-muted-foreground ml-1">(gesetzt — leer lassen zum Beibehalten)</span>
-                        {/if}
-                    </Label>
-                    <Input id="stripe_secret_key" type="password" placeholder={hasSensitive['stripe.sandbox.secret_key'] ? '••••••••' : 'sk_test_…'} bind:value={form.settings['stripe.sandbox.secret_key']} />
-                </div>
-                <div class="flex flex-col gap-1.5">
-                    <Label>Webhook URL</Label>
-                    <div class="flex items-center gap-2">
-                        <Input value={stripeWebhookUrl} readonly class="font-mono text-xs text-muted-foreground" />
-                        <Button type="button" variant="outline" size="icon" onclick={copyStripeWebhookUrl} aria-label="Kopieren">
-                            {#if copiedStripe}<Check class="size-4" />{:else}<Copy class="size-4" />{/if}
-                        </Button>
-                    </div>
-                    <p class="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Info class="size-3 shrink-0" />
-                        Im Stripe Dashboard unter Developers → Webhooks eintragen.
-                    </p>
-                </div>
-                <div class="flex flex-col gap-1.5">
-                    <Label for="stripe_webhook">
-                        Webhook Secret
-                        {#if hasSensitive['stripe.sandbox.webhook_secret']}
-                            <span class="text-xs text-muted-foreground ml-1">(gesetzt — leer lassen zum Beibehalten)</span>
-                        {/if}
-                    </Label>
-                    <Input id="stripe_webhook" type="password" placeholder={hasSensitive['stripe.sandbox.webhook_secret'] ? '••••••••' : 'whsec_…'} bind:value={form.settings['stripe.sandbox.webhook_secret']} />
-                </div>
-            </div>
-            {:else}
-            <div class="flex flex-col gap-3 rounded-md bg-muted/40 p-4">
-                <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Live-Zugangsdaten</p>
-                <div class="flex flex-col gap-1.5">
-                    <Label for="stripe_publishable_key">Publishable Key</Label>
-                    <Input id="stripe_publishable_key" placeholder="pk_live_…" bind:value={form.settings['stripe.live.publishable_key']} />
-                </div>
-                <div class="flex flex-col gap-1.5">
-                    <Label for="stripe_secret_key">
-                        Secret Key
-                        {#if hasSensitive['stripe.live.secret_key']}
-                            <span class="text-xs text-muted-foreground ml-1">(gesetzt — leer lassen zum Beibehalten)</span>
-                        {/if}
-                    </Label>
-                    <Input id="stripe_secret_key" type="password" placeholder={hasSensitive['stripe.live.secret_key'] ? '••••••••' : 'sk_live_…'} bind:value={form.settings['stripe.live.secret_key']} />
-                </div>
-                <div class="flex flex-col gap-1.5">
-                    <Label>Webhook URL</Label>
-                    <div class="flex items-center gap-2">
-                        <Input value={stripeWebhookUrl} readonly class="font-mono text-xs text-muted-foreground" />
-                        <Button type="button" variant="outline" size="icon" onclick={copyStripeWebhookUrl} aria-label="Kopieren">
-                            {#if copiedStripe}<Check class="size-4" />{:else}<Copy class="size-4" />{/if}
-                        </Button>
-                    </div>
-                    <p class="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Info class="size-3 shrink-0" />
-                        Im Stripe Dashboard unter Developers → Webhooks eintragen.
-                    </p>
-                </div>
-                <div class="flex flex-col gap-1.5">
-                    <Label for="stripe_webhook">
-                        Webhook Secret
-                        {#if hasSensitive['stripe.live.webhook_secret']}
-                            <span class="text-xs text-muted-foreground ml-1">(gesetzt — leer lassen zum Beibehalten)</span>
-                        {/if}
-                    </Label>
-                    <Input id="stripe_webhook" type="password" placeholder={hasSensitive['stripe.live.webhook_secret'] ? '••••••••' : 'whsec_…'} bind:value={form.settings['stripe.live.webhook_secret']} />
-                </div>
-            </div>
-            {/if}
-        </div>
-
-        <div class="flex justify-end gap-2">
-            <Button type="button" variant="secondary" onclick={checkStripe} disabled={checkingStripe}>
-                {#if checkingStripe}<Loader2 class="size-4 animate-spin" />{/if}
-                Verbindung prüfen
-            </Button>
-            <Button type="submit" disabled={form.processing}>
-                {form.processing ? 'Speichern…' : 'Speichern'}
-            </Button>
-        </div>
-        {/if}
-
         <!-- PayPal-Felder -->
-        {#if form.settings['payment.provider'] === 'paypal'}
+        {#if paypalActive}
         <div class="rounded-lg border bg-card p-5 flex flex-col gap-4">
             <p class="text-sm font-semibold">PayPal</p>
 
@@ -321,17 +192,19 @@
                 <Input id="pp_webhook_id" type="password" placeholder={hasSensitive['paypal.webhook_id'] ? '••••••••' : ''} bind:value={form.settings['paypal.webhook_id']} />
             </div>
         </div>
+        {/if}
 
         <div class="flex justify-end gap-2">
-            <Button type="button" variant="secondary" onclick={checkPayPal} disabled={checkingPayPal}>
-                {#if checkingPayPal}<Loader2 class="size-4 animate-spin" />{/if}
-                Verbindung prüfen
-            </Button>
+            {#if paypalActive}
+                <Button type="button" variant="secondary" onclick={checkPayPal} disabled={checkingPayPal}>
+                    {#if checkingPayPal}<Loader2 class="size-4 animate-spin" />{/if}
+                    Verbindung prüfen
+                </Button>
+            {/if}
             <Button type="submit" disabled={form.processing}>
                 {form.processing ? 'Speichern…' : 'Speichern'}
             </Button>
         </div>
-        {/if}
 
     </form>
 </div>

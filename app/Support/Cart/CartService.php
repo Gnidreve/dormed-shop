@@ -236,10 +236,10 @@ class CartService
     {
         $methods = [];
         $index = 0;
-        $activeProvider = Setting::get('payment.provider') ?? 'invoice';
+        $activeProvider = Setting::get('payment.provider') ?? 'paypal';
         $providers = config('shop.cart.providers', []);
 
-        // Invoice is always available; active gateway (paypal/stripe) is shown additionally.
+        // Invoice is always available; PayPal is shown additionally when active.
         $visibleProviders = array_unique(array_filter(['invoice', $activeProvider]));
 
         foreach ($visibleProviders as $provider) {

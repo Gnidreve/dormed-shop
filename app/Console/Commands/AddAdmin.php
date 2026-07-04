@@ -14,14 +14,17 @@ class AddAdmin extends Command
 {
     public function handle(): int
     {
-        $name = $this->ask('Name');
+        $name = $this->askValidated('Name', fn (string $v): ?string => trim($v) === ''
+            ? 'Der Name darf nicht leer sein.'
+            : null
+        );
 
         $email = $this->askValidated('E-Mail', function (string $value): ?string {
             if (! filter_var($value, FILTER_VALIDATE_EMAIL)) {
                 return 'Bitte eine gueltige E-Mail-Adresse eingeben.';
             }
 
-            if (User::where('email', $value)->exists()) {
+            if (User::query()->where('email', $value)->exists()) {
                 return 'Diese E-Mail-Adresse ist bereits vergeben.';
             }
 
