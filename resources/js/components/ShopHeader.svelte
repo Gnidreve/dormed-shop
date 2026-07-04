@@ -1,40 +1,23 @@
 <script lang="ts">
-    import { Link, page, router } from '@inertiajs/svelte';
+    import { Link, page } from '@inertiajs/svelte';
     import ChevronRight from 'lucide-svelte/icons/chevron-right';
-    import LogOut from 'lucide-svelte/icons/log-out';
-    import MapPin from 'lucide-svelte/icons/map-pin';
     import Menu from 'lucide-svelte/icons/menu';
-    import Package from 'lucide-svelte/icons/package';
     import Search from 'lucide-svelte/icons/search';
-    import Settings from 'lucide-svelte/icons/settings';
     import ShoppingCart from 'lucide-svelte/icons/shopping-cart';
     import User from 'lucide-svelte/icons/user';
-    import UserPlus from 'lucide-svelte/icons/user-plus';
     import X from 'lucide-svelte/icons/x';
     import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     import CartSheet from '@/components/CartSheet.svelte'; // benötigt für auskommentierte Sidebar-Variante unten
-    import CustomerInfo from '@/components/CustomerInfo.svelte';
     import TestModeBanner from '@/components/TestModeBanner.svelte';
     import { Button } from '@/components/ui/button';
-    import {
-        DropdownMenu,
-        DropdownMenuContent,
-        DropdownMenuGroup,
-        DropdownMenuItem,
-        DropdownMenuLabel,
-        DropdownMenuSeparator,
-        DropdownMenuTrigger,
-    } from '@/components/ui/dropdown-menu';
     import { Input } from '@/components/ui/input';
     import {Sheet, SheetContent, SheetTitle, SheetTrigger} from '@/components/ui/sheet';
     import { formatPrice } from '@/lib/currency';
     import { toUrl } from '@/lib/utils';
-    import { logout } from '@/routes';
     import cartRoutes from '@/routes/cart';
-    import customerRoutes from '@/routes/customer';
     import { edit as editProfile } from '@/routes/profile';
-    import type { Cart, Customer } from '@/types';
+    import type { Cart } from '@/types';
 
     type NavCategory = { id: number; name: string; slug: string };
 
@@ -114,6 +97,7 @@
     const allResultsUrl = $derived(
         ProductController.index.url({ query: { q: query } }),
     );
+    const accountHref = $derived(auth?.user ? toUrl(editProfile()) : '/login');
 
 
 </script>
@@ -286,115 +270,14 @@
                     <CartSheet {cart} />
                 -->
 
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        {#snippet children(props)}
-                            <Button variant="ghost" size="icon" {...props}>
-                                <User class="size-5" />
-                                <span class="sr-only">Konto</span>
-                            </Button>
-                        {/snippet}
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent class="w-56" align="end">
-                        {#if auth?.user}
-                            <DropdownMenuLabel class="p-0 font-normal">
-                                <div
-                                    class="flex items-center gap-2 px-1 py-1.5 text-left text-sm"
-                                >
-                                    <CustomerInfo
-                                        user={auth.user as Customer}
-                                        showEmail={true}
-                                    />
-                                </div>
-                            </DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuGroup>
-                                <DropdownMenuItem asChild>
-                                    {#snippet children(props)}
-                                        <Link
-                                            class={props.class}
-                                            href={customerRoutes.orders.url()}
-                                            onclick={props.onClick}
-                                        >
-                                            <Package class="mr-2 size-4" />
-                                            Bestellungen
-                                        </Link>
-                                    {/snippet}
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    {#snippet children(props)}
-                                        <Link
-                                            class={props.class}
-                                            href={toUrl(editProfile())}
-                                            prefetch
-                                            onclick={props.onClick}
-                                        >
-                                            <MapPin class="mr-2 size-4" />
-                                            Adressen
-                                        </Link>
-                                    {/snippet}
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    {#snippet children(props)}
-                                        <Link
-                                            class={props.class}
-                                            href={toUrl(editProfile())}
-                                            prefetch
-                                            onclick={props.onClick}
-                                        >
-                                            <Settings class="mr-2 size-4" />
-                                            Einstellungen
-                                        </Link>
-                                    {/snippet}
-                                </DropdownMenuItem>
-                            </DropdownMenuGroup>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem asChild>
-                                {#snippet children(props)}
-                                    <Link
-                                        class={props.class}
-                                        href={logout()}
-                                        as="button"
-                                        onclick={() => {
-                                            props.onClick?.();
-                                            router.flushAll();
-                                        }}
-                                    >
-                                        <LogOut class="mr-2 size-4" />
-                                        Abmelden
-                                    </Link>
-                                {/snippet}
-                            </DropdownMenuItem>
-                        {:else}
-                            <DropdownMenuGroup>
-                                <DropdownMenuItem asChild>
-                                    {#snippet children(props)}
-                                        <Link
-                                            class={props.class}
-                                            href="/login"
-                                            onclick={props.onClick}
-                                        >
-                                            <User class="mr-2 size-4" />
-                                            Anmelden
-                                        </Link>
-                                    {/snippet}
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    {#snippet children(props)}
-                                        <Link
-                                            class={props.class}
-                                            href="/register"
-                                            onclick={props.onClick}
-                                        >
-                                            <UserPlus class="mr-2 size-4" />
-                                            Registrieren
-                                        </Link>
-                                    {/snippet}
-                                </DropdownMenuItem>
-                            </DropdownMenuGroup>
-                        {/if}
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                <Button variant="ghost" size="icon" asChild>
+                    {#snippet children(props)}
+                        <Link href={accountHref} class={props.class} prefetch={auth?.user ? true : undefined}>
+                            <User class="size-5" />
+                            <span class="sr-only">{auth?.user ? 'Profil' : 'Anmelden'}</span>
+                        </Link>
+                    {/snippet}
+                </Button>
             </div>
         </div>
     </div>
