@@ -5,14 +5,16 @@
     import Plus from 'lucide-svelte/icons/plus';
     import ShoppingCart from 'lucide-svelte/icons/shopping-cart';
     import Star from 'lucide-svelte/icons/star';
+    import * as CategoryController from '@/actions/App/Http/Controllers/CategoryController';
     import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
     import AppFooter from '@/components/AppFooter.svelte';
     import AppHead from '@/components/AppHead.svelte';
     import InputError from '@/components/InputError.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
     import { Button } from '@/components/ui/button';
+    import * as Carousel from '@/components/ui/carousel';
     import { Label } from '@/components/ui/label';
-    import { Separator } from '@/components/ui/separator';
+    import * as Select from '@/components/ui/select';
     import { Textarea } from '@/components/ui/textarea';
     import { formatPrice } from '@/lib/currency';
     import { cn } from '@/lib/utils';
@@ -28,6 +30,7 @@
         description: string | null;
         price: string;
         is_available: boolean;
+        category: { id: number; name: string; slug: string } | null;
         manufacturer: { id: number; name: string } | null;
         images: ProductImage[];
         variants: ProductVariant[];
@@ -58,20 +61,21 @@
     const hasVariants = product.variants.length > 0;
     const defaultVariant = product.variants.find((v) => v.is_default) ?? product.variants[0] ?? null;
 
-    let selectedVariantId = $state<number | null>(defaultVariant?.id ?? null);
+    let selectedVariantValue = $state(defaultVariant ? String(defaultVariant.id) : '');
     let quantity = $state(1);
     let activeTab = $state<'beschreibung' | 'bewertungen'>('beschreibung');
     let ratingStars = $state(5);
     let activeImageIndex = $state(0);
+    let carouselApi = $state<any>();
     let zoomActive = $state(false);
     let cursorPct = $state({ x: 0.5, y: 0.5 });
-    let zoomPanel = $state<{ left: number; top: number; size: number } | null>(null);
+    let zoomPanel = $state<{ left: number; top: number; width: number; height: number } | null>(null);
 
     function handleZoomMouseEnter(e: MouseEvent) {
         const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-        const availableWidth = window.innerWidth - rect.right - 24;
-        const size = Math.min(rect.height, Math.max(280, availableWidth));
-        zoomPanel = { left: rect.right + 16, top: rect.top, size };
+        const left = rect.right + 24;
+        const width = Math.max(320, window.innerWidth - left - 32);
+        zoomPanel = { left, top: rect.top, width, height: rect.height };
         zoomActive = true;
     }
 
@@ -88,14 +92,16 @@
     }
 
     const selectedVariant = $derived(
-        hasVariants ? product.variants.find((v) => v.id === selectedVariantId) ?? null : null,
+        hasVariants ? product.variants.find((v) => String(v.id) === selectedVariantValue) ?? null : null,
     );
     const displayedPrice = $derived(selectedVariant ? selectedVariant.price : product.price);
+    const ratingAverageValue = $derived(
+        ratingSummary.average !== null ? Number(ratingSummary.average.replace(',', '.')) : null,
+    );
+    const variantSelectLabel = $derived(selectedVariant?.label ?? 'Variation waehlen');
 
     const metaDescription = $derived(
-        product.description
-            ? product.description.replace(/\n+/g, ' ').trim().slice(0, 160)
-            : null,
+        product.description ? product.description.replace(/\n+/g, ' ').trim().slice(0, 160) : null,
     );
 
     const productSchema = $derived.by(() => {
@@ -140,10 +146,7 @@
         return JSON.stringify(schema);
     });
 
-    // Split closing tag to prevent Svelte parser from treating it as end of <script> block
-    const jsonLdHtml = $derived(
-        `<script type="application/ld+json">${productSchema}<` + `/script>`,
-    );
+    const jsonLdHtml = $derived(`<script type="application/ld+json">${productSchema}<` + `/script>`);
 
     function starLabel(stars: number): string {
         return `${stars} Stern${stars === 1 ? '' : 'e'}`;
@@ -162,6 +165,29 @@
             },
         );
     }
+
+    $effect(() => {
+        if (!carouselApi || product.images.length <= 1) return;
+
+        const syncFromCarousel = () => {
+            activeImageIndex = carouselApi.selectedScrollSnap();
+        };
+
+        carouselApi.on('select', syncFromCarousel);
+        syncFromCarousel();
+
+        return () => {
+            carouselApi.off('select', syncFromCarousel);
+        };
+    });
+
+    $effect(() => {
+        if (!carouselApi) return;
+        if (carouselApi.selectedScrollSnap() === activeImageIndex) return;
+
+        carouselApi.scrollTo(activeImageIndex);
+    });
+
 </script>
 
 <AppHead
@@ -172,61 +198,65 @@
 />
 
 <svelte:head>
-    <!-- eslint-disable-next-line svelte/no-at-html-tags -->
     {@html jsonLdHtml}
 </svelte:head>
 
 <div class="flex min-h-screen flex-col bg-white">
     <ShopHeader />
 
-    <main class="flex-1 mx-auto max-w-7xl px-4 py-6 lg:px-8">
-
-        <!-- Breadcrumb -->
-        <nav class="mb-6 flex items-center gap-1.5 text-sm text-gray-500">
+    <main class="mx-auto flex-1 max-w-7xl px-4 py-6 lg:px-8">
+        <nav class="mb-8 flex items-center gap-1.5 text-sm text-gray-500">
             <Link href={ProductController.index.url()} class="hover:text-[#1a6bbf]">
                 Alle Produkte
             </Link>
-            {#if product.manufacturer}
+            {#if product.category}
                 <ChevronRight class="size-3.5 shrink-0" />
-                <span class="text-gray-400">{product.manufacturer.name}</span>
+                <Link href={CategoryController.show.url(product.category.slug)} class="text-gray-600 hover:text-[#1a6bbf]">
+                    {product.category.name}
+                </Link>
             {/if}
             <ChevronRight class="size-3.5 shrink-0" />
             <span class="truncate text-gray-800">{product.name}</span>
         </nav>
 
-        <!-- Two-column layout -->
-        <div class="flex flex-col gap-10 lg:flex-row lg:items-start">
-
-            <!-- Left: image gallery -->
-            <div class="w-full lg:max-w-lg xl:max-w-xl">
+        <div class="grid gap-12 lg:grid-cols-2 lg:items-start">
+            <div class="w-full">
                 {#if product.images.length > 0}
-                    <div class="flex flex-col gap-3">
-                        <!-- Main image -->
-                        <div
-                            class="aspect-square w-full overflow-hidden rounded-xl border bg-gray-50 cursor-crosshair"
-                            onmouseenter={handleZoomMouseEnter}
-                            onmouseleave={handleZoomMouseLeave}
-                            onmousemove={handleZoomMouseMove}
-                            role="none"
+                    <div class="flex flex-col gap-4">
+                        <Carousel.Root
+                            class="w-full"
+                            setApi={(api) => {
+                                carouselApi = api;
+                            }}
                         >
-                            <img
-                                src={product.images[activeImageIndex]?.url}
-                                alt={product.name}
-                                class="size-full object-cover"
-                            />
-                        </div>
-                        <!-- Thumbnails -->
+                            <Carousel.Content class="-ms-0">
+                                {#each product.images as image (image.id)}
+                                    <Carousel.Item class="ps-0">
+                                        <div
+                                            class="aspect-square w-full cursor-crosshair overflow-hidden rounded-[1.75rem] border border-gray-200 bg-[#f6f7f8]"
+                                            onmouseenter={handleZoomMouseEnter}
+                                            onmouseleave={handleZoomMouseLeave}
+                                            onmousemove={handleZoomMouseMove}
+                                            role="none"
+                                        >
+                                            <img src={image.url} alt={product.name} class="size-full object-cover" />
+                                        </div>
+                                    </Carousel.Item>
+                                {/each}
+                            </Carousel.Content>
+                        </Carousel.Root>
+
                         {#if product.images.length > 1}
-                            <div class="flex gap-2">
+                            <div class="grid grid-cols-5 gap-3">
                                 {#each product.images as image, i (image.id)}
                                     <button
                                         type="button"
                                         onclick={() => (activeImageIndex = i)}
                                         class={cn(
-                                            'size-16 shrink-0 overflow-hidden rounded-lg border-2 bg-gray-50 transition-colors',
+                                            'aspect-square overflow-hidden rounded-2xl border bg-[#f6f7f8] p-1.5 transition-colors',
                                             activeImageIndex === i
-                                                ? 'border-[#1a6bbf]'
-                                                : 'border-transparent hover:border-gray-300',
+                                                ? 'border-[#0d1f44]'
+                                                : 'border-gray-200 hover:border-gray-300',
                                         )}
                                         aria-label={`Bild ${i + 1}`}
                                     >
@@ -237,106 +267,122 @@
                         {/if}
                     </div>
                 {:else}
-                    <div class="flex aspect-square items-center justify-center rounded-xl border bg-gray-50">
+                    <div class="flex aspect-square items-center justify-center rounded-[1.75rem] border border-gray-200 bg-[#f6f7f8]">
                         <ShoppingCart class="size-20 text-gray-200" strokeWidth={1} />
                     </div>
                 {/if}
             </div>
 
-            <!-- Right: purchase info -->
-            <div class="flex-1">
-                <!-- Name + manufacturer -->
-                <div class="mb-4 flex items-start justify-between gap-4">
-                    <h1 class="text-2xl font-bold text-gray-900 lg:text-3xl">{product.name}</h1>
-                    {#if product.manufacturer}
-                        <span class="shrink-0 rounded border border-gray-200 px-3 py-1.5 text-sm font-semibold text-[#1a3a5c]">
-                            {product.manufacturer.name}
-                        </span>
-                    {/if}
-                </div>
+            <div class="flex flex-col gap-8">
+                <div class="flex flex-col gap-5">
+                    <div class="flex flex-col gap-3">
+                        {#if product.manufacturer}
+                            <span class="text-sm font-medium uppercase tracking-[0.18em] text-[#1a6bbf]">
+                                {product.manufacturer.name}
+                            </span>
+                        {/if}
+                        <h1 class="max-w-xl text-3xl font-semibold tracking-tight text-[#111827] lg:text-5xl">
+                            {product.name}
+                        </h1>
+                    </div>
 
-                <!-- Price -->
-                <div class="mb-1">
-                    <span class="text-3xl font-bold text-gray-900">
-                        {formatPrice(displayedPrice)}*
-                    </span>
-                </div>
-                <p class="mb-5 text-sm text-[#1a6bbf] hover:underline">
-                    <a href="/versandkosten">Preise inkl. MwSt. zzgl. Versandkosten</a>
-                </p>
-
-                <!-- Short description -->
-                {#if product.description}
-                    <p class="mb-5 whitespace-pre-line text-sm leading-relaxed text-gray-600">{product.description}</p>
-                {/if}
-
-                <Separator class="mb-6" />
-
-                <!-- Variant picker -->
-                {#if hasVariants}
-                    <div class="mb-5">
-                        <p class="mb-2 text-sm font-semibold text-gray-700">Verpackungseinheit</p>
-                        <div class="flex flex-wrap gap-2">
-                            {#each product.variants as variant (variant.id)}
-                                <button
-                                    type="button"
-                                    onclick={() => (selectedVariantId = variant.id)}
+                    <div class="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                        <div class="flex items-center gap-1 text-[#111827]">
+                            {#each Array.from({ length: 5 }, (_, index) => index + 1) as star (star)}
+                                <Star
                                     class={cn(
-                                        'rounded border px-4 py-1.5 text-sm font-medium transition-colors',
-                                        selectedVariantId === variant.id
-                                            ? 'border-[#0d1f44] bg-[#0d1f44] text-white'
-                                            : 'border-gray-300 text-gray-700 hover:border-[#0d1f44]',
+                                        'size-4',
+                                        ratingAverageValue !== null && star <= Math.round(ratingAverageValue)
+                                            ? 'fill-current'
+                                            : 'text-gray-300',
                                     )}
-                                >
-                                    {variant.label}
-                                </button>
+                                />
                             {/each}
                         </div>
-                    </div>
-                {/if}
-
-                <!-- Availability -->
-                <div class="mb-5 flex items-center gap-2">
-                    <span class="size-2.5 shrink-0 rounded-full {product.is_available ? 'bg-green-500' : 'bg-red-400'}"></span>
-                    <span class="text-sm text-gray-700">
-                        {product.is_available ? 'Sofort verfügbar, Lieferzeit: 1–2 Wochen' : 'Derzeit nicht verfügbar'}
-                    </span>
-                </div>
-
-                <!-- Qty + CTA -->
-                <div class="flex items-center gap-3">
-                    <div class="flex items-center rounded border">
-                        <button
-                            class="flex size-10 items-center justify-center text-gray-500 hover:bg-gray-50 disabled:opacity-40"
-                            onclick={() => (quantity = Math.max(1, quantity - 1))}
-                            disabled={quantity <= 1}
-                            aria-label="Menge verringern"
-                        >
-                            <Minus class="size-4" />
-                        </button>
-                        <span class="w-12 text-center text-sm font-semibold">{quantity}</span>
-                        <button
-                            class="flex size-10 items-center justify-center text-gray-500 hover:bg-gray-50"
-                            onclick={() => quantity++}
-                            aria-label="Menge erhöhen"
-                        >
-                            <Plus class="size-4" />
-                        </button>
+                        <span>
+                            {ratingSummary.count > 0
+                                ? `${ratingSummary.count} Bewertung${ratingSummary.count === 1 ? '' : 'en'}`
+                                : 'Noch keine Bewertungen'}
+                        </span>
                     </div>
 
-                    <Button
-                        class="flex-1 bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90 disabled:opacity-50"
-                        onclick={addToCart}
-                        disabled={!product.is_available}
-                    >
-                        <ShoppingCart class="size-4" />
-                        {product.is_available ? 'In den Warenkorb' : 'Nicht verfügbar'}
-                    </Button>
+                    {#if product.description}
+                        <p class="max-w-2xl whitespace-pre-line text-base leading-8 text-gray-600">
+                            {product.description}
+                        </p>
+                    {/if}
+
+                    <div class="flex flex-wrap items-end gap-4">
+                        <span class="text-4xl font-semibold tracking-tight text-[#111827]">
+                            {formatPrice(displayedPrice)}*
+                        </span>
+                    </div>
+
+                    <p class="text-sm text-[#1a6bbf] hover:underline">
+                        <a href="/versandkosten">Preise inkl. MwSt. zzgl. Versandkosten</a>
+                    </p>
                 </div>
+
+                <div class="flex flex-col gap-6">
+                        {#if hasVariants}
+                            <div class="flex flex-col gap-2.5">
+                                <Label class="text-sm font-medium text-[#111827]">Variation</Label>
+                                <Select.Root type="single" bind:value={selectedVariantValue}>
+                                    <Select.Trigger class="h-12 w-full rounded-xl border-gray-300 text-left text-[15px]">
+                                        {variantSelectLabel}
+                                    </Select.Trigger>
+                                    <Select.Content>
+                                        {#each product.variants as variant (variant.id)}
+                                            <Select.Item value={String(variant.id)}>
+                                                {variant.label}
+                                            </Select.Item>
+                                        {/each}
+                                    </Select.Content>
+                                </Select.Root>
+                            </div>
+                        {/if}
+
+                        <div class="flex items-center gap-2">
+                            <span class="size-2.5 shrink-0 rounded-full {product.is_available ? 'bg-emerald-500' : 'bg-red-400'}"></span>
+                            <span class="text-sm text-gray-700">
+                                {product.is_available ? 'Sofort verfügbar, Lieferzeit: 1-2 Wochen' : 'Derzeit nicht verfügbar'}
+                            </span>
+                        </div>
+
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+                            <div class="flex h-12 items-center rounded-xl border border-gray-300 bg-white">
+                                <button
+                                    class="flex h-full w-12 items-center justify-center text-gray-500 hover:bg-gray-50 disabled:opacity-40"
+                                    onclick={() => (quantity = Math.max(1, quantity - 1))}
+                                    disabled={quantity <= 1}
+                                    aria-label="Menge verringern"
+                                >
+                                    <Minus class="size-4" />
+                                </button>
+                                <span class="w-14 text-center text-sm font-semibold">{quantity}</span>
+                                <button
+                                    class="flex h-full w-12 items-center justify-center text-gray-500 hover:bg-gray-50"
+                                    onclick={() => quantity++}
+                                    aria-label="Menge erhöhen"
+                                >
+                                    <Plus class="size-4" />
+                                </button>
+                            </div>
+
+                            <Button
+                                class="h-12 flex-1 rounded-xl bg-[#111111] text-white hover:bg-[#111111]/90 disabled:opacity-50"
+                                onclick={addToCart}
+                                disabled={!product.is_available}
+                            >
+                                <ShoppingCart class="size-4" />
+                                {product.is_available ? 'In den Warenkorb' : 'Nicht verfügbar'}
+                            </Button>
+                        </div>
+                </div>
+
             </div>
         </div>
 
-        <!-- Tabs -->
         <div class="mt-12">
             <div class="flex border-b">
                 <button
@@ -367,14 +413,12 @@
                 {#if activeTab === 'beschreibung'}
                     <div class="max-w-3xl">
                         <h2 class="mb-4 text-lg font-bold text-gray-900">
-                            Produktinformationen „{product.name}"
+                            Produktinformationen "{product.name}"
                         </h2>
                         {#if product.description}
                             <p class="whitespace-pre-line text-sm leading-relaxed text-gray-700">{product.description}</p>
                         {:else}
-                            <p class="text-sm text-gray-400">
-                                Keine Beschreibung vorhanden.
-                            </p>
+                            <p class="text-sm text-gray-400">Keine Beschreibung vorhanden.</p>
                         {/if}
                     </div>
                 {:else}
@@ -388,7 +432,7 @@
                                         </p>
                                         <div class="mt-2 flex items-end gap-3">
                                             <span class="text-3xl font-bold text-gray-900">
-                                                {ratingSummary.average ?? '–'}
+                                                {ratingSummary.average ?? '-'}
                                             </span>
                                             <span class="pb-1 text-sm text-gray-500">
                                                 von 5 bei {ratingSummary.count} Bewertung{ratingSummary.count === 1 ? '' : 'en'}
@@ -400,7 +444,7 @@
                                             <Star
                                                 class={cn(
                                                     'size-5',
-                                                    ratingSummary.average !== null && star <= Math.round(Number(ratingSummary.average.replace(',', '.')))
+                                                    ratingAverageValue !== null && star <= Math.round(ratingAverageValue)
                                                         ? 'fill-current'
                                                         : 'text-gray-300',
                                                 )}
@@ -461,10 +505,7 @@
                                             {#each [1, 2, 3, 4, 5] as star (star)}
                                                 <button
                                                     type="button"
-                                                    class={cn(
-                                                        `star-button s${star}`,
-                                                        star <= ratingStars && 'active',
-                                                    )}
+                                                    class={cn(`star-button s${star}`, star <= ratingStars && 'active')}
                                                     onclick={() => (ratingStars = star)}
                                                     aria-label={starLabel(star)}
                                                     aria-pressed={star === ratingStars}
@@ -508,11 +549,10 @@
     <AppFooter />
 </div>
 
-<!-- Zoom panel: fixed, viewport-aware, desktop only -->
 {#if zoomActive && zoomPanel && product.images[activeImageIndex]}
     <div
         class="pointer-events-none fixed z-50 hidden overflow-hidden rounded-xl border bg-gray-50 shadow-2xl lg:block"
-        style="left: {zoomPanel.left}px; top: {zoomPanel.top}px; width: {zoomPanel.size}px; height: {zoomPanel.size}px; background-image: url('{product.images[activeImageIndex].url}'); background-size: 300%; background-position: {cursorPct.x * 100}% {cursorPct.y * 100}%; background-repeat: no-repeat;"
+        style="left: {zoomPanel.left}px; top: {zoomPanel.top}px; width: {zoomPanel.width}px; height: {zoomPanel.height}px; background-image: url('{product.images[activeImageIndex].url}'); background-size: 280%; background-position: {cursorPct.x * 100}% {cursorPct.y * 100}%; background-repeat: no-repeat;"
     ></div>
 {/if}
 
