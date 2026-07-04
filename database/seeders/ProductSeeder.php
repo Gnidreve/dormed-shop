@@ -193,7 +193,35 @@ class ProductSeeder extends Seeder
             'https://static.wixstatic.com/media/30d618_c7a6dee259f14c6caa4f71249c0d2120~mv2.webp/v1/fill/w_638,h_551,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/30d618_c7a6dee259f14c6caa4f71249c0d2120~mv2.webp',
         ]);
 
-        return 3;
+        $teAir = Product::create([
+            'manufacturer_id' => $mindrayManufacturer->id,
+            'category_id' => $categories['ultraschallsysteme']->id ?? null,
+            'name' => 'TE Air e5M',
+            'description' => "Das Mindray TE Air e5M ist ein kabelloses Premium-Handheld-Ultraschallsystem, welches modernste Technologie mit herausragender Bildqualitaet und maximaler Flexibilitaet in einem kompakten Design vereint.\n\nDank der innovativen Free Band Technology ermoeglicht es nahtlose Frequenzwechsel zwischen 2,5 MHz und 12 MHz, sodass eine einzige Sonde fuer vielfaeltige Anwendungen genutzt werden kann - von der Abdomen- und Gefaessdiagnostik bis hin zur Schilddruesen- und Muskuloskelettalen Sonographie.\n\nDie iTouch+ Funktion passt automatisch die Presets an die jeweilige Untersuchung an und optimiert die Einstellungen in Sekundenbruchteilen. Zusaetzliche Technologien wie Acoustic Boost sorgen fuer gestochen scharfe Bilder, waehrend das wasserdichte Gehaeuse (IP68) eine einfache Desinfektion ermoeglicht.\n\nDas Mindray TE Air e5M ist unteranderem ideal fuer Allgemeinmediziner, Notfallmediziner, Orthopaedengeeignet und alle Sonographie-Liebhaber - ein perfekter Begleiter fuer die moderne, mobile Diagnostik.",
+            'price' => $this->decimal(4163.81),
+            'is_available' => true,
+        ]);
+
+        $teAir->variants()->create([
+            'label' => 'ohne Air Capsule',
+            'price' => $this->decimal(4163.81),
+            'sort_order' => 0,
+            'is_default' => true,
+        ]);
+
+        $teAir->variants()->create([
+            'label' => 'mit Air Capsule',
+            'price' => $this->decimal(4877.81),
+            'sort_order' => 1,
+            'is_default' => false,
+        ]);
+
+        $this->seedProductImages($teAir, [
+            'https://static.wixstatic.com/media/30d618_bd77047285404791bfd2aba25ae5c13e~mv2.jpg/v1/fill/w_367,h_551,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/30d618_bd77047285404791bfd2aba25ae5c13e~mv2.jpg',
+            'https://static.wixstatic.com/media/30d618_e47e99f0ebed474c8edb72f577cc65d2~mv2.jpg/v1/fill/w_827,h_551,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/30d618_e47e99f0ebed474c8edb72f577cc65d2~mv2.jpg',
+        ]);
+
+        return 4;
     }
 
     private function createManualProduct(

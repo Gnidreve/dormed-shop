@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Link, page } from '@inertiajs/svelte';
+    import { Link, page, router } from '@inertiajs/svelte';
     import ChevronRight from 'lucide-svelte/icons/chevron-right';
     import Menu from 'lucide-svelte/icons/menu';
     import Search from 'lucide-svelte/icons/search';
@@ -43,6 +43,7 @@
     let total = $state(0);
     let isOpen = $state(false);
     let isLoading = $state(false);
+    let activeResultIndex = $state(-1);
     let debounceTimer: ReturnType<typeof setTimeout>;
     let searchContainerEl: HTMLDivElement;
 
@@ -54,6 +55,7 @@
             results = [];
             total = 0;
             isOpen = false;
+            activeResultIndex = -1;
 
             return;
         }
@@ -69,6 +71,7 @@
             total = data.total ?? 0;
             isOpen = true;
             isLoading = false;
+            activeResultIndex = results.length > 0 ? 0 : -1;
         }, 300);
 
         return () => clearTimeout(debounceTimer);
@@ -78,11 +81,35 @@
         query = '';
         results = [];
         isOpen = false;
+        activeResultIndex = -1;
     }
 
     function handleKeydown(e: KeyboardEvent) {
         if (e.key === 'Escape') {
             isOpen = false;
+            activeResultIndex = -1;
+        }
+    }
+
+    function handleSearchKeydown(e: KeyboardEvent) {
+        if (!isOpen || results.length === 0) {
+            return;
+        }
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            activeResultIndex = (activeResultIndex + 1) % results.length;
+        }
+
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            activeResultIndex = activeResultIndex <= 0 ? results.length - 1 : activeResultIndex - 1;
+        }
+
+        if (e.key === 'Enter' && activeResultIndex >= 0) {
+            e.preventDefault();
+            isOpen = false;
+            router.visit(ProductController.show.url(results[activeResultIndex].id));
         }
     }
 
@@ -125,6 +152,7 @@
                         placeholder="Suchbegriff eingeben ..."
                         bind:value={query}
                         onfocus={() => query.length >= 2 && (isOpen = true)}
+                        onkeydown={handleSearchKeydown}
                         class="pr-10 [&::-webkit-search-cancel-button]:hidden"
                     />
                     {#if query}
@@ -164,14 +192,15 @@
                             </div>
                         {:else}
                             <ul>
-                                {#each results as product (product.id)}
+                                {#each results as product, index (product.id)}
                                     <li class="border-b last:border-b-0">
                                         <Link
                                             href={ProductController.show.url(
                                                 product.id,
                                             )}
-                                            class="flex items-center gap-3 px-4 py-2.5 hover:bg-accent"
+                                            class={`flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-accent ${activeResultIndex === index ? 'bg-[#eef5ff] text-[#0d1f44]' : ''}`}
                                             onclick={() => (isOpen = false)}
+                                            onmouseenter={() => (activeResultIndex = index)}
                                         >
                                             <div
                                                 class="size-9 shrink-0 overflow-hidden rounded bg-gray-100"
