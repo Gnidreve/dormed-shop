@@ -3,8 +3,8 @@
     import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
     import AppFooter from '@/components/AppFooter.svelte';
     import AppHead from '@/components/AppHead.svelte';
+    import ProductCard from '@/components/ProductCard.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
-    import { formatPrice } from '@/lib/currency';
 
     type ProductImage = { id: number; url: string; sort_order: number };
 
@@ -89,39 +89,9 @@
             </div>
         {:else}
             <InfiniteScroll data="products">
-                <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                <div class="grid grid-cols-2 gap-5 lg:grid-cols-4">
                     {#each products.data as product (product.id)}
-                        <Link
-                            href={ProductController.show.url(product.id)}
-                            class="group rounded-lg border bg-white p-3 shadow-sm transition hover:shadow-md"
-                        >
-                            <div
-                                class="mb-3 aspect-square w-full overflow-hidden rounded bg-gray-100"
-                            >
-                                {#if product.images[0]}
-                                    <img
-                                        src={product.images[0].url}
-                                        alt={product.name}
-                                        class="size-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                    />
-                                {/if}
-                            </div>
-                            <div class="flex flex-col gap-1">
-                                <p
-                                    class="line-clamp-2 text-sm font-medium text-gray-900 group-hover:text-[#1a6bbf]"
-                                >
-                                    {product.name}
-                                </p>
-                                {#if product.manufacturer}
-                                    <p class="text-xs text-muted-foreground">
-                                        {product.manufacturer.name}
-                                    </p>
-                                {/if}
-                                <p class="text-sm font-semibold text-[#1a3a5c]">
-                                    {formatPrice(product.price)}*
-                                </p>
-                            </div>
-                        </Link>
+                        <ProductCard {product} />
                     {/each}
                 </div>
 
