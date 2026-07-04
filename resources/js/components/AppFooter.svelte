@@ -32,14 +32,46 @@
             <div>
                 <p class="text-sm font-bold text-[#1a3a5c]">Leistungen</p>
                 <ul class="mt-3 space-y-2">
-                    <li class="text-sm text-muted-foreground">Beratung</li>
-                    <li class="text-sm text-muted-foreground">Finanzierung &amp; Leasing</li>
-                    <li class="text-sm text-muted-foreground">Lieferung &amp; Installation</li>
-                    <li class="text-sm text-muted-foreground">Wartung &amp; Reparatur</li>
-                    <li class="text-sm text-muted-foreground">Netzwerkanbindung</li>
-                    <li class="text-sm text-muted-foreground">Schulung &amp; Einweisung</li>
-                    <li class="text-sm text-muted-foreground">Garantie &amp; Versicherung</li>
-                    <li class="text-sm text-muted-foreground">Inzahlungnahme</li>
+                    <li>
+                        <a href="https://dormed.de/leistungen/beratung" target="_blank" rel="noopener noreferrer" class="text-sm text-[#1a6bbf] hover:underline">
+                            Beratung
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://dormed.de/leistungen/finanzierung" target="_blank" rel="noopener noreferrer" class="text-sm text-[#1a6bbf] hover:underline">
+                            Finanzierung &amp; Leasing
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://dormed.de/leistungen/lieferung" target="_blank" rel="noopener noreferrer" class="text-sm text-[#1a6bbf] hover:underline">
+                            Lieferung &amp; Installation
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://dormed.de/leistungen/wartung-reparatur" target="_blank" rel="noopener noreferrer" class="text-sm text-[#1a6bbf] hover:underline">
+                            Wartung &amp; Reparatur
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://dormed.de/leistungen/netzwerkanbindung" target="_blank" rel="noopener noreferrer" class="text-sm text-[#1a6bbf] hover:underline">
+                            Netzwerkanbindung
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://dormed.de/leistungen/schulung-einweisung" target="_blank" rel="noopener noreferrer" class="text-sm text-[#1a6bbf] hover:underline">
+                            Schulung &amp; Einweisung
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://dormed.de/leistungen/garantie-versicherung" target="_blank" rel="noopener noreferrer" class="text-sm text-[#1a6bbf] hover:underline">
+                            Garantie &amp; Versicherung
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://dormed.de/leistungen/inzahlungnahme" target="_blank" rel="noopener noreferrer" class="text-sm text-[#1a6bbf] hover:underline">
+                            Inzahlungnahme
+                        </a>
+                    </li>
                 </ul>
             </div>
 
