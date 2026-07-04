@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
 
 class OrderItem extends Model
@@ -14,5 +15,10 @@ class OrderItem extends Model
             'unit_price' => 'decimal:2',
             'quantity' => 'integer',
         ];
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
     }
 }

@@ -22,4 +22,5 @@ Route::patch('/checkout/address', [CheckoutController::class, 'updateAddress'])-
 Route::post('/checkout/submit', [CheckoutController::class, 'submit'])->middleware('auth')->name('checkout.submit');
 Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
 Route::get('/customer/orders', [CustomerOrderController::class, 'index'])->middleware('auth')->name('customer.orders');
+Route::get('/customer/orders/{order}', [CustomerOrderController::class, 'show'])->middleware('auth')->name('customer.orders.show');
 Route::inertia('/checkout/error', 'Checkout/Error')->name('checkout.error');

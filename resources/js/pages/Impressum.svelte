@@ -1,7 +1,18 @@
 <script lang="ts">
+    import { page } from '@inertiajs/svelte';
     import AppFooter from '@/components/AppFooter.svelte';
     import AppHead from '@/components/AppHead.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
+
+    type ContactInfo = {
+        email: string;
+        phone: string;
+        fax: string;
+        phone_href: string;
+        fax_href: string;
+    };
+
+    const contact = $derived(page.props.contact as ContactInfo);
 </script>
 
 <AppHead title="Impressum" description="Impressum und Anbieterkennzeichnung der Dormed medizinische Systeme GmbH, Wilhelm-Röntgen-Straße 4, 59439 Holzwickede." />
@@ -9,18 +20,18 @@
 <div class="flex min-h-screen flex-col bg-white">
     <ShopHeader />
 
-    <main class="flex-1 mx-auto max-w-3xl px-4 py-10 lg:px-8">
+    <main class="mx-auto max-w-3xl flex-1 px-4 py-10 lg:px-8">
         <h1 class="mb-8 text-2xl font-bold text-[#1a3a5c]">Impressum</h1>
 
         <section class="mb-8">
             <h2 class="mb-3 text-base font-bold text-[#1a3a5c]">Angaben zum Dienstanbieter</h2>
-            <address class="not-italic text-sm text-gray-700 leading-relaxed">
+            <address class="not-italic text-sm leading-relaxed text-gray-700">
                 DORMED medizinische Systeme GmbH<br />
                 Wilhelm-Röntgen-Straße 4<br />
                 59439 Holzwickede<br /><br />
-                Telefon: +49 (0) 2301 / 188-600<br />
-                Telefax: +49 (0) 2301 / 188-620<br />
-                E-Mail: <a href="mailto:mail@dormed.de" class="text-[#1a6bbf] hover:underline">mail@dormed.de</a>
+                Telefon: <a href={contact.phone_href} class="text-[#1a6bbf] hover:underline">{contact.phone}</a><br />
+                Telefax: <a href={contact.fax_href} class="text-[#1a6bbf] hover:underline">{contact.fax}</a><br />
+                E-Mail: <a href={`mailto:${contact.email}`} class="text-[#1a6bbf] hover:underline">{contact.email}</a>
             </address>
         </section>
 

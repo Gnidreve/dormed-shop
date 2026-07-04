@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Link } from '@inertiajs/svelte';
+    import { Link, page } from '@inertiajs/svelte';
     import ArrowRight from 'lucide-svelte/icons/arrow-right';
     import Check from 'lucide-svelte/icons/check';
     import FileCheck from 'lucide-svelte/icons/file-check';
@@ -98,6 +98,15 @@
         'Zubehör und Verbrauchsmaterial als wiederkehrender Bedarf',
         'Persönlicher Ansprechpartner statt anonymer Bestellstrecke',
     ] as const;
+    type ContactInfo = {
+        email: string;
+        phone: string;
+        fax: string;
+        phone_href: string;
+        fax_href: string;
+    };
+
+    const contact = $derived(page.props.contact as ContactInfo);
 </script>
 
 <AppHead
@@ -149,7 +158,7 @@
                 </ul>
 
                 <a
-                    href="tel:023011886000"
+                    href={contact.phone_href}
                     class="group inline-flex items-center gap-4 rounded-xl bg-white/10 px-5 py-3.5 backdrop-blur-sm transition hover:bg-white/20"
                 >
                     <div
@@ -158,9 +167,12 @@
                         <Phone class="size-5 text-white" />
                     </div>
                     <span
-                        class="text-2xl font-bold tracking-wide text-white lg:text-3xl"
+                        class="hidden text-2xl font-bold tracking-wide text-white lg:text-3xl"
                     >
                         02301 – 188/600
+                    </span>
+                    <span class="text-2xl font-bold tracking-wide text-white lg:text-3xl">
+                        {contact.phone}
                     </span>
                 </a>
             </div>

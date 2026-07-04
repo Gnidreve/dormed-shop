@@ -23,6 +23,7 @@
             'shop.name': settings['shop.name'] ?? '',
             'shop.email': settings['shop.email'] ?? '',
             'shop.phone': settings['shop.phone'] ?? '',
+            'shop.fax': settings['shop.fax'] ?? '',
         },
     });
 
@@ -50,6 +51,10 @@
             <div class="flex flex-col gap-1.5">
                 <Label for="shop_phone">Telefon</Label>
                 <Input id="shop_phone" type="tel" bind:value={form.settings['shop.phone']} />
+            </div>
+            <div class="flex flex-col gap-1.5">
+                <Label for="shop_fax">Fax</Label>
+                <Input id="shop_fax" type="tel" bind:value={form.settings['shop.fax']} />
             </div>
         </div>
 

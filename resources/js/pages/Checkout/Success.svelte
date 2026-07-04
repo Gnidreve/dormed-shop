@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { page } from '@inertiajs/svelte';
     import CheckCircle from 'lucide-svelte/icons/circle-check-big';
     import Mail from 'lucide-svelte/icons/mail';
     import AppFooter from '@/components/AppFooter.svelte';
@@ -35,6 +36,16 @@
         total: string | number;
         customer_email: string;
     } = $props();
+
+    type ContactInfo = {
+        email: string;
+        phone: string;
+        fax: string;
+        phone_href: string;
+        fax_href: string;
+    };
+
+    const contact = $derived(page.props.contact as ContactInfo);
 </script>
 
 <AppHead title="Bestellung bestätigt" />
@@ -155,8 +166,8 @@
 
         <p class="mt-6 text-center text-xs text-gray-400">
             Bei Fragen erreichen Sie uns unter <a
-                href="tel:023011886000"
-                class="hover:underline">02301 - 188600</a
+                href={contact.phone_href}
+                class="hover:underline">{contact.phone}</a
             >
         </p>
     </main>

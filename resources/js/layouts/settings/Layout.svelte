@@ -105,8 +105,8 @@
 
         <Separator class="my-6 lg:hidden" />
 
-        <div class="flex-1 md:max-w-2xl">
-            <section class="max-w-xl space-y-12">
+        <div class="min-w-0 flex-1 md:max-w-5xl">
+            <section class="space-y-12">
                 {@render children?.()}
             </section>
         </div>

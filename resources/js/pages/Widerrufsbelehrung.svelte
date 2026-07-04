@@ -1,7 +1,18 @@
 <script lang="ts">
+    import { page } from '@inertiajs/svelte';
     import AppFooter from '@/components/AppFooter.svelte';
     import AppHead from '@/components/AppHead.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
+
+    type ContactInfo = {
+        email: string;
+        phone: string;
+        fax: string;
+        phone_href: string;
+        fax_href: string;
+    };
+
+    const contact = $derived(page.props.contact as ContactInfo);
 </script>
 
 <AppHead title="Widerrufsbelehrung" description="Widerrufsrecht und Rückgabebedingungen für Käufe im dormed24-Shop der Dormed medizinische Systeme GmbH." />
@@ -68,9 +79,9 @@
                 <h2 class="mb-2 font-semibold text-gray-900">Kontakt</h2>
                 <p>Weitere Informationen erhalten Sie telefonisch oder über unser Kontaktformular.</p>
                 <ul class="mt-3 space-y-1">
-                    <li>Telefon: +49 (0) 2301 / 188-600</li>
-                    <li>Telefax: +49 (0) 2301 / 188-620</li>
-                    <li>E-Mail: <a href="mailto:mail@dormed.de" class="text-[#1a6bbf] hover:underline">mail@dormed.de</a></li>
+                    <li>Telefon: <a href={contact.phone_href} class="text-[#1a6bbf] hover:underline">{contact.phone}</a></li>
+                    <li>Telefax: <a href={contact.fax_href} class="text-[#1a6bbf] hover:underline">{contact.fax}</a></li>
+                    <li>E-Mail: <a href={`mailto:${contact.email}`} class="text-[#1a6bbf] hover:underline">{contact.email}</a></li>
                 </ul>
             </section>
         </div>

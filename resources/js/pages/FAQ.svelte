@@ -1,8 +1,19 @@
 <script lang="ts">
+    import { page } from '@inertiajs/svelte';
     import AppFooter from '@/components/AppFooter.svelte';
     import AppHead from '@/components/AppHead.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
     import * as Accordion from '@/components/ui/accordion';
+
+    type ContactInfo = {
+        email: string;
+        phone: string;
+        fax: string;
+        phone_href: string;
+        fax_href: string;
+    };
+
+    const contact = $derived(page.props.contact as ContactInfo);
 
     const faqItems = [
         {
@@ -27,7 +38,7 @@
             id: 'finanzierung',
             question: 'Bietet ihr Finanzierung oder Leasing an?',
             answer:
-                'Ja. Für Praxen, Kliniken und andere Einrichtungen bieten wir individuelle Finanzierungs- und Leasingmodelle an. Sprechen Sie uns unter 02301 – 188600 oder mail@dormed.de an – wir erstellen Ihnen gerne ein maßgeschneidertes Angebot.',
+                'Ja. Für Praxen, Kliniken und andere Einrichtungen bieten wir individuelle Finanzierungs- und Leasingmodelle an. Sprechen Sie uns direkt an – wir erstellen Ihnen gerne ein maßgeschneidertes Angebot.',
         },
         {
             id: 'rueckgabe',
@@ -57,7 +68,7 @@
             id: 'beratung',
             question: 'Ich bin unsicher, welches Produkt zu meiner Praxis passt. Helft ihr?',
             answer:
-                'Gerne. Unsere Fachberater kennen die Anforderungen von Praxen, Kliniken und Pflegeeinrichtungen und helfen Ihnen bei der Auswahl des richtigen Geräts. Rufen Sie uns unter 02301 – 188600 an oder schreiben Sie uns an mail@dormed.de – wir melden uns in der Regel innerhalb eines Werktages.',
+                'Gerne. Unsere Fachberater kennen die Anforderungen von Praxen, Kliniken und Pflegeeinrichtungen und helfen Ihnen bei der Auswahl des richtigen Geräts. Rufen Sie uns an oder schreiben Sie uns – wir melden uns in der Regel innerhalb eines Werktages.',
         },
         {
             id: 'netzwerk',
@@ -85,7 +96,6 @@
         },
     ];
 
-    // JSON-LD FAQPage schema for Google Rich Results
     const jsonLd = JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'FAQPage',
@@ -99,7 +109,6 @@
         })),
     });
 
-    // Split closing tag to avoid Svelte parser treating it as end of script block
     const jsonLdHtml = `<script type="application/ld+json">${jsonLd}<` + `/script>`;
 </script>
 
@@ -116,19 +125,20 @@
 
     <main class="flex-1">
         <div class="mx-auto max-w-3xl px-4 py-10 lg:px-8">
-            <h1 class="mb-2 text-2xl font-bold text-[#1a3a5c]">
-                Häufige Fragen
-            </h1>
+            <h1 class="mb-2 text-2xl font-bold text-[#1a3a5c]">Häufige Fragen</h1>
             <p class="mb-10 text-sm text-gray-500">
                 Sie finden hier Antworten auf die häufigsten Fragen zu Bestellung, Lieferung, Zahlung und unseren Serviceleistungen.
-                Bei weiteren Fragen erreichen Sie uns unter <a href="tel:+492301188600" class="text-[#1a6bbf] hover:underline">02301 – 188600</a> oder <a href="mailto:mail@dormed.de" class="text-[#1a6bbf] hover:underline">mail@dormed.de</a>.
+                Bei weiteren Fragen erreichen Sie uns unter
+                <a href={contact.phone_href} class="text-[#1a6bbf] hover:underline">{contact.phone}</a>
+                oder
+                <a href={`mailto:${contact.email}`} class="text-[#1a6bbf] hover:underline">{contact.email}</a>.
             </p>
 
             <Accordion.Root type="single" collapsible={true} class="divide-y divide-gray-100 border-y border-gray-100">
                 {#each faqItems as item (item.id)}
                     <Accordion.Item value={item.id} class="group">
                         <Accordion.Trigger
-                            class="flex w-full items-center justify-between gap-4 py-5 text-left text-sm font-medium text-[#1a3a5c] hover:text-[#1a6bbf] transition-colors [&[data-state=open]>svg]:rotate-180"
+                            class="flex w-full items-center justify-between gap-4 py-5 text-left text-sm font-medium text-[#1a3a5c] transition-colors hover:text-[#1a6bbf] [&[data-state=open]>svg]:rotate-180"
                         >
                             {item.question}
                         </Accordion.Trigger>
@@ -146,16 +156,16 @@
                 </p>
                 <div class="mt-4 flex flex-wrap gap-3">
                     <a
-                        href="tel:+492301188600"
+                        href={contact.phone_href}
                         class="inline-flex items-center rounded-md bg-[#1a3a5c] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#1a6bbf]"
                     >
-                        02301 – 188600
+                        {contact.phone}
                     </a>
                     <a
-                        href="mailto:mail@dormed.de"
+                        href={`mailto:${contact.email}`}
                         class="inline-flex items-center rounded-md border border-[#1a3a5c] px-4 py-2 text-sm font-medium text-[#1a3a5c] transition-colors hover:bg-[#1a3a5c] hover:text-white"
                     >
-                        mail@dormed.de
+                        {contact.email}
                     </a>
                 </div>
             </div>

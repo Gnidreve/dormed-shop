@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { Link } from '@inertiajs/svelte';
     import AppHead from '@/components/AppHead.svelte';
     import Heading from '@/components/Heading.svelte';
     import * as Table from '@/components/ui/table';
@@ -52,20 +53,30 @@
             </Table.Header>
             <Table.Body>
                 {#each orders as order (order.id)}
-                    <Table.Row>
-                        <Table.Cell class="font-medium">#{order.id}</Table.Cell>
-                        <Table.Cell>
-                            {new Date(order.created_at).toLocaleDateString('de-DE')}
+                    <Table.Row class="hover:bg-muted/40">
+                        <Table.Cell class="font-medium">
+                            <Link href={`/customer/orders/${order.id}`} class="block w-full text-[#0d1f44] hover:underline">
+                                #{order.id}
+                            </Link>
                         </Table.Cell>
                         <Table.Cell>
-                            <span
-                                class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {statusClass[order.status] ?? 'bg-yellow-100 text-yellow-700'}"
-                            >
-                                {statusLabels[order.status] ?? order.status}
-                            </span>
+                            <Link href={`/customer/orders/${order.id}`} class="block w-full">
+                                {new Date(order.created_at).toLocaleDateString('de-DE')}
+                            </Link>
+                        </Table.Cell>
+                        <Table.Cell>
+                            <Link href={`/customer/orders/${order.id}`} class="block w-full">
+                                <span
+                                    class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {statusClass[order.status] ?? 'bg-yellow-100 text-yellow-700'}"
+                                >
+                                    {statusLabels[order.status] ?? order.status}
+                                </span>
+                            </Link>
                         </Table.Cell>
                         <Table.Cell class="text-right font-semibold">
-                            {formatPrice(order.total_amount)}
+                            <Link href={`/customer/orders/${order.id}`} class="block w-full">
+                                {formatPrice(order.total_amount)}
+                            </Link>
                         </Table.Cell>
                     </Table.Row>
                 {/each}

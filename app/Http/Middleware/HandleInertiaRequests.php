@@ -12,6 +12,12 @@ use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
 {
+    private const DEFAULT_SHOP_EMAIL = 'mail@dormed.de';
+
+    private const DEFAULT_SHOP_PHONE = '02301 – 188600';
+
+    private const DEFAULT_SHOP_FAX = '02301 / 188-620';
+
     /**
      * The root template that's loaded on the first page visit.
      *
@@ -51,6 +57,13 @@ class HandleInertiaRequests extends Middleware
             ],
             'cart' => $cart,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'contact' => [
+                'email' => Setting::get('shop.email', self::DEFAULT_SHOP_EMAIL) ?? self::DEFAULT_SHOP_EMAIL,
+                'phone' => Setting::get('shop.phone', self::DEFAULT_SHOP_PHONE) ?? self::DEFAULT_SHOP_PHONE,
+                'fax' => Setting::get('shop.fax', self::DEFAULT_SHOP_FAX) ?? self::DEFAULT_SHOP_FAX,
+                'phone_href' => $this->phoneHref(Setting::get('shop.phone', self::DEFAULT_SHOP_PHONE) ?? self::DEFAULT_SHOP_PHONE),
+                'fax_href' => $this->phoneHref(Setting::get('shop.fax', self::DEFAULT_SHOP_FAX) ?? self::DEFAULT_SHOP_FAX),
+            ],
             'navCategories' => Inertia::always(
                 fn () => Category::orderBy('name')->get(['id', 'name', 'slug']),
             ),
@@ -63,5 +76,24 @@ class HandleInertiaRequests extends Middleware
             })(),
             'sandbox' => ! PaymentMode::isLive(),
         ];
+    }
+
+    private function phoneHref(string $value): string
+    {
+        $normalized = preg_replace('/[^\d+]/', '', $value) ?? '';
+
+        if (str_starts_with($normalized, '00')) {
+            return 'tel:+'.substr($normalized, 2);
+        }
+
+        if (str_starts_with($normalized, '+')) {
+            return 'tel:'.$normalized;
+        }
+
+        if (str_starts_with($normalized, '0')) {
+            return 'tel:+49'.ltrim($normalized, '0');
+        }
+
+        return 'tel:'.$normalized;
     }
 }

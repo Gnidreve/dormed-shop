@@ -1,10 +1,21 @@
 <script lang="ts">
+    import { page } from '@inertiajs/svelte';
     import { Link } from '@inertiajs/svelte';
     import AlertCircle from 'lucide-svelte/icons/circle-alert';
     import AppFooter from '@/components/AppFooter.svelte';
     import AppHead from '@/components/AppHead.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
     import { Button } from '@/components/ui/button';
+
+    type ContactInfo = {
+        email: string;
+        phone: string;
+        fax: string;
+        phone_href: string;
+        fax_href: string;
+    };
+
+    const contact = $derived(page.props.contact as ContactInfo);
 </script>
 
 <AppHead title="Fehler bei der Bestellung" />
@@ -23,7 +34,7 @@
         </h1>
         <p class="mt-3 text-sm text-gray-500">
             Bitte versuchen Sie es erneut oder kontaktieren Sie uns unter
-            <a href="tel:023011886000" class="text-[#1a6bbf] hover:underline">02301 - 188600</a>.
+            <a href={contact.phone_href} class="text-[#1a6bbf] hover:underline">{contact.phone}</a>.
         </p>
         <div class="mt-8 flex justify-center gap-3">
             <Button asChild variant="outline">

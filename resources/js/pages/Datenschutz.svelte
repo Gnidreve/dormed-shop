@@ -1,7 +1,18 @@
 <script lang="ts">
+    import { page } from '@inertiajs/svelte';
     import AppFooter from '@/components/AppFooter.svelte';
     import AppHead from '@/components/AppHead.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
+
+    type ContactInfo = {
+        email: string;
+        phone: string;
+        fax: string;
+        phone_href: string;
+        fax_href: string;
+    };
+
+    const contact = $derived(page.props.contact as ContactInfo);
 </script>
 
 <AppHead title="Datenschutzerklärung" description="Datenschutzerklärung des dormed24-Online-Shops der Dormed medizinische Systeme GmbH." />
@@ -386,8 +397,8 @@
                     Dormed medizinische Systeme GmbH<br />
                     Wilhelm-Röntgen-Straße 4<br />
                     59439 Holzwickede<br /><br />
-                    Telefon: +49 (0) 2301-188600<br />
-                    E-Mail: <a href="mailto:mail@dormed.de" class="text-[#1a6bbf] hover:underline">mail@dormed.de</a><br /><br />
+                    Telefon: <a href={contact.phone_href} class="text-[#1a6bbf] hover:underline">{contact.phone}</a><br />
+                    E-Mail: <a href={`mailto:${contact.email}`} class="text-[#1a6bbf] hover:underline">{contact.email}</a><br /><br />
                     Datenschutzanfragen: <a href="mailto:datenschutz@dormed24.de" class="text-[#1a6bbf] hover:underline">datenschutz@dormed24.de</a>
                 </address>
             </section>

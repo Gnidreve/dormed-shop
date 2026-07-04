@@ -1,6 +1,14 @@
 import type { Auth } from '@/types/auth';
 import type { Cart } from '@/types/cart';
 
+type ContactInfo = {
+    email: string;
+    phone: string;
+    fax: string;
+    phone_href: string;
+    fax_href: string;
+};
+
 // Extend ImportMeta interface for Vite...
 declare module 'vite/client' {
     interface ImportMetaEnv {
@@ -23,6 +31,7 @@ declare module '@inertiajs/core' {
             name: string;
             auth: Auth;
             cart: Cart;
+            contact: ContactInfo;
             sidebarOpen: boolean;
             sandbox: boolean;
             [key: string]: unknown;
