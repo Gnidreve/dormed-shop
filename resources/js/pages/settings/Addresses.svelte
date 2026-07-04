@@ -33,6 +33,7 @@
         billing: AddressData | null;
     } = $props();
 
+    // svelte-ignore state_referenced_locally
     const form = useForm({
         billing_same_as_shipping: billing === null,
         shipping: { ...EMPTY_ADDRESS, ...(shipping ?? {}) },

@@ -316,6 +316,7 @@
                     <button
                         type="button"
                         role="switch"
+                        aria-label="Verfügbarkeit umschalten"
                         aria-checked={form.is_available}
                         onclick={() => (form.is_available = !form.is_available)}
                         class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring {form.is_available ? 'bg-primary' : 'bg-input'}"

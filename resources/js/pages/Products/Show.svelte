@@ -58,7 +58,9 @@
         ratingSummary: RatingSummary;
     } = $props();
 
+    // svelte-ignore state_referenced_locally
     const hasVariants = product.variants.length > 0;
+    // svelte-ignore state_referenced_locally
     const defaultVariant = product.variants.find((v) => v.is_default) ?? product.variants[0] ?? null;
 
     let selectedVariantValue = $state(defaultVariant ? String(defaultVariant.id) : '');

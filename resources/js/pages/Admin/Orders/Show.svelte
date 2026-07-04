@@ -82,6 +82,7 @@
         REFUNDED: 'Rückerstattet',
     };
 
+    // svelte-ignore state_referenced_locally
     let selectedStatus = $state(order.status);
     let notifyCustomer = $state(false);
     let savingStatus = $state(false);
