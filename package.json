@@ -5,7 +5,9 @@
     "scripts": {
         "build": "vite build",
         "build:ssr": "vite build && vite build --ssr",
-        "dev": "vite",
+        "dev": "run-p dev:vite dev:laravel",
+        "dev:vite": "vite",
+        "dev:laravel": "php artisan serve",
         "format": "prettier --write resources/",
         "format:check": "prettier --check resources/",
         "lint": "eslint . --fix",
@@ -46,6 +48,7 @@
         "laravel-vite-plugin": "^3.0.0",
         "layerchart": "^2.0.0-next.65",
         "lucide-svelte": "^0.468.0",
+        "npm-run-all": "^4.1.5",
         "svelte": "^5.16.0",
         "svelte-sonner": "^0.3.28",
         "tailwind-merge": "^3.2.0",
