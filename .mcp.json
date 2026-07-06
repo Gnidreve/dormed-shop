@@ -2,14 +2,7 @@
     "mcpServers": {
         "laravel-boost": {
             "command": "php",
-<<<<<<< HEAD
-            "args": [
-                "artisan",
-                "boost:mcp"
-            ]
-=======
             "args": ["artisan", "boost:mcp"]
->>>>>>> cb2ae03 (Test-Integration)
         }
     }
 }
