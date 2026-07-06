@@ -1,0 +1,1009 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Access to property \$default on an unknown class Laravel\\Chisel\\Question\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Console/Commands/InstallFeaturesCommand.php
+
+		-
+			message: '#^Access to property \$hint on an unknown class Laravel\\Chisel\\Question\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Console/Commands/InstallFeaturesCommand.php
+
+		-
+			message: '#^Access to property \$label on an unknown class Laravel\\Chisel\\Question\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Console/Commands/InstallFeaturesCommand.php
+
+		-
+			message: '#^Access to property \$options on an unknown class Laravel\\Chisel\\Question\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Console/Commands/InstallFeaturesCommand.php
+
+		-
+			message: '#^Access to property \$required on an unknown class Laravel\\Chisel\\Question\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Console/Commands/InstallFeaturesCommand.php
+
+		-
+			message: '#^Call to method chisel\(\) on an unknown class Laravel\\Chisel\\Script\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Console/Commands/InstallFeaturesCommand.php
+
+		-
+			message: '#^Call to method collectAnswers\(\) on an unknown class Laravel\\Chisel\\Script\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Console/Commands/InstallFeaturesCommand.php
+
+		-
+			message: '#^Call to static method in\(\) on an unknown class Laravel\\Chisel\\Chisel\.$#'
+			identifier: class.notFound
+			count: 2
+			path: app/Console/Commands/InstallFeaturesCommand.php
+
+		-
+			message: '#^PHPDoc tag @var for variable \$script contains unknown class Laravel\\Chisel\\Script\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Console/Commands/InstallFeaturesCommand.php
+
+		-
+			message: '#^Parameter \$question of anonymous function has invalid type Laravel\\Chisel\\Question\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Console/Commands/InstallFeaturesCommand.php
+
+		-
+			message: '#^Method App\\Contracts\\CartStore\:\:get\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/CartStore.php
+
+		-
+			message: '#^Method App\\Contracts\\CartStore\:\:put\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Contracts/CartStore.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Order\:\:\$orders\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Admin/DashboardController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Order\:\:\$revenue\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Admin/DashboardController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>orders" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/Admin/DashboardController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>revenue" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/Admin/DashboardController.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\Product\:\:orderItems\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/Admin/ProductController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:each\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: mixed, Closure\(App\\Models\\ProductImage, int\)\: bool given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Admin/ProductImageController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:each\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: mixed, Closure\(App\\Models\\ProductVariant, int\)\: bool given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/Admin/ProductVariantController.php
+
+		-
+			message: '#^Called ''pluck'' on Laravel collection, but could have been retrieved as a query\.$#'
+			identifier: larastan.noUnnecessaryCollectionCall
+			count: 1
+			path: app/Http/Controllers/Admin/SettingController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\Admin\\SettingController\:\:loadSettings\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/Admin/SettingController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:available\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/CategoryController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/CheckoutController.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\Customer\|App\\Models\\User\:\:addresses\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Http/Controllers/CheckoutController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:toAddressArray\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Http/Controllers/CheckoutController.php
+
+		-
+			message: '#^Parameter \#1 \$customer of method App\\Support\\Orders\\OrderManager\:\:createFromCart\(\) expects App\\Models\\Customer, App\\Models\\Customer\|App\\Models\\User\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/CheckoutController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/CustomerOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$product\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/CustomerOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$product_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/CustomerOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quantity\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/CustomerOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$unit_price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/CustomerOrderController.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\Customer\|App\\Models\\User\:\:orders\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/CustomerOrderController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/CustomerOrderController.php
+
+		-
+			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: method.unresolvableReturnType
+			count: 1
+			path: app/Http/Controllers/CustomerOrderController.php
+
+		-
+			message: '#^Unable to resolve the template type TFlatMapKey in call to method Illuminate\\Support\\Collection\<\(int\|string\),mixed\>\:\:flatMap\(\)$#'
+			identifier: argument.templateType
+			count: 1
+			path: app/Http/Controllers/CustomerOrderController.php
+
+		-
+			message: '#^Unable to resolve the template type TFlatMapValue in call to method Illuminate\\Support\\Collection\<\(int\|string\),mixed\>\:\:flatMap\(\)$#'
+			identifier: argument.templateType
+			count: 1
+			path: app/Http/Controllers/CustomerOrderController.php
+
+		-
+			message: '#^Unable to resolve the template type TKey in call to function collect$#'
+			identifier: argument.templateType
+			count: 1
+			path: app/Http/Controllers/CustomerOrderController.php
+
+		-
+			message: '#^Unable to resolve the template type TValue in call to function collect$#'
+			identifier: argument.templateType
+			count: 1
+			path: app/Http/Controllers/CustomerOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$total_amount\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Http/Controllers/PayPalController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PayPalController\:\:handleCaptureCompleted\(\) has parameter \$resource with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/PayPalController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PayPalController\:\:handleCaptureDenied\(\) has parameter \$resource with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/PayPalController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PayPalController\:\:handleCaptureRefunded\(\) has parameter \$resource with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/PayPalController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\PayPalController\:\:handleOrderApproved\(\) has parameter \$resource with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Controllers/PayPalController.php
+
+		-
+			message: '#^Offset ''id'' on array\{id\: string, status\: string, links\: array, \.\.\.\} in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.offset
+			count: 1
+			path: app/Http/Controllers/PayPalController.php
+
+		-
+			message: '#^Parameter \#1 \$customer of method App\\Http\\Controllers\\PayPalController\:\:cancelStalePendingPayPalOrders\(\) expects App\\Models\\Customer, App\\Models\\Customer\|App\\Models\\User\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/PayPalController.php
+
+		-
+			message: '#^Parameter \#1 \$customer of method App\\Support\\Orders\\OrderManager\:\:createFromCart\(\) expects App\\Models\\Customer, App\\Models\\Customer\|App\\Models\\User\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/PayPalController.php
+
+		-
+			message: '#^Parameter \#1 \$order of method App\\Support\\Orders\\OrderManager\:\:markPaid\(\) expects App\\Models\\Order, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 3
+			path: app/Http/Controllers/PayPalController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Product\:\:\$ratings_avg_stars\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$content\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$is_default\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$label\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$sort_order\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$stars\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$url\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Product\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 3
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Product\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: method.unresolvableReturnType
+			count: 1
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: method.unresolvableReturnType
+			count: 3
+			path: app/Http/Controllers/ProductController.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\Customer\|App\\Models\\User\:\:addresses\(\)\.$#'
+			identifier: method.notFound
+			count: 7
+			path: app/Http/Controllers/Settings/AddressController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:toAddressArray\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Http/Controllers/Settings/AddressController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Customer\|App\\Models\\User\:\:\$email_verified_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Settings/ProfileController.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\Customer\|App\\Models\\User\:\:hasEnabledTwoFactorAuthentication\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/Settings/SecurityController.php
+
+		-
+			message: '#^Call to an undefined method App\\Models\\Customer\|App\\Models\\User\:\:passkeys\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/Settings/SecurityController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Customer\|App\\Models\\User\:\:\$is_admin\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/EnsureAdmin.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Admin\\StoreCategoryRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Admin/StoreCategoryRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Admin\\StoreManufacturerRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Admin/StoreManufacturerRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Admin\\UpdateCategoryRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Admin/UpdateCategoryRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Admin\\UpdateManufacturerRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Admin/UpdateManufacturerRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Cart\\AddCartItemRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Cart/AddCartItemRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Cart\\UpdateCartItemRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Cart/UpdateCartItemRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Cart\\UpdateCartPaymentMethodRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Cart/UpdateCartPaymentMethodRequest.php
+
+		-
+			message: '#^Unable to resolve the template type TFlatMapKey in call to method Illuminate\\Support\\Collection\<\(int\|string\),mixed\>\:\:flatMap\(\)$#'
+			identifier: argument.templateType
+			count: 1
+			path: app/Http/Requests/Cart/UpdateCartPaymentMethodRequest.php
+
+		-
+			message: '#^Unable to resolve the template type TFlatMapValue in call to method Illuminate\\Support\\Collection\<\(int\|string\),mixed\>\:\:flatMap\(\)$#'
+			identifier: argument.templateType
+			count: 1
+			path: app/Http/Requests/Cart/UpdateCartPaymentMethodRequest.php
+
+		-
+			message: '#^Unable to resolve the template type TKey in call to function collect$#'
+			identifier: argument.templateType
+			count: 1
+			path: app/Http/Requests/Cart/UpdateCartPaymentMethodRequest.php
+
+		-
+			message: '#^Unable to resolve the template type TValue in call to function collect$#'
+			identifier: argument.templateType
+			count: 1
+			path: app/Http/Requests/Cart/UpdateCartPaymentMethodRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Cart\\UpdateCartShippingMethodRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Cart/UpdateCartShippingMethodRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\Checkout\\PlaceOrderRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/Checkout/PlaceOrderRequest.php
+
+		-
+			message: '#^Method App\\Http\\Requests\\StoreRatingRequest\:\:rules\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Http/Requests/StoreRatingRequest.php
+
+		-
+			message: '#^Method App\\Mail\\NewOrderMail\:\:__construct\(\) has parameter \$cart with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Mail/NewOrderMail.php
+
+		-
+			message: '#^Method App\\Models\\Address\:\:customer\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Address.php
+
+		-
+			message: '#^Method App\\Models\\Address\:\:toAddressArray\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Models/Address.php
+
+		-
+			message: '#^Method App\\Models\\Category\:\:products\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Category.php
+
+		-
+			message: '#^Method App\\Models\\Customer\:\:addresses\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Customer.php
+
+		-
+			message: '#^Method App\\Models\\Customer\:\:orders\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Customer.php
+
+		-
+			message: '#^PHPDoc tag @return with type array\<string, string\> is incompatible with native type Illuminate\\Database\\Eloquent\\Relations\\HasMany\.$#'
+			identifier: return.phpDocType
+			count: 1
+			path: app/Models/Customer.php
+
+		-
+			message: '#^Method App\\Models\\Manufacturer\:\:products\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Manufacturer.php
+
+		-
+			message: '#^Method App\\Models\\Order\:\:customer\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Order.php
+
+		-
+			message: '#^Method App\\Models\\Order\:\:items\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Order.php
+
+		-
+			message: '#^Method App\\Models\\Order\:\:payments\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Order.php
+
+		-
+			message: '#^Offset ''first_name'' on non\-falsy\-string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Models/Order.php
+
+		-
+			message: '#^Offset ''house_number'' on non\-falsy\-string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Models/Order.php
+
+		-
+			message: '#^Offset ''last_name'' on non\-falsy\-string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Models/Order.php
+
+		-
+			message: '#^Offset ''street'' on non\-falsy\-string on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Models/Order.php
+
+		-
+			message: '#^Method App\\Models\\OrderItem\:\:order\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/OrderItem.php
+
+		-
+			message: '#^Method App\\Models\\OrderItem\:\:product\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/OrderItem.php
+
+		-
+			message: '#^Method App\\Models\\Payment\:\:order\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Payment.php
+
+		-
+			message: '#^Method App\\Models\\Product\:\:category\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Product.php
+
+		-
+			message: '#^Method App\\Models\\Product\:\:images\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Product.php
+
+		-
+			message: '#^Method App\\Models\\Product\:\:manufacturer\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Product.php
+
+		-
+			message: '#^Method App\\Models\\Product\:\:ratings\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Product.php
+
+		-
+			message: '#^Method App\\Models\\Product\:\:scopeAvailable\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Product.php
+
+		-
+			message: '#^Method App\\Models\\Product\:\:scopeAvailable\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Product.php
+
+		-
+			message: '#^Method App\\Models\\Product\:\:variants\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Product.php
+
+		-
+			message: '#^Method App\\Models\\ProductImage\:\:product\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/ProductImage.php
+
+		-
+			message: '#^Method App\\Models\\ProductVariant\:\:product\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/ProductVariant.php
+
+		-
+			message: '#^Method App\\Models\\Rating\:\:product\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/Rating.php
+
+		-
+			message: '#^Property App\\Models\\Setting\:\:\$encryptedKeys type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Models/Setting.php
+
+		-
+			message: '#^Class App\\Models\\ShippingMethod uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Models/ShippingMethod.php
+
+		-
+			message: '#^Cannot access offset ''access_token'' on array\<string, mixed\>\|Psr\\Http\\Message\\StreamInterface\|string\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/Services/PayPalService.php
+
+		-
+			message: '#^Cannot access offset ''error'' on array\<string, mixed\>\|Psr\\Http\\Message\\StreamInterface\|string\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/Services/PayPalService.php
+
+		-
+			message: '#^Cannot access offset ''verification_status'' on array\<string, mixed\>\|Psr\\Http\\Message\\StreamInterface\|string\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: app/Services/PayPalService.php
+
+		-
+			message: '#^Method App\\Services\\PayPalService\:\:buildConfig\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/PayPalService.php
+
+		-
+			message: '#^Method App\\Services\\PayPalService\:\:captureOrder\(\) should return array\<string, mixed\> but returns array\<string, mixed\>\|Psr\\Http\\Message\\StreamInterface\|string\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/PayPalService.php
+
+		-
+			message: '#^Method App\\Services\\PayPalService\:\:createOrder\(\) has parameter \$address with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/PayPalService.php
+
+		-
+			message: '#^Method App\\Services\\PayPalService\:\:createOrder\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/PayPalService.php
+
+		-
+			message: '#^Method App\\Services\\PayPalService\:\:createOrder\(\) should return array\{id\: string, status\: string, links\: array, \.\.\.\} but returns array\<string, mixed\>\|Psr\\Http\\Message\\StreamInterface\|string\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/PayPalService.php
+
+		-
+			message: '#^Method App\\Services\\PayPalService\:\:getCaptureIdFromOrder\(\) has parameter \$orderResponse with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/PayPalService.php
+
+		-
+			message: '#^Method App\\Services\\PayPalService\:\:logResponse\(\) has parameter \$response with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/PayPalService.php
+
+		-
+			message: '#^Method App\\Services\\PayPalService\:\:recordPayment\(\) has parameter \$response with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Services/PayPalService.php
+
+		-
+			message: '#^Method App\\Services\\PayPalService\:\:refundOrder\(\) should return array\<string, mixed\> but returns array\<string, mixed\>\|Psr\\Http\\Message\\StreamInterface\|string\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/PayPalService.php
+
+		-
+			message: '#^Method App\\Services\\PayPalService\:\:showOrderDetails\(\) should return array\<string, mixed\> but returns array\<string, mixed\>\|Psr\\Http\\Message\\StreamInterface\|string\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/PayPalService.php
+
+		-
+			message: '#^Method Srmklive\\PayPal\\Services\\PayPal\:\:verifyWebHook\(\) invoked with 3 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/Services/PayPalService.php
+
+		-
+			message: '#^Parameter \#1 \$data of method Srmklive\\PayPal\\Services\\PayPal\:\:verifyWebHook\(\) expects array\<string, mixed\>, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/PayPalService.php
+
+		-
+			message: '#^Parameter \#1 \$response of method Srmklive\\PayPal\\Services\\PayPal\:\:setAccessToken\(\) expects array\<string, mixed\>, array\<string, mixed\>\|\(ArrayAccess&Psr\\Http\\Message\\StreamInterface\) given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/PayPalService.php
+
+		-
+			message: '#^Parameter \#2 \$response of method App\\Services\\PayPalService\:\:logResponse\(\) expects array, array\<string, mixed\>\|Psr\\Http\\Message\\StreamInterface\|string given\.$#'
+			identifier: argument.type
+			count: 3
+			path: app/Services/PayPalService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Support/Cart/CartService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$url\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Support/Cart/CartService.php
+
+		-
+			message: '#^Method App\\Support\\Cart\\CartService\:\:cart\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/Cart/CartService.php
+
+		-
+			message: '#^Method App\\Support\\Cart\\CartService\:\:getBillingAddress\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/Cart/CartService.php
+
+		-
+			message: '#^Method App\\Support\\Cart\\CartService\:\:getShippingAddress\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/Cart/CartService.php
+
+		-
+			message: '#^Method App\\Support\\Cart\\CartService\:\:items\(\) has parameter \$rawItems with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/Cart/CartService.php
+
+		-
+			message: '#^Method App\\Support\\Cart\\CartService\:\:items\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Support/Cart/CartService.php
+
+		-
+			message: '#^Method App\\Support\\Cart\\CartService\:\:paymentMethods\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/Cart/CartService.php
+
+		-
+			message: '#^Method App\\Support\\Cart\\CartService\:\:persist\(\) has parameter \$state with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/Cart/CartService.php
+
+		-
+			message: '#^Method App\\Support\\Cart\\CartService\:\:setBillingAddress\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/Cart/CartService.php
+
+		-
+			message: '#^Method App\\Support\\Cart\\CartService\:\:setShippingAddress\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/Cart/CartService.php
+
+		-
+			message: '#^Method App\\Support\\Cart\\CartService\:\:shippingMethodModels\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Support/Cart/CartService.php
+
+		-
+			message: '#^Method App\\Support\\Cart\\CartService\:\:shippingMethods\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/Cart/CartService.php
+
+		-
+			message: '#^Method App\\Support\\Cart\\CartService\:\:state\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/Cart/CartService.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<\(int\|string\),mixed\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Support/Cart/CartService.php
+
+		-
+			message: '#^Property App\\Support\\Cart\\CartService\:\:\$shippingMethodModelsCache with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
+			identifier: missingType.generics
+			count: 1
+			path: app/Support/Cart/CartService.php
+
+		-
+			message: '#^Return type of call to method Illuminate\\Support\\Collection\<\(int\|string\),mixed\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: method.unresolvableReturnType
+			count: 1
+			path: app/Support/Cart/CartService.php
+
+		-
+			message: '#^Unable to resolve the template type TKey in call to function collect$#'
+			identifier: argument.templateType
+			count: 1
+			path: app/Support/Cart/CartService.php
+
+		-
+			message: '#^Unable to resolve the template type TValue in call to function collect$#'
+			identifier: argument.templateType
+			count: 1
+			path: app/Support/Cart/CartService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Support/Cart/CartService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Support/Cart/CartService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>price" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Support/Cart/CartService.php
+
+		-
+			message: '#^Method App\\Support\\Cart\\SessionCartStore\:\:get\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/Cart/SessionCartStore.php
+
+		-
+			message: '#^Method App\\Support\\Cart\\SessionCartStore\:\:put\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: app/Support/Cart/SessionCartStore.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Support/Orders/OrderManager.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Support/Orders/OrderManager.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$product_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Support/Orders/OrderManager.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quantity\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Support/Orders/OrderManager.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$unit_price\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Support/Orders/OrderManager.php
+
+		-
+			message: '#^Parameter \#1 \$array \(array\{0\?\: mixed\}\) of array_values is already a list, call has no effect\.$#'
+			identifier: arrayValues.list
+			count: 1
+			path: app/Support/Orders/OrderManager.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Support/Orders/OrderManager.php
+
+		-
+			message: '#^Parameter \#2 \$customer of class App\\Mail\\OrderConfirmationMail constructor expects App\\Models\\Customer, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/Orders/OrderManager.php
+
+		-
+			message: '#^Parameter \#3 \$customer of class App\\Mail\\NewOrderMail constructor expects App\\Models\\Customer, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Support/Orders/OrderManager.php
+
+		-
+			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: method.unresolvableReturnType
+			count: 1
+			path: app/Support/Orders/OrderManager.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 1
+			path: database/seeders/ContactsSeeder.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 4
+			path: database/seeders/MailSeeder.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 9
+			path: database/seeders/PaymentSeeder.php
+
+		-
+			message: '#^Parameter \#2 \$value of static method App\\Models\\Setting\:\:set\(\) expects string\|null, bool\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: database/seeders/PaymentSeeder.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between non\-empty\-list\<string\|null\> and array\{\} will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: database/seeders/ProductSeeder.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type Illuminate\\Console\\Command\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 6
+			path: database/seeders/ProductSeeder.php
