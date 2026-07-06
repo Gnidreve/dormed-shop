@@ -67,6 +67,39 @@ class PayPalCaptureTest extends TestCase
         $this->assertSame('paid', $order->fresh()->status);
     }
 
+    public function test_capture_rejects_amount_mismatch(): void
+    {
+        $customer = Customer::factory()->create();
+        $order = Order::factory()->for($customer)->create(['status' => 'pending', 'total_amount' => '100.00']);
+        $payment = Payment::factory()->created()->for($order)->create();
+
+        $this->mock(PayPalService::class, function ($mock) use ($payment): void {
+            $mock->shouldReceive('captureOrder')
+                ->once()
+                ->with($payment->paypal_order_id)
+                ->andReturn([
+                    'status' => 'COMPLETED',
+                    'purchase_units' => [[
+                        'payments' => [
+                            'captures' => [[
+                                'amount' => ['value' => '1.00'],
+                            ]],
+                        ],
+                    ]],
+                ]);
+        });
+
+        $this->actingAs($customer)
+            ->postJson(route('paypal.order.capture'), [
+                'paypal_order_id' => $payment->paypal_order_id,
+            ])
+            ->assertOk()
+            ->assertJson(['status' => 'FAILED']);
+
+        $this->assertSame('FAILED', $payment->fresh()->status);
+        $this->assertSame('failed', $order->fresh()->status);
+    }
+
     public function test_create_order_rejects_cart_with_unavailable_product(): void
     {
         $customer = Customer::factory()->create();

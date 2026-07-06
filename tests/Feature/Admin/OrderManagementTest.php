@@ -66,7 +66,7 @@ class OrderManagementTest extends TestCase
             ->assertOk();
 
         $this->assertSame('paid', $order->fresh()->status);
-        Mail::assertSent(OrderConfirmationMail::class);
+        Mail::assertQueued(OrderConfirmationMail::class);
     }
 
     public function test_marking_paid_without_notify_does_not_send_mail(): void

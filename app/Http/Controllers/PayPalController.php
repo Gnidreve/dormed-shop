@@ -123,6 +123,12 @@ class PayPalController extends Controller
             $response = $this->payPalService->captureOrder($paypalOrderId);
 
             $captureStatus = $response['status'] ?? 'FAILED';
+            $capturedAmount = $response['purchase_units'][0]['payments']['captures'][0]['amount']['value'] ?? null;
+
+            if ($captureStatus === 'COMPLETED' && $capturedAmount !== null && number_format((float) $capturedAmount, 2, '.', '') !== number_format((float) $payment->order->total_amount, 2, '.', '')) {
+                Log::error('PayPal capture amount mismatch', ['paypal_order_id' => $paypalOrderId, 'captured' => $capturedAmount, 'expected' => $payment->order->total_amount]);
+                $captureStatus = 'FAILED';
+            }
 
             if ($captureStatus === 'COMPLETED') {
                 $captureId = $this->payPalService->getCaptureIdFromOrder($response);
@@ -238,6 +244,12 @@ class PayPalController extends Controller
         try {
             $response = $this->payPalService->captureOrder($token);
             $captureStatus = $response['status'] ?? 'FAILED';
+            $capturedAmount = $response['purchase_units'][0]['payments']['captures'][0]['amount']['value'] ?? null;
+
+            if ($captureStatus === 'COMPLETED' && $capturedAmount !== null && number_format((float) $capturedAmount, 2, '.', '') !== number_format((float) $payment->order->total_amount, 2, '.', '')) {
+                Log::error('PayPal capture amount mismatch', ['token' => $token, 'captured' => $capturedAmount, 'expected' => $payment->order->total_amount]);
+                $captureStatus = 'FAILED';
+            }
 
             if ($captureStatus === 'COMPLETED') {
                 $captureId = $this->payPalService->getCaptureIdFromOrder($response);

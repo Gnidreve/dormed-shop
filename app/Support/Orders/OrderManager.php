@@ -58,12 +58,20 @@ class OrderManager
      */
     public function markPaid(Order $order): bool
     {
-        if ($order->status === 'paid') {
+        // Atomic status transition: the webhook and the PayPal return URL can
+        // both call this for the same order at nearly the same time. A plain
+        // read-then-write would let both pass the "already paid" check before
+        // either update lands, sending the confirmation mails twice.
+        $affected = Order::query()
+            ->whereKey($order->getKey())
+            ->where('status', '!=', 'paid')
+            ->update(['status' => 'paid']);
+
+        if ($affected === 0) {
             return false;
         }
 
-        $order->update(['status' => 'paid']);
-
+        $order->refresh();
         $this->sendConfirmations($order);
 
         return true;

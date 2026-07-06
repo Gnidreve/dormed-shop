@@ -188,8 +188,8 @@ class CartFlowTest extends TestCase
         $this->assertSame(1, Order::query()->count());
 
         // Both the customer confirmation and the admin notification go out.
-        Mail::assertSent(OrderConfirmationMail::class);
-        Mail::assertSent(NewOrderMail::class);
+        Mail::assertQueued(OrderConfirmationMail::class);
+        Mail::assertQueued(NewOrderMail::class);
     }
 
     public function test_order_submit_rejects_cart_with_meanwhile_unavailable_product(): void
