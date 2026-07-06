@@ -43,7 +43,7 @@ Der Endpoint `checkout.payment.update` funktioniert jetzt, aber **kein Frontend 
 `captureOrder` sucht Payments nur per `paypal_order_id` (fremde Captures triggerbar); `debug => $e->getMessage()` leakt Interna.
 **Vorgehen:** `whereHas('order', customer_id)`-Scope; `debug`-Felder entfernen.
 
-### 8. Settings-Update ohne Key-Whitelist
+### 8. Settings-Update ohne Key-Whitelist ✅
 `SettingController::update` schreibt jeden übermittelten Key in die DB.
 **Vorgehen:** erlaubte Keys als Konstante whitelisten.
 
