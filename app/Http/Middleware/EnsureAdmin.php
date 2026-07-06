@@ -14,7 +14,15 @@ class EnsureAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! Auth::guard('admin')->check()) {
+        $guard = Auth::guard('admin');
+
+        if (! $guard->check()) {
+            return redirect()->route('admin.login');
+        }
+
+        if (! $guard->user()->is_admin) {
+            $guard->logout();
+
             return redirect()->route('admin.login');
         }
 

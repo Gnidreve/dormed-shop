@@ -62,4 +62,13 @@ class AdminAccessTest extends TestCase
             ->get(route('admin.dashboard'))
             ->assertRedirect(route('admin.login'));
     }
+
+    public function test_non_admin_user_is_denied_admin_access(): void
+    {
+        $user = User::factory()->create(['is_admin' => false]);
+
+        $this->actingAs($user, 'admin')
+            ->get(route('admin.dashboard'))
+            ->assertRedirect(route('admin.login'));
+    }
 }
