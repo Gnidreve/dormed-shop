@@ -34,16 +34,16 @@ class PayPalService
         return [
             'mode' => $mode,
             'sandbox' => [
-                'client_id' => Setting::get('paypal.sandbox.client_id') ?? env('PAYPAL_SANDBOX_CLIENT_ID', ''),
-                'client_secret' => Setting::get('paypal.sandbox.client_secret') ?? env('PAYPAL_SANDBOX_CLIENT_SECRET', ''),
-                'app_id' => Setting::get('paypal.sandbox.app_id') ?? env('PAYPAL_SANDBOX_APP_ID', 'APP-80W284485P519543T'),
-                'merchant_id' => Setting::get('paypal.sandbox.merchant_id') ?? env('PAYPAL_SANDBOX_MERCHANT_ID', ''),
+                'client_id' => Setting::get('paypal.sandbox.client_id') ?? config('paypal.sandbox.client_id', ''),
+                'client_secret' => Setting::get('paypal.sandbox.client_secret') ?? config('paypal.sandbox.client_secret', ''),
+                'app_id' => Setting::get('paypal.sandbox.app_id') ?? config('paypal.sandbox.app_id', 'APP-80W284485P519543T'),
+                'merchant_id' => Setting::get('paypal.sandbox.merchant_id') ?? config('paypal.sandbox.merchant_id', ''),
             ],
             'live' => [
-                'client_id' => Setting::get('paypal.live.client_id') ?? env('PAYPAL_LIVE_CLIENT_ID', ''),
-                'client_secret' => Setting::get('paypal.live.client_secret') ?? env('PAYPAL_LIVE_CLIENT_SECRET', ''),
-                'app_id' => Setting::get('paypal.live.app_id') ?? env('PAYPAL_LIVE_APP_ID', ''),
-                'merchant_id' => Setting::get('paypal.live.merchant_id') ?? env('PAYPAL_LIVE_MERCHANT_ID', ''),
+                'client_id' => Setting::get('paypal.live.client_id') ?? config('paypal.live.client_id', ''),
+                'client_secret' => Setting::get('paypal.live.client_secret') ?? config('paypal.live.client_secret', ''),
+                'app_id' => Setting::get('paypal.live.app_id') ?? config('paypal.live.app_id', ''),
+                'merchant_id' => Setting::get('paypal.live.merchant_id') ?? config('paypal.live.merchant_id', ''),
             ],
             'payment_action' => config('paypal.payment_action', 'Sale'),
             'currency' => config('paypal.currency', 'EUR'),
@@ -69,7 +69,7 @@ class PayPalService
         $token = $this->client->getAccessToken();
 
         if (! isset($token['access_token'])) {
-            throw new \RuntimeException('PayPal authentication failed: ' . ($token['error']['message'] ?? 'No access token returned'));
+            throw new \RuntimeException('PayPal authentication failed: '.($token['error']['message'] ?? 'No access token returned'));
         }
 
         $this->client->setAccessToken($token);
@@ -177,11 +177,11 @@ class PayPalService
      * Verify an incoming PayPal webhook notification.
      *
      * @param  Request  $request  The incoming HTTP request
-     * @return bool  Whether the webhook is authentic
+     * @return bool Whether the webhook is authentic
      */
     public function verifyWebhook(Request $request): bool
     {
-        $webhookId = Setting::get('paypal.webhook_id') ?? env('PAYPAL_WEBHOOK_ID');
+        $webhookId = Setting::get('paypal.webhook_id') ?? config('paypal.webhook_id');
 
         if (blank($webhookId)) {
             Log::warning('PayPal webhook verification skipped: no webhook ID configured');
@@ -199,10 +199,6 @@ class PayPalService
         ];
 
         try {
-            $this->client()->setApiCredentials(config('paypal'));
-            $token = $this->client()->getAccessToken();
-            $this->client()->setAccessToken($token);
-
             $result = $this->client()->verifyWebHook($payload, $headers, $webhookId);
 
             return ($result['verification_status'] ?? '') === 'SUCCESS';
@@ -218,7 +214,6 @@ class PayPalService
     /**
      * Show PayPal Order details.
      *
-     * @param  string  $paypalOrderId
      * @return array<string, mixed>
      *
      * @throws \Throwable
