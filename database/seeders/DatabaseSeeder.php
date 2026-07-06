@@ -13,9 +13,14 @@ class DatabaseSeeder extends Seeder
             PaymentSeeder::class,
             MailSeeder::class,
             ShippingMethodSeeder::class,
-            UserSeeder::class,
-            CustomerSeeder::class,
             ProductSeeder::class,
         ]);
+
+        if (! app()->isProduction()) {
+            $this->call([
+                UserSeeder::class,
+                CustomerSeeder::class,
+            ]);
+        }
     }
 }
