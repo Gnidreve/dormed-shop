@@ -133,9 +133,9 @@ class SettingController extends Controller
 
             return response()->json(['message' => 'Authentifizierung fehlgeschlagen: '.($response->json()['error_description'] ?? 'Unbekannter Fehler')], 422);
         } catch (\Throwable $e) {
-            \Log::error('Stripe connection test failed', ['exception' => $e]);
-            return response()->json(['message' => 'Stripe-Verbindung fehlgeschlagen. Prüfen Sie die Konfiguration.'], 422);
-        }
+            Log::error('PayPal connection test failed', ['exception' => $e]);
+
+            return response()->json(['message' => 'PayPal-Verbindung fehlgeschlagen. Prüfen Sie die Konfiguration.'], 422);
         }
     }
 

@@ -24,15 +24,14 @@
         CardDescription,
         CardContent,
     } from '@/components/ui/card';
-    import { ChartContainer  } from '@/components/ui/chart';
-import type {ChartConfig} from '@/components/ui/chart';
+    import { ChartContainer } from '@/components/ui/chart';
+    import type { ChartConfig } from '@/components/ui/chart';
     import * as Popover from '@/components/ui/popover';
     import { Separator } from '@/components/ui/separator';
     type ChartEntry = { date: string; orders: number; revenue: number };
 
     let { chartData }: { chartData: ChartEntry[] } = $props();
 
-     
     const allData = $derived(chartData.map((d) => ({ ...d, date: new Date(d.date) })));
 
     const admin = $derived((page.props.auth as any).admin);
@@ -78,9 +77,6 @@ import type {ChartConfig} from '@/components/ui/chart';
             new Date().getUTCMonth(),
             new Date().getUTCDate() - days
         ));
-        return allData.filter((d) => d.date >= cutoff);
-    });
-
         return allData.filter((d) => d.date >= cutoff);
     });
 

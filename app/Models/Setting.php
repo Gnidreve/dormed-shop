@@ -30,9 +30,9 @@ class Setting extends Model
                 return decrypt($value);
             } catch (\Throwable $e) {
                 report($e);
+
                 return null;
             }
-        }
         }
 
         return $value;
