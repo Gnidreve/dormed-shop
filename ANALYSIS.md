@@ -57,7 +57,7 @@ Der Endpoint `checkout.payment.update` funktioniert jetzt, aber **kein Frontend 
 
 ## 🟡 Businesslogik
 
-### 11. is_available wird nirgends durchgesetzt
+### 11. is_available wird nirgends durchgesetzt ✅
 Nicht verfügbare/gelöschte Produkte sind list-, such- und bestellbar (Session-Snapshot).
 **Vorgehen:** Scope in Listing/Suche/Add-to-Cart + finaler Recheck in `submit()`/PayPal-`createOrder`.
 
