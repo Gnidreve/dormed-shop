@@ -68,7 +68,7 @@ Nicht verfügbare/gelöschte Produkte sind list-, such- und bestellbar (Session-
 ### 13. Jeder PayPal-Button-Klick erzeugt eine verwaiste Order ✅
 **Vorgehen:** pending-Order wiederverwenden/canceln + Cleanup-Command für alte pending-Orders ohne Payment.
 
-### 14. Dashboard-Umsatz zählt Test-/failed-/pending-Orders
+### 14. Dashboard-Umsatz zählt Test-/failed-/pending-Orders ✅
 **Vorgehen:** `->where('is_test', false)->whereIn('status', ['paid', 'processing', 'completed'])`.
 
 ### 15. Kleinere Flow-Punkte
