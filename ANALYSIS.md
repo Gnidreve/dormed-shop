@@ -65,7 +65,7 @@ Nicht verfügbare/gelöschte Produkte sind list-, such- und bestellbar (Session-
 `CartService::add()` friert Preis/Name ein; Snapshot gehört erst in die Order.
 **Vorgehen:** Cart auf `product_id => quantity` reduzieren, Preise live lesen — vereinfacht den Cart-State deutlich.
 
-### 13. Jeder PayPal-Button-Klick erzeugt eine verwaiste Order
+### 13. Jeder PayPal-Button-Klick erzeugt eine verwaiste Order ✅
 **Vorgehen:** pending-Order wiederverwenden/canceln + Cleanup-Command für alte pending-Orders ohne Payment.
 
 ### 14. Dashboard-Umsatz zählt Test-/failed-/pending-Orders
