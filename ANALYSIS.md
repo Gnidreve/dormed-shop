@@ -71,7 +71,7 @@ Nicht verfügbare/gelöschte Produkte sind list-, such- und bestellbar (Session-
 ### 14. Dashboard-Umsatz zählt Test-/failed-/pending-Orders ✅
 **Vorgehen:** `->where('is_test', false)->whereIn('status', ['paid', 'processing', 'completed'])`.
 
-### 15. Kleinere Flow-Punkte
+### 15. Kleinere Flow-Punkte ✅
 - Race-Conditions: `markPaid()`/`captureOrder` nicht atomar → doppelte Mails möglich (Webhook + Return-URL). Atomarer Status-Übergang, nur bei `affected > 0` mailen.
 - Mails synchron im Request → `ShouldQueue` auf die Mailables (Queue existiert).
 - PayPal-Capture ohne Betragsabgleich gegen die Order — Defense-in-Depth, eine Zeile.
