@@ -90,7 +90,7 @@ Nicht verfügbare/gelöschte Produkte sind list-, such- und bestellbar (Session-
 ### 18. PHPStan konfiguriert, aber rot (Level 7, ~200 Fehler) ✅ (Baseline; Cart-DTO offen)
 **Vorgehen:** Level senken und grün fixen oder Baseline einfrieren — dann in CI erzwingen. Cart-Array langfristig als DTO.
 
-### 19. Beispiel-Tests entsorgen
+### 19. Beispiel-Tests entsorgen ✅
 `tests/Feature/ExampleTest.php` + `tests/Unit/ExampleTest.php` (Löschen braucht laut Projektregeln explizites OK).
 
 ## 🧪 Testing — fehlende Abdeckung
