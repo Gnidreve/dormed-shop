@@ -61,7 +61,7 @@ Der Endpoint `checkout.payment.update` funktioniert jetzt, aber **kein Frontend 
 Nicht verfügbare/gelöschte Produkte sind list-, such- und bestellbar (Session-Snapshot).
 **Vorgehen:** Scope in Listing/Suche/Add-to-Cart + finaler Recheck in `submit()`/PayPal-`createOrder`.
 
-### 12. Preis-Snapshot im Warenkorb ist sessionlang eingefroren
+### 12. Preis-Snapshot im Warenkorb ist sessionlang eingefroren ✅
 `CartService::add()` friert Preis/Name ein; Snapshot gehört erst in die Order.
 **Vorgehen:** Cart auf `product_id => quantity` reduzieren, Preise live lesen — vereinfacht den Cart-State deutlich.
 
