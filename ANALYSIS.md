@@ -87,7 +87,7 @@ Nicht verfügbare/gelöschte Produkte sind list-, such- und bestellbar (Session-
 **Erledigt:** `Setting::get()`/`set()` memoisieren jetzt pro Prozess (= pro Request, da kein Octane läuft); `CartService` cached die ShippingMethod-Liste instanzweit, sodass `state()` und `shippingMethods()` sich innerhalb eines `cart()`-Aufrufs eine Query teilen statt zwei zu stellen.
 **Bewusst nicht umgesetzt:** „Cart-Props partial" — der Cart wird aktuell app-weit als Shared-Prop für den Header (Artikelzähler) gebraucht; ihn per Inertia `lazy()/defer()` nur bei Bedarf zu laden hätte den Header auf praktisch jeder Seite betroffen und mehr Fläche für Regressionen als die anderen Punkte hier. Sauber nachrüstbar, aber als eigene Aufgabe mit UI-Verifikation, nicht nebenbei.
 
-### 18. PHPStan konfiguriert, aber rot (Level 7, ~200 Fehler)
+### 18. PHPStan konfiguriert, aber rot (Level 7, ~200 Fehler) ✅ (Baseline; Cart-DTO offen)
 **Vorgehen:** Level senken und grün fixen oder Baseline einfrieren — dann in CI erzwingen. Cart-Array langfristig als DTO.
 
 ### 19. Beispiel-Tests entsorgen
