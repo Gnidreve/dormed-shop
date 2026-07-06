@@ -12,6 +12,7 @@ use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -20,6 +21,32 @@ class SettingController extends Controller
     private const SENSITIVE_KEYS = [
         'mail.smtp_password',
         'paypal.sandbox.client_secret',
+        'paypal.live.client_secret',
+        'paypal.webhook_id',
+    ];
+
+    private const ALLOWED_KEYS = [
+        'shop.name',
+        'shop.email',
+        'shop.phone',
+        'shop.fax',
+        'shop.bank_account_holder',
+        'shop.bank_iban',
+        'shop.bank_bic',
+        'shop.bank_name',
+        'shop.notification_emails',
+        'mail.smtp_host',
+        'mail.smtp_port',
+        'mail.smtp_user',
+        'mail.smtp_password',
+        'payment.mode',
+        'payment.provider',
+        'paypal.sandbox.client_id',
+        'paypal.sandbox.merchant_id',
+        'paypal.sandbox.client_secret',
+        'paypal.live.client_id',
+        'paypal.live.app_id',
+        'paypal.live.merchant_id',
         'paypal.live.client_secret',
         'paypal.webhook_id',
     ];
@@ -62,8 +89,23 @@ class SettingController extends Controller
     {
         $data = $request->validate([
             'settings' => ['required', 'array'],
-            'settings.*' => ['nullable', 'string', 'max:1000'],
         ]);
+
+        $unknownKeys = array_diff(array_keys($data['settings']), self::ALLOWED_KEYS);
+
+        if ($unknownKeys !== []) {
+            throw ValidationException::withMessages([
+                'settings' => 'Unbekannte Einstellungs-Keys: '.implode(', ', $unknownKeys),
+            ]);
+        }
+
+        foreach ($data['settings'] as $key => $value) {
+            if ($value !== null && (! is_string($value) || strlen($value) > 1000)) {
+                throw ValidationException::withMessages([
+                    'settings' => "Ungültiger Wert für \"{$key}\".",
+                ]);
+            }
+        }
 
         foreach ($data['settings'] as $key => $value) {
             if (in_array($key, self::SENSITIVE_KEYS, true) && ($value === '••••••••' || $value === '')) {
