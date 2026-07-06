@@ -35,7 +35,7 @@ Der Endpoint `checkout.payment.update` funktioniert jetzt, aber **kein Frontend 
 `PayPalService::buildConfig()`/`verifyWebhook()` nutzen `env()`-Fallbacks — mit `config:cache` liefern die `null`. Außerdem verifiziert `verifyWebhook` mit `config('paypal')`-Credentials statt der Settings-basierten; sind die Keys nur im Admin gepflegt, ist die Webhook-Verifikation tot.
 **Vorgehen:** Fallbacks über `config/paypal.php` deklarieren, `verifyWebhook` denselben Client wie der Rest der Klasse nutzen lassen.
 
-### 6. Erfolgsseite leakt Bestelldaten ohne Login
+### 6. Erfolgsseite leakt Bestelldaten ohne Login ✅
 `checkout.success?paypal_order_id=…` zeigt Adresse/E-Mail/Bestellung ohne Auth/Ownership (nur der `order_id`-Zweig prüft).
 **Vorgehen:** Route hinter `auth` + `customer_id`-Check in beiden Zweigen.
 
