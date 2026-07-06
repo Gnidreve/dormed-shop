@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Checkout\PlaceOrderRequest;
+use App\Models\Customer;
+use App\Models\Order;
 use App\Models\Payment;
 use App\Services\PayPalService;
 use App\Support\Cart\CartService;
@@ -43,6 +45,11 @@ class PayPalController extends Controller
         if ($this->cartService->hasUnavailableItems()) {
             return response()->json(['error' => 'Ihr Warenkorb enthält nicht mehr verfügbare Produkte.'], 422);
         }
+
+        // Each PayPal button click creates a fresh order; cancel earlier attempts
+        // by this customer that were abandoned before approval, so a repeated
+        // click (retry, closed popup, ...) doesn't pile up orphaned orders.
+        $this->cancelStalePendingPayPalOrders($request->user());
 
         $order = $this->orderManager->createFromCart($request->user(), $cart, 'paypal');
 
@@ -345,5 +352,15 @@ class PayPalController extends Controller
         Payment::query()
             ->where('paypal_capture_id', $captureId)
             ->update(['status' => 'FAILED']);
+    }
+
+    private function cancelStalePendingPayPalOrders(Customer $customer): void
+    {
+        Order::query()
+            ->where('customer_id', $customer->id)
+            ->where('payment_method', 'paypal')
+            ->where('status', 'pending')
+            ->whereDoesntHave('payments', fn ($q) => $q->where('status', 'COMPLETED'))
+            ->update(['status' => 'cancelled']);
     }
 }
