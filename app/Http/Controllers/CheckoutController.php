@@ -163,6 +163,7 @@ class CheckoutController extends Controller
         if ($paypalOrderId) {
             $order = Order::query()
                 ->with(['items', 'customer'])
+                ->where('customer_id', $request->user()?->id)
                 ->whereHas('payments', fn ($q) => $q->where('paypal_order_id', $paypalOrderId))
                 ->first();
         } elseif ($orderId) {

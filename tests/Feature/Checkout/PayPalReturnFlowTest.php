@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Checkout;
 
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Services\PayPalService;
@@ -72,19 +73,43 @@ class PayPalReturnFlowTest extends TestCase
 
     public function test_success_page_renders_order_via_paypal_order_id(): void
     {
-        $order = Order::factory()->create([
+        $customer = Customer::factory()->create();
+        $order = Order::factory()->for($customer)->create([
             'status' => 'paid',
             'total_amount' => '50.00',
             'shipping_amount' => '0.00',
         ]);
         $payment = Payment::factory()->completed()->for($order)->create();
 
-        $this->get(route('checkout.success', ['paypal_order_id' => $payment->paypal_order_id]))
+        $this->actingAs($customer)
+            ->get(route('checkout.success', ['paypal_order_id' => $payment->paypal_order_id]))
             ->assertOk()
             ->assertInertia(
                 fn ($page) => $page
                     ->component('Checkout/Success')
                     ->where('order_id', $order->id)
             );
+    }
+
+    public function test_success_page_requires_authentication_for_paypal_order_id(): void
+    {
+        $order = Order::factory()->create(['status' => 'paid']);
+        $payment = Payment::factory()->completed()->for($order)->create();
+
+        $this->get(route('checkout.success', ['paypal_order_id' => $payment->paypal_order_id]))
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_success_page_does_not_expose_another_customers_order_via_paypal_order_id(): void
+    {
+        $owner = Customer::factory()->create();
+        $order = Order::factory()->for($owner)->create(['status' => 'paid']);
+        $payment = Payment::factory()->completed()->for($order)->create();
+
+        $attacker = Customer::factory()->create();
+
+        $this->actingAs($attacker)
+            ->get(route('checkout.success', ['paypal_order_id' => $payment->paypal_order_id]))
+            ->assertRedirect(route('home'));
     }
 }
