@@ -78,7 +78,7 @@ Nicht verfügbare/gelöschte Produkte sind list-, such- und bestellbar (Session-
 
 ## 🔵 Simplifizierung & Code-Refinement
 
-### 16. Adressvalidierung dreifach dupliziert
+### 16. Adressvalidierung dreifach dupliziert ✅ (Backend vereinheitlicht; AddressForm bleibt als separate Client-Validierung bestehen)
 `CheckoutController::updateAddress` vs. `AddressController::ADDRESS_RULES` vs. `AddressForm`.
 **Vorgehen:** ein gemeinsames `AddressRules`-Objekt/FormRequest.
 
