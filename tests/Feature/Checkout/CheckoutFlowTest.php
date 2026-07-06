@@ -5,6 +5,7 @@ namespace Tests\Feature\Checkout;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Setting;
 use App\Models\ShippingMethod;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -137,6 +138,63 @@ class CheckoutFlowTest extends TestCase
             ->assertSessionHasErrors('agreed_to_terms');
 
         $this->assertSame(0, Order::query()->count());
+    }
+
+    public function test_payment_update_switches_selected_method(): void
+    {
+        $customer = Customer::factory()->create();
+
+        $this->actingAs($customer)
+            ->withSession([
+                'cart' => [
+                    'payment_method' => 'invoice',
+                ],
+            ])
+            ->patch(route('checkout.payment.update'), ['payment_method' => 'paypal'])
+            ->assertRedirect()
+            ->assertSessionHas('cart.payment_method', 'paypal');
+    }
+
+    public function test_payment_update_rejects_unknown_method(): void
+    {
+        $customer = Customer::factory()->create();
+
+        $this->actingAs($customer)
+            ->patch(route('checkout.payment.update'), ['payment_method' => 'bitcoin'])
+            ->assertSessionHasErrors('payment_method');
+    }
+
+    public function test_confirm_exposes_paypal_client_id_when_paypal_selected(): void
+    {
+        $customer = Customer::factory()->create();
+        $shipping = ShippingMethod::factory()->create(['price' => '0.00']);
+        $product = Product::factory()->create(['price' => '10.00']);
+
+        Setting::set('paypal.sandbox.client_id', 'sandbox-client-id');
+
+        $this->actingAs($customer)
+            ->withSession([
+                'cart' => [
+                    'items' => [
+                        $product->id => [
+                            'quantity' => 1,
+                            'unit_price' => '10.00',
+                            'name' => $product->name,
+                            'product_number' => (string) $product->id,
+                        ],
+                    ],
+                    'shipping_method' => (string) $shipping->id,
+                    'payment_method' => 'paypal',
+                    'shipping_address' => $this->completeAddress(),
+                ],
+            ])
+            ->get(route('checkout.confirm'))
+            ->assertOk()
+            ->assertInertia(
+                fn ($page) => $page
+                    ->component('Checkout/Confirm')
+                    ->where('paypal_client_id', 'sandbox-client-id')
+            );
     }
 
     public function test_submit_rejects_non_invoice_payment_methods(): void

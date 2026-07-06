@@ -144,6 +144,14 @@
         }
     }
 
+    function updatePayment(paymentMethod: string) {
+        router.patch(
+            checkout.payment.update.url(),
+            { payment_method: paymentMethod },
+            { preserveScroll: true, preserveState: true },
+        );
+    }
+
     function submitOrder() {
         router.post(
             checkout.submit.url(),
@@ -347,6 +355,44 @@
                                 <span>{formatPrice(cart.vat_amount)}</span>
                             </div>
                         </div>
+
+                        {#if cart.payment_methods.length > 1}
+                            <div class="mt-4 border-t pt-4">
+                                <h3 class="mb-3 text-sm font-bold text-gray-900">
+                                    Zahlungsart
+                                </h3>
+                                <div class="flex flex-col gap-3">
+                                    {#each cart.payment_methods as method (method.id)}
+                                        <label
+                                            class="flex cursor-pointer items-start gap-3"
+                                        >
+                                            <input
+                                                type="radio"
+                                                name="payment"
+                                                value={method.id}
+                                                checked={method.selected}
+                                                onchange={() =>
+                                                    updatePayment(method.id)}
+                                                class="mt-0.5 accent-[#0d1f44]"
+                                            />
+                                            <span class="text-sm">
+                                                <span
+                                                    class="font-semibold text-gray-900"
+                                                    >{method.label}</span
+                                                >
+                                                {#if method.description}
+                                                    <br />
+                                                    <span
+                                                        class="text-gray-500"
+                                                        >{method.description}</span
+                                                    >
+                                                {/if}
+                                            </span>
+                                        </label>
+                                    {/each}
+                                </div>
+                            </div>
+                        {/if}
 
                         {#if customer}
                             {#if isInvoice}
