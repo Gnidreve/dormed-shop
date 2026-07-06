@@ -73,14 +73,9 @@ class CartService
     {
         $state = $this->state();
         $productId = (string) $product->getKey();
-        $existingItem = $state['items'][$productId] ?? [];
+        $existingQuantity = (int) ($state['items'][$productId] ?? 0);
 
-        $state['items'][$productId] = [
-            'quantity' => min(99, ((int) ($existingItem['quantity'] ?? 0)) + $quantity),
-            'unit_price' => (string) ($existingItem['unit_price'] ?? $product->price),
-            'name' => (string) ($existingItem['name'] ?? $product->name),
-            'product_number' => (string) ($existingItem['product_number'] ?? $product->id),
-        ];
+        $state['items'][$productId] = min(99, $existingQuantity + $quantity);
 
         $this->persist($state);
     }
@@ -88,15 +83,7 @@ class CartService
     public function updateQuantity(Product $product, int $quantity): void
     {
         $state = $this->state();
-        $productId = (string) $product->getKey();
-
-        if (! isset($state['items'][$productId])) {
-            $this->add($product, $quantity);
-
-            return;
-        }
-
-        $state['items'][$productId]['quantity'] = min(99, max(1, $quantity));
+        $state['items'][(string) $product->getKey()] = min(99, max(1, $quantity));
 
         $this->persist($state);
     }
@@ -181,23 +168,22 @@ class CartService
             ->keyBy(fn (Product $product) => (string) $product->getKey());
 
         return collect($rawItems)
-            ->map(function (array $item, string $productId) use ($products): ?array {
+            ->map(function (int $quantity, string $productId) use ($products): ?array {
                 /** @var Product|null $product */
                 $product = $products->get($productId);
-                $quantity = (int) ($item['quantity'] ?? 0);
 
                 if ($quantity < 1) {
                     return null;
                 }
 
-                $unitPriceCents = $this->amountToCents($item['unit_price'] ?? $product?->price ?? 0);
+                $unitPriceCents = $this->amountToCents($product?->price ?? 0);
                 $lineTotalCents = $unitPriceCents * $quantity;
 
                 return [
                     'product_id' => (int) $productId,
-                    'name' => (string) ($item['name'] ?? $product?->name ?? 'Produkt nicht verfügbar'),
+                    'name' => (string) ($product?->name ?? 'Produkt nicht verfügbar'),
                     'description' => $product?->description,
-                    'product_number' => (string) ($item['product_number'] ?? $productId),
+                    'product_number' => (string) ($product?->id ?? $productId),
                     'manufacturer_name' => $product?->manufacturer?->name,
                     'quantity' => $quantity,
                     'unit_price' => $this->formatAmount($unitPriceCents),
@@ -296,20 +282,15 @@ class CartService
             'items' => collect($rawState['items'] ?? [])
                 ->mapWithKeys(function (mixed $item, mixed $productId): array {
                     $normalizedProductId = (int) $productId;
-                    $normalizedQuantity = (int) data_get($item, 'quantity', is_array($item) ? null : $item);
+                    // Older sessions stored a {quantity, unit_price, name, product_number}
+                    // shape per item; only the quantity still matters going forward.
+                    $normalizedQuantity = (int) (is_array($item) ? ($item['quantity'] ?? 0) : $item);
 
                     if ($normalizedProductId < 1 || $normalizedQuantity < 1) {
                         return [];
                     }
 
-                    return [
-                        (string) $normalizedProductId => [
-                            'quantity' => min(99, $normalizedQuantity),
-                            'unit_price' => (string) data_get($item, 'unit_price', '0.00'),
-                            'name' => (string) data_get($item, 'name', ''),
-                            'product_number' => (string) data_get($item, 'product_number', $normalizedProductId),
-                        ],
-                    ];
+                    return [(string) $normalizedProductId => min(99, $normalizedQuantity)];
                 })
                 ->all(),
             'shipping_method' => in_array(($rawState['shipping_method'] ?? null), $shippingMethodIds, true)

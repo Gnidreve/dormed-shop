@@ -76,9 +76,9 @@ class CartFlowTest extends TestCase
         ])->assertSessionHasErrors('product_id');
     }
 
-    public function test_cart_keeps_the_snapshot_price_when_product_price_changes(): void
+    public function test_cart_reads_the_live_price_when_product_price_changes(): void
     {
-        $product = Product::factory()->create(['name' => 'Snapshot Product', 'price' => '19.99']);
+        $product = Product::factory()->create(['name' => 'Live Price Product', 'price' => '19.99']);
 
         $this->post(route('cart.items.store'), [
             'product_id' => $product->id,
@@ -90,8 +90,8 @@ class CartFlowTest extends TestCase
         $this->get(route('checkout.index'))
             ->assertOk()
             ->assertInertia(fn ($page) => $page
-                ->where('cart.items.0.unit_price', '19.99')
-                ->where('cart.total', '19.99'));
+                ->where('cart.items.0.unit_price', '99.99')
+                ->where('cart.total', '99.99'));
     }
 
     public function test_cart_item_quantity_can_be_updated(): void
@@ -115,7 +115,7 @@ class CartFlowTest extends TestCase
             'quantity' => 3,
         ])
             ->assertRedirect()
-            ->assertSessionHas("cart.items.{$product->id}.quantity", 3);
+            ->assertSessionHas("cart.items.{$product->id}", 3);
     }
 
     public function test_shipping_method_can_be_updated(): void
