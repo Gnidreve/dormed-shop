@@ -6,6 +6,7 @@ use App\Http\Requests\Cart\UpdateCartPaymentMethodRequest;
 use App\Http\Requests\Checkout\PlaceOrderRequest;
 use App\Models\Order;
 use App\Models\Setting;
+use App\Support\Address\AddressRules;
 use App\Support\Cart\CartService;
 use App\Support\Orders\OrderManager;
 use App\Support\PaymentMode;
@@ -83,31 +84,9 @@ class CheckoutController extends Controller
     public function updateAddress(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            // Shipping address
-            'shipping_address.company' => ['nullable', 'string', 'max:255'],
-            'shipping_address.salutation' => ['nullable', 'string', 'in:Herr,Frau'],
-            'shipping_address.first_name' => ['required', 'string', 'max:255'],
-            'shipping_address.last_name' => ['required', 'string', 'max:255'],
-            'shipping_address.street' => ['required', 'string', 'max:255'],
-            'shipping_address.house_number' => ['required', 'string', 'max:20'],
-            'shipping_address.address_line2' => ['nullable', 'string', 'max:255'],
-            'shipping_address.zip' => ['required', 'string', 'max:20'],
-            'shipping_address.city' => ['required', 'string', 'max:255'],
-            'shipping_address.country' => ['required', 'string', 'size:2'],
-            'shipping_address.phone' => ['nullable', 'string', 'max:50'],
-            // Billing
+            ...AddressRules::forPrefix('shipping_address'),
             'billing_same_as_shipping' => ['boolean'],
-            'billing_address.company' => ['nullable', 'string', 'max:255'],
-            'billing_address.salutation' => ['nullable', 'string', 'in:Herr,Frau'],
-            'billing_address.first_name' => ['nullable', 'string', 'max:255'],
-            'billing_address.last_name' => ['nullable', 'string', 'max:255'],
-            'billing_address.street' => ['nullable', 'string', 'max:255'],
-            'billing_address.house_number' => ['nullable', 'string', 'max:20'],
-            'billing_address.address_line2' => ['nullable', 'string', 'max:255'],
-            'billing_address.zip' => ['nullable', 'string', 'max:20'],
-            'billing_address.city' => ['nullable', 'string', 'max:255'],
-            'billing_address.country' => ['nullable', 'string', 'size:2'],
-            'billing_address.phone' => ['nullable', 'string', 'max:50'],
+            ...AddressRules::forPrefix('billing_address', required: false),
         ]);
 
         // Save shipping address
