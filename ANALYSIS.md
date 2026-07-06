@@ -51,7 +51,7 @@ Der Endpoint `checkout.payment.update` funktioniert jetzt, aber **kein Frontend 
 `POST /products/{product}/ratings` unauthentifiziert, ungedrosselt, ohne Moderation.
 **Vorgehen:** mindestens `throttle:3,1` + Honeypot; besser Verified-Buyer-Check + `is_approved`-Flag.
 
-### 10. is_admin-Flag wird nie geprüft
+### 10. is_admin-Flag wird nie geprüft ✅ (Flag geprüft; 2FA-Spalten weiterhin ungenutzt, siehe Notiz)
 `EnsureAdmin` prüft nur den Guard-Login; `is_admin` und die users-2FA-Spalten sind tot.
 **Vorgehen:** Flag in Middleware prüfen — oder Feld + 2FA-Spalten entfernen (Simplifizierung).
 
