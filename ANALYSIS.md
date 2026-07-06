@@ -39,7 +39,7 @@ Der Endpoint `checkout.payment.update` funktioniert jetzt, aber **kein Frontend 
 `checkout.success?paypal_order_id=…` zeigt Adresse/E-Mail/Bestellung ohne Auth/Ownership (nur der `order_id`-Zweig prüft).
 **Vorgehen:** Route hinter `auth` + `customer_id`-Check in beiden Zweigen.
 
-### 7. PayPal-Capture ohne Ownership + Fehler-Interna an den Client
+### 7. PayPal-Capture ohne Ownership + Fehler-Interna an den Client ✅
 `captureOrder` sucht Payments nur per `paypal_order_id` (fremde Captures triggerbar); `debug => $e->getMessage()` leakt Interna.
 **Vorgehen:** `whereHas('order', customer_id)`-Scope; `debug`-Felder entfernen.
 
