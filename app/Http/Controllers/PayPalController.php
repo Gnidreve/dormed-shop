@@ -40,6 +40,10 @@ class PayPalController extends Controller
             return response()->json(['error' => 'Bitte vervollständigen Sie Ihre Lieferadresse.'], 422);
         }
 
+        if ($this->cartService->hasUnavailableItems()) {
+            return response()->json(['error' => 'Ihr Warenkorb enthält nicht mehr verfügbare Produkte.'], 422);
+        }
+
         $order = $this->orderManager->createFromCart($request->user(), $cart, 'paypal');
 
         try {

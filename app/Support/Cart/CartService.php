@@ -205,7 +205,7 @@ class CartService
                     'line_total_cents' => $lineTotalCents,
                     'image_url' => $product?->images->first()?->url,
                     'product_url' => $product ? route('products.show', $product) : route('products.index'),
-                    'is_available' => $product !== null,
+                    'is_available' => $product !== null && $product->is_available,
                 ];
             })
             ->filter();
@@ -261,6 +261,17 @@ class CartService
         }
 
         return $methods;
+    }
+
+    public function hasUnavailableItems(): bool
+    {
+        $productIds = array_map('intval', array_keys($this->state()['items']));
+
+        if ($productIds === []) {
+            return false;
+        }
+
+        return Product::query()->whereKey($productIds)->available()->count() < count($productIds);
     }
 
     public function isAddressComplete(): bool

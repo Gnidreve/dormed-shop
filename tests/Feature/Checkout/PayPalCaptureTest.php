@@ -67,6 +67,43 @@ class PayPalCaptureTest extends TestCase
         $this->assertSame('paid', $order->fresh()->status);
     }
 
+    public function test_create_order_rejects_cart_with_unavailable_product(): void
+    {
+        $customer = Customer::factory()->create();
+        $product = Product::factory()->create(['price' => '10.00', 'is_available' => false]);
+
+        $this->mock(PayPalService::class, function ($mock): void {
+            $mock->shouldNotReceive('createOrder');
+        });
+
+        $this->actingAs($customer)
+            ->withSession([
+                'cart' => [
+                    'items' => [
+                        $product->id => [
+                            'quantity' => 1,
+                            'unit_price' => '10.00',
+                            'name' => $product->name,
+                            'product_number' => (string) $product->id,
+                        ],
+                    ],
+                    'shipping_address' => [
+                        'first_name' => 'Erika',
+                        'last_name' => 'Mustermann',
+                        'street' => 'Musterstraße',
+                        'house_number' => '1',
+                        'zip' => '44135',
+                        'city' => 'Dortmund',
+                        'country' => 'DE',
+                    ],
+                ],
+            ])
+            ->postJson(route('paypal.order.create'), ['agreed_to_terms' => true])
+            ->assertStatus(422);
+
+        $this->assertSame(0, Order::query()->count());
+    }
+
     public function test_create_order_error_response_does_not_leak_internals(): void
     {
         $customer = Customer::factory()->create();

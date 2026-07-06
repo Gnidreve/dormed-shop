@@ -39,6 +39,16 @@ class ProductBrowsingTest extends TestCase
             );
     }
 
+    public function test_index_excludes_unavailable_products(): void
+    {
+        Product::factory()->create(['is_available' => true]);
+        Product::factory()->create(['is_available' => false]);
+
+        $this->get(route('products.index'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->where('total', 1));
+    }
+
     public function test_index_accepts_price_sort(): void
     {
         Product::factory()->create();
@@ -87,6 +97,18 @@ class ProductBrowsingTest extends TestCase
         $this->getJson(route('products.search', ['q' => '']))
             ->assertOk()
             ->assertExactJson(['results' => [], 'total' => 0]);
+    }
+
+    public function test_search_excludes_unavailable_products(): void
+    {
+        Product::factory()->create(['name' => 'Maske Standard', 'is_available' => true]);
+        Product::factory()->create(['name' => 'Maske Deluxe', 'is_available' => false]);
+
+        $this->getJson(route('products.search', ['q' => 'Maske']))
+            ->assertOk()
+            ->assertJson(['total' => 1])
+            ->assertJsonCount(1, 'results')
+            ->assertJsonPath('results.0.name', 'Maske Standard');
     }
 
     public function test_search_limits_results_to_five(): void

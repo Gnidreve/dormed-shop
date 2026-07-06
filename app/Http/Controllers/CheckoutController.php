@@ -135,6 +135,10 @@ class CheckoutController extends Controller
             return back()->withErrors(['shipping_address' => 'Bitte vervollständigen Sie Ihre Lieferadresse.']);
         }
 
+        if ($this->cartService->hasUnavailableItems()) {
+            return back()->withErrors(['cart' => 'Ihr Warenkorb enthält nicht mehr verfügbare Produkte. Bitte aktualisieren Sie Ihren Warenkorb.']);
+        }
+
         // PayPal payments run through the PayPal JS SDK and PayPalController;
         // this endpoint only finalizes invoice ("Kauf auf Rechnung") orders.
         if (($cart['selected_payment_method']['id'] ?? '') !== 'invoice') {

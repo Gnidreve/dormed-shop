@@ -28,6 +28,17 @@ class CategoryPageTest extends TestCase
             );
     }
 
+    public function test_category_page_excludes_unavailable_products(): void
+    {
+        $category = Category::factory()->create();
+        Product::factory()->for($category)->create(['is_available' => true]);
+        Product::factory()->for($category)->create(['is_available' => false]);
+
+        $this->get(route('category.show', $category))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->where('total', 1));
+    }
+
     public function test_category_page_accepts_sort_option(): void
     {
         $category = Category::factory()->create();

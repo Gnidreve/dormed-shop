@@ -21,6 +21,7 @@ class CategoryController extends Controller
         };
 
         $baseQuery = $category->products()
+            ->available()
             ->with(['manufacturer', 'images' => fn ($q) => $q->where('sort_order', 0)])
             ->orderBy($column, $direction)
             ->orderBy('id');

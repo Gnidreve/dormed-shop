@@ -22,7 +22,8 @@ class ProductController extends Controller
             default => ['name', 'asc'],
         };
 
-        $baseQuery = Product::with(['manufacturer', 'images' => fn ($q) => $q->where('sort_order', 0)])
+        $baseQuery = Product::available()
+            ->with(['manufacturer', 'images' => fn ($q) => $q->where('sort_order', 0)])
             ->when($query, fn ($q) => $q->where('name', 'like', "%{$query}%"))
             ->orderBy($column, $direction)
             ->orderBy('id');
@@ -79,7 +80,8 @@ class ProductController extends Controller
             return response()->json(['results' => [], 'total' => 0]);
         }
 
-        $results = Product::with(['images' => fn ($q) => $q->where('sort_order', 0)])
+        $results = Product::available()
+            ->with(['images' => fn ($q) => $q->where('sort_order', 0)])
             ->where('name', 'like', "%{$query}%")
             ->orderBy('name')
             ->limit(5)
@@ -91,7 +93,7 @@ class ProductController extends Controller
                 'image_url' => $product->images->first()?->url,
             ]);
 
-        $total = Product::where('name', 'like', "%{$query}%")->count();
+        $total = Product::available()->where('name', 'like', "%{$query}%")->count();
 
         return response()->json([
             'results' => $results,

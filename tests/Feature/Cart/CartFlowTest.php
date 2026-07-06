@@ -66,6 +66,16 @@ class CartFlowTest extends TestCase
                 ->where('cart.total', '39.98'));
     }
 
+    public function test_unavailable_product_cannot_be_added_to_the_cart(): void
+    {
+        $product = Product::factory()->create(['is_available' => false]);
+
+        $this->post(route('cart.items.store'), [
+            'product_id' => $product->id,
+            'quantity' => 1,
+        ])->assertSessionHasErrors('product_id');
+    }
+
     public function test_cart_keeps_the_snapshot_price_when_product_price_changes(): void
     {
         $product = Product::factory()->create(['name' => 'Snapshot Product', 'price' => '19.99']);
@@ -180,6 +190,39 @@ class CartFlowTest extends TestCase
         // Both the customer confirmation and the admin notification go out.
         Mail::assertSent(OrderConfirmationMail::class);
         Mail::assertSent(NewOrderMail::class);
+    }
+
+    public function test_order_submit_rejects_cart_with_meanwhile_unavailable_product(): void
+    {
+        Mail::fake();
+
+        $customer = Customer::factory()->create();
+        $product = Product::factory()->create(['name' => 'Now Unavailable Product', 'price' => '10.00']);
+
+        $this->actingAs($customer)
+            ->withSession([
+                'cart' => [
+                    'items' => [
+                        $product->id => [
+                            'quantity' => 1,
+                            'unit_price' => '10.00',
+                            'name' => $product->name,
+                            'product_number' => (string) $product->id,
+                        ],
+                    ],
+                    'shipping_method' => (string) $this->freeShipping->id,
+                    'payment_method' => 'invoice',
+                    'shipping_address' => $this->completeAddress(),
+                ],
+            ]);
+
+        $product->update(['is_available' => false]);
+
+        $this->post(route('checkout.submit'), ['agreed_to_terms' => true])
+            ->assertSessionHasErrors('cart');
+
+        $this->assertSame(0, Order::query()->count());
+        Mail::assertNothingSent();
     }
 
     public function test_order_submit_requires_a_complete_shipping_address(): void

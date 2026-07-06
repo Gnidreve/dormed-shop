@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -54,5 +55,10 @@ class Product extends Model
     public function ratings(): HasMany
     {
         return $this->hasMany(Rating::class)->latest();
+    }
+
+    public function scopeAvailable(Builder $query): Builder
+    {
+        return $query->where('is_available', true);
     }
 }
