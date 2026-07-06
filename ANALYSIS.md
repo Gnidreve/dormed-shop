@@ -27,11 +27,11 @@ Der Endpoint `checkout.payment.update` funktioniert jetzt, aber **kein Frontend 
 
 ## 🟠 Sicherheitslücken
 
-### 4. Geseedeter Admin mit Passwort „password"
+### 4. Geseedeter Admin mit Passwort „password" ✅
 `UserSeeder` legt `mail@dormed.de` mit Factory-Default `password` an, `CustomerSeeder` ebenso. Der `admin:add`-Command existiert bereits — der Seeder muss nur noch aus dem produktiven Pfad raus.
 **Vorgehen:** `UserSeeder`/`CustomerSeeder` aus `DatabaseSeeder` nehmen (nur explizit für Dev aufrufen) oder per `app()->isProduction()` guarden.
 
-### 5. env() zur Laufzeit bricht PayPal bei config:cache
+### 5. env() zur Laufzeit bricht PayPal bei config:cache ✅
 `PayPalService::buildConfig()`/`verifyWebhook()` nutzen `env()`-Fallbacks — mit `config:cache` liefern die `null`. Außerdem verifiziert `verifyWebhook` mit `config('paypal')`-Credentials statt der Settings-basierten; sind die Keys nur im Admin gepflegt, ist die Webhook-Verifikation tot.
 **Vorgehen:** Fallbacks über `config/paypal.php` deklarieren, `verifyWebhook` denselben Client wie der Rest der Klasse nutzen lassen.
 
