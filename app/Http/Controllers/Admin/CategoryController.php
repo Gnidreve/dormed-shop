@@ -49,6 +49,10 @@ class CategoryController extends Controller
 
     public function destroy(Category $category): RedirectResponse
     {
+        if ($category->products()->count() > 0) {
+            return back()->with('error', 'Kategorie kann nicht gelöscht werden, da noch Produkte zugeordnet sind.');
+        }
+
         $category->delete();
 
         return redirect()->route('admin.categories.index')

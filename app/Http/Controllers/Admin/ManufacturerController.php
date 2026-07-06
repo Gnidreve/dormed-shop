@@ -49,6 +49,10 @@ class ManufacturerController extends Controller
 
     public function destroy(Manufacturer $manufacturer): RedirectResponse
     {
+        if ($manufacturer->products()->count() > 0) {
+            return back()->with('error', 'Hersteller kann nicht gelöscht werden, da noch Produkte zugeordnet sind.');
+        }
+
         $manufacturer->delete();
 
         return redirect()->route('admin.manufacturers.index')

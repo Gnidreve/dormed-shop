@@ -56,6 +56,10 @@ class ProductController extends Controller
 
     public function destroy(Product $product): RedirectResponse
     {
+        if ($product->orderItems()->count() > 0) {
+            return back()->with('error', 'Produkt kann nicht gelöscht werden, da es bereits bestellt wurde.');
+        }
+
         $product->delete();
 
         return redirect()->route('admin.products.index')

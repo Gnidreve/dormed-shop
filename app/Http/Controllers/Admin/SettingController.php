@@ -133,7 +133,9 @@ class SettingController extends Controller
 
             return response()->json(['message' => 'Authentifizierung fehlgeschlagen: '.($response->json()['error_description'] ?? 'Unbekannter Fehler')], 422);
         } catch (\Throwable $e) {
-            return response()->json(['message' => 'Fehler: '.$e->getMessage()], 422);
+            \Log::error('Stripe connection test failed', ['exception' => $e]);
+            return response()->json(['message' => 'Stripe-Verbindung fehlgeschlagen. Prüfen Sie die Konfiguration.'], 422);
+        }
         }
     }
 

@@ -68,15 +68,18 @@ import type {ChartConfig} from '@/components/ui/chart';
         if (timeRange === 'custom') {
             const from = customFrom ? new Date(customFrom) : null;
             const to = customTo ? new Date(customTo + 'T23:59:59') : null;
-
             return allData.filter(
                 (d) => (!from || d.date >= from) && (!to || d.date <= to),
             );
         }
-
         const days = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
-         
-        const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+        const cutoff = new Date(Date.UTC(
+            new Date().getUTCFullYear(),
+            new Date().getUTCMonth(),
+            new Date().getUTCDate() - days
+        ));
+        return allData.filter((d) => d.date >= cutoff);
+    });
 
         return allData.filter((d) => d.date >= cutoff);
     });
@@ -135,27 +138,50 @@ return '';
                             aria-label="Zeitraum auswählen"
                         >
                             {timeRangeLabel}
-                            <svg xmlns="http://www.w3.org/2000/svg" class="ml-2 size-4 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="ml-2 size-4 opacity-50"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"><path d="m6 9 6 6 6-6" /></svg
+                            >
                         </Button>
                     {/snippet}
                 </Popover.Trigger>
                 <Popover.Content class="w-52 p-1" align="end">
                     {#each presets as preset (preset.value)}
                         <button
-                            class="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-sm transition-colors hover:bg-accent {timeRange === preset.value ? 'font-medium' : ''}"
+                            class="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-sm transition-colors hover:bg-accent {timeRange ===
+                            preset.value
+                                ? 'font-medium'
+                                : ''}"
                             onclick={() => {
- timeRange = preset.value; popoverOpen = false; 
-}}
+                                timeRange = preset.value;
+                                popoverOpen = false;
+                            }}
                         >
                             {preset.label}
                             {#if timeRange === preset.value}
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="size-4"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    ><path d="M20 6 9 17l-5-5" /></svg
+                                >
                             {/if}
                         </button>
                     {/each}
                     <Separator class="my-1" />
                     <div class="px-3 py-2">
-                        <p class="mb-2 text-xs font-medium text-muted-foreground">Benutzerdefiniert</p>
+                        <p
+                            class="mb-2 text-xs font-medium text-muted-foreground"
+                        >
+                            Benutzerdefiniert
+                        </p>
                         <div class="flex flex-col gap-1.5">
                             <input
                                 type="date"
@@ -168,7 +194,12 @@ return '';
                                 min={customFrom}
                                 class="h-8 w-full rounded-md border bg-transparent px-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
                             />
-                            <Button size="sm" class="mt-1 h-7 text-xs" onclick={applyCustomRange} disabled={!customFrom || !customTo}>
+                            <Button
+                                size="sm"
+                                class="mt-1 h-7 text-xs"
+                                onclick={applyCustomRange}
+                                disabled={!customFrom || !customTo}
+                            >
                                 Anwenden
                             </Button>
                         </div>

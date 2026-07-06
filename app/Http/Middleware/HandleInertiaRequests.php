@@ -65,7 +65,14 @@ class HandleInertiaRequests extends Middleware
                 'fax_href' => $this->phoneHref(Setting::get('shop.fax', self::DEFAULT_SHOP_FAX) ?? self::DEFAULT_SHOP_FAX),
             ],
             'navCategories' => Inertia::always(
-                fn () => Category::orderBy('name')->get(['id', 'name', 'slug']),
+                function () {
+                    try {
+                        return Category::orderBy('name')->get(['id', 'name', 'slug']);
+                    } catch (\Throwable $e) {
+                        report($e);
+                        return collect();
+                    }
+                },
             ),
             'sandbox' => ! PaymentMode::isLive(),
         ];

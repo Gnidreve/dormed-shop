@@ -28,9 +28,11 @@ class Setting extends Model
         if ($value !== null && in_array($key, static::$encryptedKeys, true)) {
             try {
                 return decrypt($value);
-            } catch (\Throwable) {
-                return $value;
+            } catch (\Throwable $e) {
+                report($e);
+                return null;
             }
+        }
         }
 
         return $value;
