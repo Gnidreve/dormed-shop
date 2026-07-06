@@ -221,7 +221,7 @@ class PayPalController extends Controller
         }
 
         if ($payment->status === 'COMPLETED') {
-            return to_route('checkout.success');
+            return to_route('checkout.success', ['paypal_order_id' => $token]);
         }
 
         // If still pending/created, try to capture
@@ -241,7 +241,7 @@ class PayPalController extends Controller
                 $this->orderManager->markPaid($payment->order);
                 $this->cartService->clear();
 
-                return to_route('checkout.success');
+                return to_route('checkout.success', ['paypal_order_id' => $token]);
             }
 
             return to_route('checkout.error');

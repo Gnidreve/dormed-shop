@@ -1,0 +1,90 @@
+<?php
+
+namespace Tests\Feature\Checkout;
+
+use App\Models\Order;
+use App\Models\Payment;
+use App\Services\PayPalService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
+use Tests\TestCase;
+
+class PayPalReturnFlowTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_after_payment_without_token_redirects_to_checkout(): void
+    {
+        $this->get(route('paypal.after-payment'))
+            ->assertRedirect(route('checkout.index'));
+    }
+
+    public function test_after_payment_with_unknown_token_redirects_to_checkout(): void
+    {
+        $this->get(route('paypal.after-payment', ['token' => 'UNKNOWN123']))
+            ->assertRedirect(route('checkout.index'));
+    }
+
+    public function test_after_payment_with_completed_payment_redirects_to_success_with_token(): void
+    {
+        $payment = Payment::factory()->completed()->create();
+
+        $this->get(route('paypal.after-payment', ['token' => $payment->paypal_order_id]))
+            ->assertRedirect(route('checkout.success', ['paypal_order_id' => $payment->paypal_order_id]));
+    }
+
+    public function test_after_payment_captures_pending_payment_and_redirects_to_success(): void
+    {
+        Mail::fake();
+
+        $order = Order::factory()->create(['status' => 'pending']);
+        $payment = Payment::factory()->created()->for($order)->create();
+
+        $this->mock(PayPalService::class, function ($mock) use ($payment): void {
+            $mock->shouldReceive('captureOrder')
+                ->once()
+                ->with($payment->paypal_order_id)
+                ->andReturn(['status' => 'COMPLETED']);
+            $mock->shouldReceive('getCaptureIdFromOrder')
+                ->once()
+                ->andReturn('CAPTURE123456789');
+        });
+
+        $this->get(route('paypal.after-payment', ['token' => $payment->paypal_order_id]))
+            ->assertRedirect(route('checkout.success', ['paypal_order_id' => $payment->paypal_order_id]));
+
+        $this->assertSame('COMPLETED', $payment->fresh()->status);
+        $this->assertSame('CAPTURE123456789', $payment->fresh()->paypal_capture_id);
+        $this->assertSame('paid', $order->fresh()->status);
+    }
+
+    public function test_after_payment_with_failed_capture_redirects_to_error(): void
+    {
+        $payment = Payment::factory()->created()->create();
+
+        $this->mock(PayPalService::class, function ($mock): void {
+            $mock->shouldReceive('captureOrder')->once()->andReturn(['status' => 'DECLINED']);
+        });
+
+        $this->get(route('paypal.after-payment', ['token' => $payment->paypal_order_id]))
+            ->assertRedirect(route('checkout.error'));
+    }
+
+    public function test_success_page_renders_order_via_paypal_order_id(): void
+    {
+        $order = Order::factory()->create([
+            'status' => 'paid',
+            'total_amount' => '50.00',
+            'shipping_amount' => '0.00',
+        ]);
+        $payment = Payment::factory()->completed()->for($order)->create();
+
+        $this->get(route('checkout.success', ['paypal_order_id' => $payment->paypal_order_id]))
+            ->assertOk()
+            ->assertInertia(
+                fn ($page) => $page
+                    ->component('Checkout/Success')
+                    ->where('order_id', $order->id)
+            );
+    }
+}

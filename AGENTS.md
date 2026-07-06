@@ -10,14 +10,6 @@
 
 Ablösung für Shopware. Medical equipment online shop für dormed 24 (Medizintechnik). Gebaut mit Laravel 13 + Inertia v3 + Svelte 5.
 
-
-## IDENTITY
-- **Name:** Dormed Shop Bot
-- **Creature:** Assistent und DevOps-Ingenieur
-- **Language:** Deutsch
-
-
-
 ## Was diese App ist
 
 B2B/B2C-Shop für Medizintechnik (Ultraschallsysteme, Zubehör, Verbrauchsmaterialien). Zwei eigenständige Bereiche:
@@ -63,7 +55,7 @@ Seiten ohne Layout müssen `<ShopHeader>` selbst einbinden.
 | --------------------- | ----------------------------------------- |
 | `routes/web.php`      | Home (`/`), lädt die anderen Routedateien |
 | `routes/products.php` | `GET /products`, `GET /products/search`   |
-| `routes/checkout.php` | Cart, `checkout/confirm`, `checkout/submit`, `checkout/success`, Stripe-Webhook |
+| `routes/checkout.php` | Cart, `checkout/confirm`, `checkout/submit`, `checkout/success` |
 | `routes/paypal.php`   | PayPal createOrder/captureOrder/after-payment/webhook |
 | `routes/admin.php`    | Admin inkl. Bestell-Aktionen (`orders.status`, `orders.refund`) + Settings |
 | `routes/settings.php` | Profil + Sicherheitseinstellungen (Kunde) |
@@ -199,18 +191,17 @@ Nicht importiert, können nach Designfreigabe gelöscht werden.
 
 ## Zahlungen (Payments)
 
-Drei Bezahlarten, ein gemeinsamer Order-/Mail-Pfad über **`App\Support\Orders\OrderManager`**:
+Zwei Bezahlarten, ein gemeinsamer Order-/Mail-Pfad über **`App\Support\Orders\OrderManager`**. Stripe wurde vollständig entfernt (Commit `110890c`).
 
 | Bezahlart | Flow | Order-Status nach Abschluss |
 | --------- | ---- | --------------------------- |
-| Rechnung (`invoice`) | `CheckoutController::submitInvoice` | bleibt `pending` (Zahlung per Überweisung) |
-| Stripe (`stripe`) | `CheckoutController::submitStripe` → Stripe Checkout → Webhook | `paid` (via `StripeWebhookController`) |
-| PayPal (`paypal`) | `PayPalController` (JS-SDK, createOrder/captureOrder) | `paid` (nach Capture) |
+| Rechnung (`invoice`) | `CheckoutController::submit` | bleibt `pending` (Zahlung per Überweisung) |
+| PayPal (`paypal`) | `PayPalController` (JS-SDK, createOrder/captureOrder) + Return-URL `paypal/after-payment` | `paid` (nach Capture) |
 
 Regeln:
 
 - **`OrderManager` ist die einzige Stelle**, die aus dem Cart eine Order baut (`createFromCart`), Bestätigungsmails versendet (`sendConfirmations`) und „bezahlt"-Übergänge idempotent macht (`markPaid`). Neue Gateways hier andocken, nicht in den Controllern duplizieren.
-- **Aktiver Gateway** = Admin-Setting `payment.provider` (`paypal`|`stripe`); Invoice ist immer zusätzlich verfügbar. Die `methods`-Labels liegen in `config/shop.php`.
+- **Angebotene Zahlarten** = Admin-Setting `payment.provider` (`paypal` = PayPal + Rechnung, `invoice` = nur Rechnung). Die `methods`-Labels liegen in `config/shop.php`.
 - **Sandbox/Live** = `App\Support\PaymentMode`. Setting `payment.mode` (sandbox|live) gewinnt, sonst Fallback auf `APP_ENV` (production = live). Im Admin unter Einstellungen → Zahlungsarten umschaltbar.
 - **Secrets** liegen verschlüsselt in `settings` (`Setting::$encryptedKeys`), env dient nur als Fallback.
 - **Benachrichtigungs-Empfänger** = Setting `shop.notification_emails` (kommagetrennt), Fallback `mail.admin_address` → `mail.from.address`.
@@ -219,6 +210,5 @@ Regeln:
 ## Noch nicht gebaut
 
 - Produktdetailseite-Ausbau (`/products/{id}`)
-- Eigenes Stripe-`Payment`-Record (Stripe schreibt aktuell nur `stripe_*` auf die Order)
-- Stripe-Success-Seite verifiziert den Zahlungsstatus noch nicht serverseitig (siehe `TODO.md`)
+- Zahlart-Auswahl (Rechnung ↔ PayPal) im Checkout-UI (siehe `ANALYSIS.md`, Blocker 1)
 - Wartungsmodus (siehe `TODO.md`)

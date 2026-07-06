@@ -11,6 +11,7 @@ Komplettanalyse dormed-shop — Stand vor Release 1.0
 - Fehlermeldungs-Leak in `checkMail` beseitigt (Log statt Exception-Text an Client).
 - `guzzlehttp/guzzle` + `guzzlehttp/psr7` auf gepatchte Versionen (3 CVEs, composer audit jetzt sauber).
 - `OrderItem.php` nach Paste-Unfall wiederhergestellt (doppelter Dateikopf).
+- **Ex-Blocker 3 gefixt**: `PayPalController::afterPayment` leitet jetzt mit `paypal_order_id` zur Erfolgsseite (beide Pfade: bereits abgeschlossene Zahlung + frischer Capture). 6 neue Feature-Tests für den Return-Flow (`PayPalReturnFlowTest`). AGENTS.md Stripe-bereinigt, `STRIPE-TODO.md` gelöscht.
 
 ---
 
@@ -23,10 +24,6 @@ Der Endpoint `checkout.payment.update` funktioniert jetzt, aber **kein Frontend 
 ### 2. Produktvarianten werden beim Kauf ignoriert
 `addToCart()` sendet nur `product_id` + `quantity` (Show.svelte); der Warenkorb kennt keine Varianten — Kunde wählt „Variante XY für 99 €", bestellt Basisprodukt zum Basispreis.
 **Vorgehen:** Entweder Varianten durchziehen (Cart + OrderItem um `variant_id`/Variantenpreis erweitern) oder für 1.0 komplett entfernen und in 1.1 sauber bauen.
-
-### 3. PayPal-Rückkehrer sehen nie die Erfolgsseite
-`PayPalController::afterPayment` leitet zu `checkout.success` **ohne Parameter** → `success()` findet keine Order → Redirect zur Startseite. Kunde hat bezahlt, sieht aber nichts.
-**Vorgehen:** `to_route('checkout.success', ['paypal_order_id' => $token])` + Feature-Test für den Return-Flow.
 
 ## 🟠 Sicherheitslücken
 
