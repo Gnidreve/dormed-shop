@@ -24,6 +24,13 @@ class CartService
         'phone' => '',
     ];
 
+    /**
+     * Lazily loaded and reused for the lifetime of this instance, so a
+     * single cart() call doesn't query shipping methods twice (once via
+     * state() for the selected id, once via shippingMethods() for the list).
+     */
+    private ?Collection $shippingMethodModelsCache = null;
+
     public function __construct(
         private readonly CartStore $store,
     ) {}
@@ -144,7 +151,7 @@ class CartService
     {
         $this->persist([
             'items' => [],
-            'shipping_method' => (string) (ShippingMethod::orderBy('sort_order')->value('id') ?? ''),
+            'shipping_method' => (string) ($this->shippingMethodModels()->first()?->id ?? ''),
             'payment_method' => (string) (collect($this->paymentMethods(''))->first()['id'] ?? ''),
             'shipping_address' => self::DEFAULT_ADDRESS,
             'billing_address' => null,
@@ -197,10 +204,14 @@ class CartService
             ->filter();
     }
 
+    private function shippingMethodModels(): Collection
+    {
+        return $this->shippingMethodModelsCache ??= ShippingMethod::orderBy('sort_order')->get();
+    }
+
     private function shippingMethods(string $selectedId): array
     {
-        return ShippingMethod::orderBy('sort_order')
-            ->get()
+        return $this->shippingMethodModels()
             ->values()
             ->map(function (ShippingMethod $method, int $index) use ($selectedId): array {
                 $methodId = (string) $method->id;
@@ -275,7 +286,7 @@ class CartService
     private function state(): array
     {
         $rawState = $this->store->get();
-        $shippingMethodIds = ShippingMethod::orderBy('sort_order')->pluck('id')->map(fn ($id) => (string) $id)->all();
+        $shippingMethodIds = $this->shippingMethodModels()->pluck('id')->map(fn ($id) => (string) $id)->all();
         $paymentMethodIds = collect($this->paymentMethods(''))->pluck('id')->map(fn ($id) => (string) $id)->all();
 
         return [

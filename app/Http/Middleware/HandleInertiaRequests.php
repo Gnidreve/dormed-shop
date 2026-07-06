@@ -47,6 +47,8 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $cart = app(CartService::class)->cart();
+        $phone = Setting::get('shop.phone', self::DEFAULT_SHOP_PHONE) ?? self::DEFAULT_SHOP_PHONE;
+        $fax = Setting::get('shop.fax', self::DEFAULT_SHOP_FAX) ?? self::DEFAULT_SHOP_FAX;
 
         return [
             ...parent::share($request),
@@ -59,10 +61,10 @@ class HandleInertiaRequests extends Middleware
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'contact' => [
                 'email' => Setting::get('shop.email', self::DEFAULT_SHOP_EMAIL) ?? self::DEFAULT_SHOP_EMAIL,
-                'phone' => Setting::get('shop.phone', self::DEFAULT_SHOP_PHONE) ?? self::DEFAULT_SHOP_PHONE,
-                'fax' => Setting::get('shop.fax', self::DEFAULT_SHOP_FAX) ?? self::DEFAULT_SHOP_FAX,
-                'phone_href' => $this->phoneHref(Setting::get('shop.phone', self::DEFAULT_SHOP_PHONE) ?? self::DEFAULT_SHOP_PHONE),
-                'fax_href' => $this->phoneHref(Setting::get('shop.fax', self::DEFAULT_SHOP_FAX) ?? self::DEFAULT_SHOP_FAX),
+                'phone' => $phone,
+                'fax' => $fax,
+                'phone_href' => $this->phoneHref($phone),
+                'fax_href' => $this->phoneHref($fax),
             ],
             'navCategories' => Inertia::always(
                 function () {
@@ -70,6 +72,7 @@ class HandleInertiaRequests extends Middleware
                         return Category::orderBy('name')->get(['id', 'name', 'slug']);
                     } catch (\Throwable $e) {
                         report($e);
+
                         return collect();
                     }
                 },
