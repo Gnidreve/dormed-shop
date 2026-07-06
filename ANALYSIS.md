@@ -17,7 +17,7 @@ Komplettanalyse dormed-shop — Stand vor Release 1.0
 
 ## 🔴 Release-Blocker
 
-### 1. Zahlartauswahl-UI fehlt weiterhin (Rechnung ↔ PayPal)
+### 1. Zahlartauswahl-UI fehlt weiterhin (Rechnung ↔ PayPal) ✅
 Der Endpoint `checkout.payment.update` funktioniert jetzt, aber **kein Frontend ruft ihn auf** — es gibt weder im Warenkorb noch auf der Confirm-Seite eine Auswahl. Default ist immer „Rechnung" (erste Methode), PayPal ist für Kunden nur erreichbar, wenn sie nie wechseln müssen — also faktisch gar nicht wählbar.
 **Vorgehen:** Radio-Auswahl analog zur Versandart im Checkout bauen (`cart.payment_methods` liegt schon in den Props), PATCH auf `checkout.payment.update`, Feature-Test für den Wechsel + PayPal-Button-Anzeige auf Confirm.
 
