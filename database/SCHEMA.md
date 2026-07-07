@@ -189,18 +189,20 @@ Bestellungen mit JSON-Adress-Snapshots (immutable zum Zeitpunkt der Bestellung).
 | Spalte                      | Typ      | Nullable | Default     | Hinweis                            |
 |-----------------------------|----------|----------|-------------|-------------------------------------|
 | `id`                        | integer  | NO       | —           | PK, autoincrement                   |
-| `customer_id`               | integer  | NO       | —           | FK → `customers.id` CASCADE         |
-| `status`                    | varchar  | NO       | `'pending'` | pending/paid/failed/cancelled       |
-| `payment_method`            | varchar  | YES      | —           | invoice / stripe / paypal           |
+| `customer_id`               | integer  | **YES**  | —           | FK → `customers.id` **SET NULL** — Historie überlebt Kontolöschung (GoBD) |
+| `status`                    | varchar  | NO       | `'pending'` | pending/paid/processing/completed/cancelled/failed/refunded |
+| `payment_method`            | varchar  | YES      | —           | invoice / paypal                    |
 | `is_test`                   | boolean  | NO       | `false`     | true = Sandbox-/Testbestellung      |
-| `stripe_checkout_session_id`| varchar  | YES      | —           | UNIQUE, Stripe Session              |
-| `stripe_payment_intent_id`  | varchar  | YES      | —           | Stripe Payment Intent               |
 | `total_amount`              | numeric  | NO       | —           | decimal(10,2)                       |
 | `shipping_amount`           | numeric  | NO       | `0.00`      | decimal(10,2), Versandkosten        |
 | `shipping_address`          | JSON     | YES      | —           | Snapshot der Lieferadresse          |
 | `billing_address`           | JSON     | YES      | —           | Snapshot der Rechnungsadresse       |
 | `created_at`                | datetime | YES      | —           |                                     |
 | `updated_at`                | datetime | YES      | —           |                                     |
+
+> Die `stripe_*`-Spalten wurden mit der Stripe-Entfernung gedroppt
+> (Migration `2026_07_04_000001`). `customer_id` ist seit Migration
+> `2026_07_07_175921` nullable mit `ON DELETE SET NULL`.
 
 JSON-Struktur (shipping_address / billing_address):
 ```json

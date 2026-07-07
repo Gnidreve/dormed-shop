@@ -7,6 +7,8 @@
 - **Language:** Deutsch
 
 > **Datenbankschema:** [`database/SCHEMA.md`](database/SCHEMA.md) — vollständige Tabellenstruktur, Spalten, Indizes und Fremdschlüssel. Muss bei jeder Schemaänderung aktualisiert werden. Immer lesen bevor Migrationen oder Modelle erstellt werden.
+>
+> **Projekt-Landkarte:** [`README.md`](README.md) — übergreifende Flows (Checkout, PayPal, Verifikation, Varianten, Settings), Betrieb & Launch-Checkliste. Bei Flow-Änderungen mitpflegen.
 
 Ablösung für Shopware. Medical equipment online shop für dormed 24 (Medizintechnik). Gebaut mit Laravel 13 + Inertia v3 + Svelte 5.
 
@@ -26,8 +28,9 @@ B2B/B2C-Shop für Medizintechnik (Ultraschallsysteme, Zubehör, Verbrauchsmateri
 | `web`   | `Customer` | `customers` | `/login`       | `auth` (Fortify) |
 | `admin` | `User`     | `users`     | `/admin/login` | `ensure.admin`   |
 
-- `Customer` — Shop-Kunden; unterstützt Passkeys + 2FA via Fortify
-- `User` — interne Admin-Nutzer; eigener `LoginController`, kein Fortify
+- `Customer` — Shop-Kunden; Passkeys + 2FA via Fortify, implementiert `MustVerifyEmail`
+- **Bestell-Hebel:** `verified`-Middleware auf `checkout.confirm/address/submit` und `paypal.order.create/capture` — ohne bestätigte E-Mail keine Bestellung
+- `User` — interne Admin-Nutzer; eigener `LoginController`, kein Fortify; `EnsureAdmin` prüft Login **und** `is_admin`-Flag
 - In Svelte: `page.props.auth.user` ist immer der aktuelle `Customer`
 - TypeScript-Typ: `Customer` aus `@/types`
 
@@ -35,42 +38,50 @@ B2B/B2C-Shop für Medizintechnik (Ultraschallsysteme, Zubehör, Verbrauchsmateri
 
 ## Layout-Auflösung (`resources/js/app.ts`)
 
-| Seitenmuster  | Layout                         |
-| ------------- | ------------------------------ |
-| `Welcome`     | keins (standalone)             |
-| `Checkout/*`  | keins (standalone)             |
-| `Products/*`  | keins (standalone)             |
-| `auth/*`      | `AuthLayout`                   |
-| `Admin/Login` | `AuthLayout`                   |
-| `settings/*`  | `AppLayout` + `SettingsLayout` |
-| alles andere  | `AppLayout` (Admin)            |
+| Seitenmuster                  | Layout                              |
+| ----------------------------- | ----------------------------------- |
+| `Admin/*` (außer Login)       | `AppLayout` (Admin-Sidebar)         |
+| `Admin/Login`, `auth/*`       | `AuthLayout`                        |
+| `settings/*`                  | `CustomerLayout` + `SettingsLayout` |
+| alles andere (Shop-Frontend)  | keins (standalone)                  |
 
-Seiten ohne Layout müssen `<ShopHeader>` selbst einbinden.
+Standalone-Seiten (Welcome, Products/*, Checkout/*, statische Seiten) binden `<ShopHeader>` + `<AppFooter>` selbst ein.
 
 ---
 
 ## Routen-Überblick
 
-| Datei                 | Routen                                    |
-| --------------------- | ----------------------------------------- |
-| `routes/web.php`      | Home (`/`), lädt die anderen Routedateien |
-| `routes/products.php` | `GET /products`, `GET /products/search`   |
-| `routes/checkout.php` | Cart, `checkout/confirm`, `checkout/submit`, `checkout/success` |
-| `routes/paypal.php`   | PayPal createOrder/captureOrder/after-payment/webhook |
-| `routes/admin.php`    | Admin inkl. Bestell-Aktionen (`orders.status`, `orders.refund`) + Settings |
-| `routes/settings.php` | Profil + Sicherheitseinstellungen (Kunde) |
+| Datei                      | Routen                                    |
+| -------------------------- | ----------------------------------------- |
+| `routes/web.php`           | Home (`/`), statische Seiten (AGB, FAQ, …), Sitemap; lädt die anderen Routedateien |
+| `routes/products.php`      | `GET /products`, `/products/search`, `/products/{product}` |
+| `routes/categories.php`    | `GET /{category:slug}` (Catch-all, ein Segment) |
+| `routes/public/rating.php` | `POST /products/{product}/ratings` (anonym — siehe TODO) |
+| `routes/checkout.php`      | Cart (`/cart/items/{product}/{variant?}`), Checkout (`confirm`/`address`/`submit` mit `auth`+`verified`), Success, Kundenbestellungen |
+| `routes/paypal.php`        | `order/create` + `order/capture` (`auth`+`verified`), `after-payment`, `webhook` (signaturverifiziert, ohne CSRF) |
+| `routes/admin.php`         | Admin-CRUD (Produkte inkl. Bilder/Varianten, Kategorien, Hersteller, Kunden), Bestell-Aktionen (`orders.status`, `orders.refund`), Settings + Versandarten |
+| `routes/settings.php`      | Profil, Adressen, Sicherheit (Kunde)      |
 
 ---
 
 ## Modelle & Datenbank
 
-| Model          | Tabelle         | Hinweise                          |
-| -------------- | --------------- | --------------------------------- |
-| `Customer`     | `customers`     | Shop-Auth, Fortify, Passkeys, 2FA |
-| `User`         | `users`         | Nur Admin-Auth                    |
-| `Product`      | `products`      | Hat `manufacturer_id` FK          |
-| `Manufacturer` | `manufacturers` |                                   |
-| `Order`        | `orders`        | FK zu `customers`                 |
+| Model            | Tabelle            | Hinweise                          |
+| ---------------- | ------------------ | --------------------------------- |
+| `Customer`       | `customers`        | Shop-Auth, Fortify, Passkeys, 2FA, `MustVerifyEmail` |
+| `User`           | `users`            | Nur Admin-Auth (`is_admin`-Flag)  |
+| `Product`        | `products`         | `manufacturer_id`/`category_id` FKs, `is_available`, `available()`-Scope |
+| `ProductVariant` | `product_variants` | Absoluter Endpreis (`price`), `is_default`, `sort_order` |
+| `ProductImage`   | `product_images`   | public-Disk, `sort_order` (0 = Hauptbild) |
+| `Manufacturer`   | `manufacturers`    |                                   |
+| `Category`       | `categories`       | Slug-basierte Shop-Route          |
+| `Order`          | `orders`           | FK zu `customers` **nullable, ON DELETE SET NULL** (Historie überlebt Kontolöschung); Adress-Snapshots als JSON |
+| `OrderItem`      | `order_items`      | Snapshot: `product_name` (inkl. Varianten-Label), `unit_price` |
+| `Payment`        | `payments`         | PayPal-Transaktionen (order_id, capture_id, response_data) |
+| `Rating`         | `ratings`          | Anonym (Stand jetzt), FK `products` |
+| `Address`        | `addresses`        | Kunden-Stammadressen (shipping/billing, `is_default`) |
+| `ShippingMethod` | `shipping_methods` | Versandarten inkl. Preis          |
+| `Setting`        | `settings`         | Key-Value, sensible Keys verschlüsselt, pro Request memoisiert |
 
 ---
 
@@ -80,37 +91,54 @@ Seiten ohne Layout müssen `<ShopHeader>` selbst einbinden.
 resources/js/
 ├── pages/
 │   ├── Welcome.svelte              # Startseite (Hero + Trust-Bar)
+│   ├── AGB/Datenschutz/FAQ/...     # Statische Seiten
 │   ├── Checkout/
 │   │   ├── Index.svelte            # Warenkorb-Review mit Tabelle
-│   │   └── Confirm.svelte          # Bestellabschluss (Adresse, Zahlung, Versand)
+│   │   ├── Confirm.svelte          # Bestellabschluss (Adresse, AGB, Zahlart, PayPal-Button)
+│   │   ├── Success.svelte          # Bestellbestätigung
+│   │   └── Error.svelte
 │   ├── Products/
-│   │   └── Index.svelte            # Produktliste
-│   ├── Admin/
-│   │   ├── Login.svelte
-│   │   └── Dashboard.svelte
-│   ├── auth/                       # Fortify-Auth-Seiten
-│   └── settings/                   # Profil + Sicherheit
+│   │   ├── Index.svelte            # Produktliste (InfiniteScroll, Sortierung)
+│   │   ├── ByCategory.svelte       # Kategorie-Listing
+│   │   └── Show.svelte             # Detailseite (Varianten, Zoom, Ratings, JSON-LD)
+│   ├── Admin/                      # Dashboard, Products, Orders, Customers,
+│   │                               # Categories, Manufacturers, Settings, Login
+│   ├── auth/                       # Fortify-Auth-Seiten (inkl. VerifyEmail)
+│   └── settings/                   # Profil, Adressen, Sicherheit, Bestellungen (+ Show)
 ├── components/
-│   ├── ShopHeader.svelte           # Logo, Suche, User-Dropdown, Cart-Trigger
-│   ├── CartSheet.svelte            # Slide-in Warenkorb (rechts), Sheet-Komponente
+│   ├── ShopHeader.svelte           # Logo, Suche (+Empty-State), User-Dropdown, Cart-Trigger
+│   ├── CartSheet.svelte            # Slide-in Warenkorb (rechts)
+│   ├── PayPalButton.svelte         # PayPal-JS-SDK-Integration (fetchJson)
+│   ├── AddressForm.svelte          # Wiederverwendetes Adressformular (prefix-basiert)
 │   └── ui/                         # shadcn-svelte Komponentenbibliothek
-├── data/
-│   └── cart.json                   # Platzhalter-Daten (→ später API)
+├── lib/
+│   ├── http.ts                     # fetchJson() — CSRF-sicherer Fetch für Nicht-Inertia-Endpoints
+│   └── currency.ts / utils.ts / …
 ├── layouts/
 │   ├── AppLayout.svelte            # Admin-Sidebar-Layout
+│   ├── CustomerLayout.svelte       # Kunden-Settings-Rahmen
 │   ├── AuthLayout.svelte           # Auth-Seiten
-│   └── settings/Layout.svelte     # Settings-Layout
+│   └── settings/Layout.svelte      # Settings-Sub-Layout
 ├── actions/                        # Wayfinder (Controller-Routen als TS-Funktionen)
 ├── routes/                         # Wayfinder (Named Routes als TS-Funktionen)
-└── types/
-    └── index.d.ts                  # Customer-Typ + globale Props
+├── data/cart.json                  # Altlast/Referenz — NICHT Source of Truth
+└── types/                          # auth.ts, cart.ts (CartItem inkl. line_key/variant_*), …
 ```
+
+**Wichtig — CSRF:** Inertias `router.*` sendet den XSRF-Token automatisch.
+Rohe `fetch()`-Aufrufe **müssen** über `fetchJson()` aus `@/lib/http` laufen
+(sonst 419; es gibt kein csrf-Meta-Tag im Blade-Template).
 
 ---
 
 ## Cart/Checkout-Daten
 
 Der Cart läuft server-seitig über **`App\Support\Cart\CartService`** (Store via `CartStore`-Contract). `CartService::cart()` liefert das vollständige Cart-Array (Items, Versand-/Zahlungsarten, Adressen, Summen) und wird in `HandleInertiaRequests` als shared Prop `cart` verteilt. `resources/js/data/cart.json` ist nur noch Altlast/Referenz, **nicht** die Source of Truth.
+
+- **Session-State:** `items[lineKey => quantity]`; Line-Key = `productId` oder `productId:variantId` (Varianten = eigene Zeilen).
+- **Preise live:** Namen/Preise werden bei jedem Aufruf aus der DB gelesen; der Snapshot entsteht erst in der Order (`OrderManager::createFromCart`, transaktional).
+- **Varianten:** absolutes Preismodell (`product_variants.price` = Endpreis); Produkte mit Varianten nur als Variante bestellbar; Label wird Teil des Zeilennamens.
+- Frontend adressiert Cart-Zeilen über `item.line_key` (each-Key) und `/cart/items/{product}/{variant?}`.
 
 ---
 
@@ -183,9 +211,10 @@ Der Cart läuft server-seitig über **`App\Support\Cart\CartService`** (Store vi
 ## Backup-Dateien (nicht aktiv)
 
 - `ShopHeader-left-align.svelte` — alte linksbündige Header-Variante
-- `ShopHeader-with-hover.svelte` — Mega-Menü-Experiment (entfernt)
+- `ShopHeader-with-hover.svelte` — Mega-Menü-Variante
 
-Nicht importiert, können nach Designfreigabe gelöscht werden.
+Nicht importiert. **Entscheidung Linus (07/2026): die Hover-Variante bleibt
+erhalten und darf nicht gelöscht werden.**
 
 ---
 
@@ -200,15 +229,17 @@ Zwei Bezahlarten, ein gemeinsamer Order-/Mail-Pfad über **`App\Support\Orders\O
 
 Regeln:
 
-- **`OrderManager` ist die einzige Stelle**, die aus dem Cart eine Order baut (`createFromCart`), Bestätigungsmails versendet (`sendConfirmations`) und „bezahlt"-Übergänge idempotent macht (`markPaid`). Neue Gateways hier andocken, nicht in den Controllern duplizieren.
-- **Angebotene Zahlarten** = Admin-Setting `payment.provider` (`paypal` = PayPal + Rechnung, `invoice` = nur Rechnung). Die `methods`-Labels liegen in `config/shop.php`.
+- **`OrderManager` ist die einzige Stelle**, die aus dem Cart eine Order baut (`createFromCart`, in DB-Transaktion), Bestätigungsmails versendet (`sendConfirmations`) und „bezahlt"-Übergänge idempotent macht (`markPaid`, atomarer Statuswechsel → keine Doppel-Mails). Neue Gateways hier andocken, nicht in den Controllern duplizieren.
+- **Bestellen nur mit bestätigter E-Mail** (`verified`-Middleware, siehe Auth-Abschnitt).
+- **Angebotene Zahlarten** = Admin-Setting `payment.provider` (`paypal` = PayPal + Rechnung, `invoice` = nur Rechnung). Die `methods`-Labels liegen in `config/shop.php`. Auswahl-UI: Radio auf `Checkout/Confirm`.
 - **Sandbox/Live** = `App\Support\PaymentMode`. Setting `payment.mode` (sandbox|live) gewinnt, sonst Fallback auf `APP_ENV` (production = live). Im Admin unter Einstellungen → Zahlungsarten umschaltbar.
-- **Secrets** liegen verschlüsselt in `settings` (`Setting::$encryptedKeys`), env dient nur als Fallback.
-- **Benachrichtigungs-Empfänger** = Setting `shop.notification_emails` (kommagetrennt), Fallback `mail.admin_address` → `mail.from.address`.
-- **Admin-Bestellaktionen**: Status setzen + PayPal-Refund unter `Admin/Orders/Show` (`orders.status`, `orders.refund`).
+- **Secrets** liegen verschlüsselt in `settings` (`Setting::$encryptedKeys`) — **Single Source of Truth**. Es gibt keine `PAYPAL_*`-env-Fallbacks mehr; Erstbefüllung nur über `SEED_PAYPAL_*` + `PaymentSeeder`.
+- **Webhooks** (`/paypal/webhook`): signaturverifiziert; `CAPTURE.COMPLETED` → `markPaid`; `CAPTURE.REFUNDED`/`DENIED` setzen Payment **und** Order (Achtung: beim Refund ist `resource.id` die Refund-ID, die Capture-ID steckt im `up`-Link).
+- **Benachrichtigungs-Empfänger** = Setting `shop.notification_emails` (kommagetrennt), Fallback `mail.admin_address` → `mail.from.address`. Beide Bestellmails sind **queued** — Queue-Worker nötig.
+- **Admin-Bestellaktionen**: Status setzen (optional mit Kundenmail) + PayPal-Refund unter `Admin/Orders/Show` (`orders.status`, `orders.refund`).
 
 ## Noch nicht gebaut
 
-- Produktdetailseite-Ausbau (`/products/{id}`)
-- Zahlart-Auswahl (Rechnung ↔ PayPal) im Checkout-UI (siehe `ANALYSIS.md`, Blocker 1)
-- Wartungsmodus (siehe `TODO.md`)
+- Wartungsmodus, Produktfilter, Bulk-Aktionen, Bestell-/Kunden-Filter im Admin (siehe `TODO.md`)
+- Rating-Throttle/Moderation (ANALYSE-V2 S-C, Wiedervorlage Linus)
+- Kleinere Härtungen: Settings-Werte-Validierung, Throttle auf `paypal/order/create` (ANALYSE-V2 S-C)
