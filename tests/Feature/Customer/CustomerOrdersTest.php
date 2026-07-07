@@ -47,4 +47,18 @@ class CustomerOrdersTest extends TestCase
                     ->where('orders.1.id', $older->id)
             );
     }
+
+    /**
+     * Das User-Settings-Modal lädt die Liste per fetch (Accept: json).
+     */
+    public function test_orders_are_returned_as_json_for_the_settings_modal(): void
+    {
+        $customer = Customer::factory()->create();
+        $order = Order::factory()->for($customer)->create();
+
+        $this->actingAs($customer)
+            ->getJson(route('customer.orders'))
+            ->assertOk()
+            ->assertJsonPath('orders.0.id', $order->id);
+    }
 }

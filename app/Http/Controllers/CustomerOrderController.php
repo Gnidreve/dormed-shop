@@ -4,18 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Support\Orders\OrderManager;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class CustomerOrderController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): Response|JsonResponse
     {
         $orders = $request->user()
             ->orders()
             ->latest()
             ->get(['id', 'status', 'total_amount', 'created_at']);
+
+        // JSON für das User-Settings-Modal (lädt die Liste per fetch).
+        if ($request->wantsJson()) {
+            return response()->json(['orders' => $orders]);
+        }
 
         return Inertia::render('settings/Orders', ['orders' => $orders]);
     }

@@ -41,6 +41,31 @@ class AddressSettingsTest extends TestCase
             ->assertInertia(fn ($page) => $page->component('settings/Addresses'));
     }
 
+    /**
+     * Das User-Settings-Modal lädt die Formulardaten per fetch (Accept: json).
+     */
+    public function test_addresses_are_returned_as_json_for_the_settings_modal(): void
+    {
+        $customer = Customer::factory()->create();
+        $customer->addresses()->create([
+            'type' => 'shipping',
+            'is_default' => true,
+            'first_name' => 'Erika',
+            'last_name' => 'Mustermann',
+            'street' => 'Musterstraße',
+            'house_number' => '1',
+            'zip' => '44135',
+            'city' => 'Dortmund',
+            'country' => 'DE',
+        ]);
+
+        $this->actingAs($customer)
+            ->getJson(route('addresses.edit'))
+            ->assertOk()
+            ->assertJsonPath('shipping.first_name', 'Erika')
+            ->assertJsonPath('billing', null);
+    }
+
     public function test_shipping_address_is_created(): void
     {
         $customer = Customer::factory()->create();

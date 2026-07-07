@@ -12,7 +12,13 @@
     import TestModeBanner from '@/components/TestModeBanner.svelte';
     import { Button } from '@/components/ui/button';
     import { Input } from '@/components/ui/input';
-    import {Sheet, SheetContent, SheetTitle, SheetTrigger} from '@/components/ui/sheet';
+    import {
+        Sheet,
+        SheetContent,
+        SheetTitle,
+        SheetTrigger,
+    } from '@/components/ui/sheet';
+    import UserSettingsDialog from '@/components/UserSettingsDialog.svelte';
     import { formatPrice } from '@/lib/currency';
     import { toUrl } from '@/lib/utils';
     import cartRoutes from '@/routes/cart';
@@ -103,13 +109,18 @@
 
         if (e.key === 'ArrowUp') {
             e.preventDefault();
-            activeResultIndex = activeResultIndex <= 0 ? results.length - 1 : activeResultIndex - 1;
+            activeResultIndex =
+                activeResultIndex <= 0
+                    ? results.length - 1
+                    : activeResultIndex - 1;
         }
 
         if (e.key === 'Enter' && activeResultIndex >= 0) {
             e.preventDefault();
             isOpen = false;
-            router.visit(ProductController.show.url(results[activeResultIndex].id));
+            router.visit(
+                ProductController.show.url(results[activeResultIndex].id),
+            );
         }
     }
 
@@ -126,8 +137,6 @@
         ProductController.index.url({ query: { q: query } }),
     );
     const accountHref = $derived(auth?.user ? toUrl(editProfile()) : '/login');
-
-
 </script>
 
 <svelte:window onclick={handleClickOutside} onkeydown={handleKeydown} />
@@ -145,7 +154,10 @@
             </Link>
 
             <!-- Search (hidden on mobile) -->
-            <div bind:this={searchContainerEl} class="relative mx-8 hidden flex-1 md:block">
+            <div
+                bind:this={searchContainerEl}
+                class="relative mx-8 hidden flex-1 md:block"
+            >
                 <div class="relative">
                     <Input
                         type="search"
@@ -200,7 +212,8 @@
                                             )}
                                             class={`flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-accent ${activeResultIndex === index ? 'bg-[#eef5ff] text-[#0d1f44]' : ''}`}
                                             onclick={() => (isOpen = false)}
-                                            onmouseenter={() => (activeResultIndex = index)}
+                                            onmouseenter={() =>
+                                                (activeResultIndex = index)}
                                         >
                                             <div
                                                 class="size-9 shrink-0 overflow-hidden rounded bg-gray-100"
@@ -254,7 +267,12 @@
                 <Sheet>
                     <SheetTrigger asChild>
                         {#snippet children(props)}
-                            <Button variant="ghost" size="icon" class="md:hidden" onclick={props.onclick}>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                class="md:hidden"
+                                onclick={props.onclick}
+                            >
                                 <Menu class="size-5" />
                                 <span class="sr-only">Menü</span>
                             </Button>
@@ -293,7 +311,9 @@
                             <div class="relative">
                                 <ShoppingCart class="size-5" />
                                 {#if cart.count > 0}
-                                    <span class="absolute -right-2 -top-2 flex size-4 items-center justify-center rounded-full bg-[#1a6bbf] text-[10px] font-bold text-white">
+                                    <span
+                                        class="absolute -right-2 -top-2 flex size-4 items-center justify-center rounded-full bg-[#1a6bbf] text-[10px] font-bold text-white"
+                                    >
                                         {cart.count}
                                     </span>
                                 {/if}
@@ -310,12 +330,22 @@
 
                 <Button variant="ghost" size="icon" asChild>
                     {#snippet children(props)}
-                        <Link href={accountHref} class={props.class} prefetch={auth?.user ? true : undefined}>
+                        <Link
+                            href={accountHref}
+                            class={props.class}
+                            prefetch={auth?.user ? true : undefined}
+                        >
                             <User class="size-5" />
-                            <span class="sr-only">{auth?.user ? 'Profil' : 'Anmelden'}</span>
+                            <span class="sr-only"
+                                >{auth?.user ? 'Profil' : 'Anmelden'}</span
+                            >
                         </Link>
                     {/snippet}
                 </Button>
+
+                <!-- UX-EXPERIMENT: Settings-Modal statt /settings-Seiten;
+                     eine der beiden Varianten fliegt nach Bewertung raus. -->
+                <UserSettingsDialog />
             </div>
         </div>
     </div>
