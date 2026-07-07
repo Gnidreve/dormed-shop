@@ -3,6 +3,8 @@
 namespace Tests\Feature\Settings;
 
 use App\Models\Customer;
+use App\Models\Order;
+use App\Models\Payment;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -95,5 +97,33 @@ class ProfileUpdateTest extends TestCase
             ->assertRedirect(route('profile.edit'));
 
         $this->assertNotNull($user->fresh());
+    }
+
+    /**
+     * GoBD/§147 AO: Bestellungen inkl. Positionen und Zahlungen müssen die
+     * Kontolöschung überleben — die Order wird nur entkoppelt (customer_id
+     * = null), nicht gelöscht.
+     */
+    public function test_deleting_account_keeps_the_order_history(): void
+    {
+        $user = Customer::factory()->create();
+
+        /** @var Order $order */
+        $order = Order::factory()->for($user, 'customer')->create(['status' => 'paid']);
+        $order->items()->create([
+            'product_name' => 'Testprodukt',
+            'unit_price' => '19.99',
+            'quantity' => 2,
+        ]);
+        Payment::factory()->for($order)->create();
+
+        $this->actingAs($user)
+            ->delete(route('profile.destroy'), ['password' => 'password'])
+            ->assertRedirect(route('home'));
+
+        $this->assertNull($user->fresh());
+        $this->assertDatabaseHas('orders', ['id' => $order->id, 'customer_id' => null, 'status' => 'paid']);
+        $this->assertDatabaseHas('order_items', ['order_id' => $order->id, 'product_name' => 'Testprodukt']);
+        $this->assertDatabaseHas('payments', ['order_id' => $order->id]);
     }
 }
