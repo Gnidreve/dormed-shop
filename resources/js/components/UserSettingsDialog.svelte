@@ -449,25 +449,6 @@
                                 </div>
                             {:else}
                                 <div class="flex flex-col gap-5">
-                                    <div class="flex items-center gap-3">
-                                        <span
-                                            class={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusClasses[selectedOrder.status] ?? 'bg-yellow-100 text-yellow-700'}`}
-                                        >
-                                            {statusLabels[
-                                                selectedOrder.status
-                                            ] ?? selectedOrder.status}
-                                        </span>
-                                        {#if selectedOrder.created_at}
-                                            <span
-                                                class="text-sm text-muted-foreground"
-                                            >
-                                                Bestellt am {formatDate(
-                                                    selectedOrder.created_at,
-                                                )}
-                                            </span>
-                                        {/if}
-                                    </div>
-
                                     <div class="grid gap-4 sm:grid-cols-3">
                                         <div class="rounded-lg border p-4">
                                             <h3
@@ -497,17 +478,25 @@
                                                 {/each}
                                             </div>
                                         </div>
+                                        <!-- Allgemeine Info-Karte — hier lassen sich weitere Zeilen ergänzen -->
                                         <div class="rounded-lg border p-4">
                                             <h3
                                                 class="mb-2 text-sm font-semibold"
                                             >
-                                                Zahlung
+                                                Details
                                             </h3>
                                             <div
                                                 class="space-y-0.5 text-sm text-muted-foreground"
                                             >
+                                                {#if selectedOrder.created_at}
+                                                    <p>
+                                                        Bestellt am {formatDate(
+                                                            selectedOrder.created_at,
+                                                        )}
+                                                    </p>
+                                                {/if}
                                                 <p>
-                                                    {selectedOrder.payment_method_label ??
+                                                    Zahlung: {selectedOrder.payment_method_label ??
                                                         '-'}
                                                 </p>
                                                 <p>

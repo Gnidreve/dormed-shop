@@ -3,6 +3,12 @@
         "laravel-boost": {
             "command": "php",
             "args": ["artisan", "boost:mcp"]
+        },
+        "svelte": {
+            "type": "stdio",
+            "command": "npx",
+            "env": {},
+            "args": ["-y", "@sveltejs/mcp"]
         }
     }
 }

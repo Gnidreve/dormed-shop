@@ -191,10 +191,6 @@
                     >
                 </div>
             </div>
-
-            <p class="mt-3 text-xs text-gray-400">
-                * Preise inkl. MwSt. zzgl. Versandkosten
-            </p>
         </div>
 
         <div class="border-t bg-white px-5 pb-6 pt-4">
@@ -215,6 +211,9 @@
                             </Link>
                         {/snippet}
                     </Button>
+                    <p class="mt-3 text-xs text-gray-400">
+                        * Preise inkl. MwSt. zzgl. Versandkosten
+                    </p>
                 {/snippet}
             </SheetClose>
             <div class="mt-3 text-center">
