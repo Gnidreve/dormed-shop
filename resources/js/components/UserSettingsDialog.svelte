@@ -394,6 +394,15 @@
                                     ? `Bestellung ${orderCode(selectedOrder.id)}`
                                     : 'Bestellung'}
                             </h2>
+                            <!-- UX-Vergleich: Badge zusätzlich im Kopf (Duplikat unten im Content) -->
+                            {#if selectedOrder}
+                                <span
+                                    class={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusClasses[selectedOrder.status] ?? 'bg-yellow-100 text-yellow-700'}`}
+                                >
+                                    {statusLabels[selectedOrder.status] ??
+                                        selectedOrder.status}
+                                </span>
+                            {/if}
                         {:else}
                             <h2 class="text-base font-semibold">
                                 {activeTitle}
