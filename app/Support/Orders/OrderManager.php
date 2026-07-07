@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Setting;
 use App\Support\PaymentMode;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -25,28 +26,30 @@ class OrderManager
      */
     public function createFromCart(Customer $customer, array $cart, string $paymentMethod): Order
     {
-        /** @var Order $order */
-        $order = Order::query()->create([
-            'customer_id' => $customer->id,
-            'status' => 'pending',
-            'payment_method' => $paymentMethod,
-            'is_test' => ! PaymentMode::isLive(),
-            'total_amount' => $cart['total'],
-            'shipping_amount' => (float) ($cart['shipping_total'] ?? 0),
-            'shipping_address' => $cart['shipping_address'] ?? null,
-            'billing_address' => $cart['billing_address'] ?? null,
-        ]);
-
-        foreach ($cart['items'] as $item) {
-            $order->items()->create([
-                'product_id' => $item['product_id'],
-                'product_name' => $item['name'],
-                'unit_price' => $item['unit_price'],
-                'quantity' => $item['quantity'],
+        return DB::transaction(function () use ($customer, $cart, $paymentMethod): Order {
+            /** @var Order $order */
+            $order = Order::query()->create([
+                'customer_id' => $customer->id,
+                'status' => 'pending',
+                'payment_method' => $paymentMethod,
+                'is_test' => ! PaymentMode::isLive(),
+                'total_amount' => $cart['total'],
+                'shipping_amount' => (float) ($cart['shipping_total'] ?? 0),
+                'shipping_address' => $cart['shipping_address'] ?? null,
+                'billing_address' => $cart['billing_address'] ?? null,
             ]);
-        }
 
-        return $order;
+            foreach ($cart['items'] as $item) {
+                $order->items()->create([
+                    'product_id' => $item['product_id'],
+                    'product_name' => $item['name'],
+                    'unit_price' => $item['unit_price'],
+                    'quantity' => $item['quantity'],
+                ]);
+            }
+
+            return $order;
+        });
     }
 
     /**
