@@ -7,6 +7,7 @@
     import User from 'lucide-svelte/icons/user';
     import X from 'lucide-svelte/icons/x';
     import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
+    import AppLogo from '@/components/AppLogo.svelte';
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     import CartSheet from '@/components/CartSheet.svelte'; // benötigt für auskommentierte Sidebar-Variante unten
     import TestModeBanner from '@/components/TestModeBanner.svelte';
@@ -150,7 +151,7 @@
         >
             <!-- Logo -->
             <Link href="/" class="shrink-0">
-                <img src="/logo.svg" alt="dormed 24" class="h-10 w-auto" />
+                <AppLogo />
             </Link>
 
             <!-- Search (hidden on mobile) -->
