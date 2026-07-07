@@ -1,0 +1,176 @@
+# dormed24-Shop
+
+Onlineshop für Medizintechnik (dormed 24) — Ablösung für Shopware.
+**Stack:** Laravel 13 · Inertia v3 · Svelte 5 · Tailwind 4 · PHPUnit 12 · SQLite · PayPal (srmklive/paypal) · Laravel Herd (dev)
+
+Dieses README ist die übergreifende Landkarte: Was der Shop tut, wie die
+Kern-Flows laufen und wo was liegt. **Konvention: Wer einen Flow ändert,
+zieht dieses Dokument nach.**
+
+---
+
+## Dokumenten-Landkarte
+
+| Dokument | Zweck |
+| --- | --- |
+| `README.md` | Diese Übersicht — Flows, Architektur, Betrieb |
+| `AGENTS.md` | Detail-Kontext für KI-Agenten (Layouts, Frontend-Konventionen, Routen) |
+| `database/SCHEMA.md` | Vollständiges DB-Schema — bei jeder Migration aktualisieren |
+| `ANALYSE-V1.md` / `ANALYSE-V2.md` | Audit-Checklisten Richtung 1.0 (✅ = erledigt, Kurzprotokoll oben) |
+| `TODO.md` | Offener Backlog (Sicherheit, UI/UX, Ideen) |
+
+---
+
+## Architektur auf einen Blick
+
+Zwei getrennte Bereiche mit **zwei unabhängigen Auth-Guards**:
+
+| Bereich | Guard | Model | Login | Besonderheiten |
+| --- | --- | --- | --- | --- |
+| Shop-Frontend | `web` | `Customer` | `/login` (Fortify) | 2FA, Passkeys, E-Mail-Verifikation |
+| Admin-Panel | `admin` | `User` | `/admin/login` | `EnsureAdmin` prüft Login **und** `is_admin`-Flag |
+
+Zentrale Klassen (die „Geschäftslogik-Ecke"):
+
+| Klasse | Verantwortung |
+| --- | --- |
+| `app/Support/Cart/CartService.php` | Warenkorb: Session-State, Live-Preise, Varianten, Versand-/Zahlarten, Summen |
+| `app/Support/Orders/OrderManager.php` | Cart → Order (transaktional), `markPaid()` (idempotent), Bestätigungsmails, Summen-Berechnung |
+| `app/Services/PayPalService.php` | PayPal-REST-Client (Settings-basiert), Webhook-Verifikation, Refunds |
+| `app/Support/PaymentMode.php` | sandbox/live — Setting `payment.mode`, sonst `APP_ENV` |
+| `app/Models/Setting.php` | Key-Value-Settings in DB, sensible Keys verschlüsselt, pro Request memoisiert |
+| `app/Http/Middleware/HandleInertiaRequests.php` | Shared Props: Cart, Auth, Kontakt, Kategorien, Sandbox-Banner |
+
+---
+
+## Kern-Flows
+
+### 1. Warenkorb (Session-basiert, Live-Preise)
+
+- State liegt in der Session (`SessionCartStore`), Format: `items[lineKey => quantity]`.
+- **Line-Key:** `productId` (ohne Variante) oder `productId:variantId` — dasselbe
+  Produkt kann pro Variante als eigene Zeile liegen.
+- Preise/Namen werden **bei jedem Aufruf live** aus der DB gelesen (kein
+  Preis-Snapshot in der Session). Der Snapshot entsteht erst in der Order.
+- **Varianten:** absolutes Preismodell — `product_variants.price` ist der volle
+  Endpreis. Produkte *mit* Varianten sind nur als konkrete Variante bestellbar
+  (Validierung im `AddCartItemRequest`). Das Varianten-Label wird Teil des
+  Zeilennamens („Produkt – Label") und wandert so überall hin (UI, Order, Mails).
+  Pflege-Konvention: `products.price` sollte dem Preis der Default-Variante
+  entsprechen (Listen zeigen den Produktpreis).
+- Nicht verfügbare/gelöschte Produkte und gelöschte Varianten machen die Zeile
+  `is_available = false` → Checkout blockiert serverseitig.
+
+### 2. Bestellen — Voraussetzung: bestätigte E-Mail
+
+- Registrierung verschickt eine Verifikationsmail (deutscher Text,
+  `FortifyServiceProvider::configureVerificationMail()`).
+- **Bestell-Hebel:** `verified`-Middleware auf `checkout.confirm`,
+  `checkout.address.update`, `checkout.submit`, `paypal.order.create`,
+  `paypal.order.capture`. Ohne bestätigte Adresse entsteht keine Order —
+  Stöbern und Warenkorb bleiben frei.
+- E-Mail-Änderung im Profil setzt die Verifikation zurück → Bestellen gesperrt,
+  bis die neue Adresse bestätigt ist.
+
+### 3. Checkout „Kauf auf Rechnung" (invoice)
+
+```
+/checkout (Cart) → /checkout/confirm (Adresse, AGB, Zahlart)
+  → POST /checkout/submit (Hold-to-confirm-Button)
+  → Order status=pending + Items (Snapshot, DB-Transaktion)
+  → Bestätigungsmail an Kunde (inkl. Bankverbindung) + Admin-Benachrichtigung
+  → Cart wird geleert → /checkout/success
+```
+
+- Order bleibt **bewusst `pending`**, bis die Überweisung eintrifft — der Admin
+  setzt sie im Bestelldetail auf `paid` (optional mit erneuter Kundenmail).
+- Deshalb gibt es **kein automatisches Cleanup** von pending-Orders
+  (Entscheidung, siehe ANALYSE-V2 B3).
+
+### 4. Checkout PayPal
+
+```
+Confirm-Seite (Zahlart PayPal) → PayPal-JS-SDK-Button
+  → POST /paypal/order/create   (Order pending + Payment CREATED; storniert
+                                 eigene alte pending-PayPal-Orders)
+  → Kunde bestätigt bei PayPal
+  → POST /paypal/order/capture  (Ownership-Check, Betragsabgleich!)
+  → Payment COMPLETED + OrderManager::markPaid() → Mails → Cart leer
+  → /checkout/success?paypal_order_id=…
+```
+
+- **Zweiter Pfad:** Redirect-Rückkehr `/paypal/after-payment?token=…` captured
+  ebenfalls (für den Fall, dass das JS-Capture nicht lief).
+- **Webhooks** (`/paypal/webhook`, signaturverifiziert, CSRF-ausgenommen):
+  `CAPTURE.COMPLETED` → markPaid (idempotent, atomarer Statuswechsel → keine
+  Doppel-Mails); `CAPTURE.REFUNDED`/`DENIED` → Payment **und** Order werden
+  konsistent gesetzt (Capture-ID steckt beim Refund im `up`-Link!).
+- Admin-Refund im Bestelldetail nutzt dieselbe Semantik.
+
+### 5. Bestellstatus-Lebenszyklus
+
+`pending` → `paid` → `processing` → `completed`
+sowie `cancelled` / `failed` / `refunded`. `is_test` markiert Sandbox-Orders
+(Dashboard-Umsatz zählt nur echte `paid/processing/completed`).
+
+- **Kontolöschung** durch den Kunden entkoppelt Orders nur
+  (`customer_id = null`, FK `ON DELETE SET NULL`) — Historie bleibt für
+  GoBD/§147 AO erhalten; Adress-/Preisdaten sind ohnehin als Snapshot auf der
+  Order.
+
+### 6. Mails — laufen über die Queue!
+
+`OrderConfirmationMail` + `NewOrderMail` sind `ShouldQueue`
+(`QUEUE_CONNECTION=database`). **Ohne laufenden Queue-Worker geht keine
+Bestellmail raus.** SMTP-Konfiguration kommt aus den Admin-Settings
+(Einstellungen → Mailversand, dort auch „Verbindung prüfen").
+Admin-Empfänger: Setting `shop.notification_emails` (kommagetrennt).
+
+### 7. Settings & PayPal-Credentials (Single Source of Truth)
+
+- Alle Shop-/Mail-/Payment-Einstellungen liegen als Key-Value in der
+  `settings`-Tabelle, sensible Werte (Secrets, SMTP-Passwort, Webhook-ID)
+  verschlüsselt. Pflege im Admin unter Einstellungen.
+- **Es gibt keine PayPal-Credentials in der .env** — einziger env-Pfad ist die
+  Erstbefüllung über `SEED_PAYPAL_*`-Keys + `php artisan db:seed
+  --class=PaymentSeeder`.
+- sandbox/live schaltet das Setting `payment.mode` (Admin → Zahlungsarten);
+  ohne Setting gilt: Produktion = live, sonst sandbox. Sandbox zeigt im
+  Frontend einen Banner.
+
+---
+
+## Entwicklung
+
+```bash
+composer run dev          # Laravel + Vite parallel (oder: npm run dev)
+php artisan test --compact            # Testsuite (PHPUnit)
+vendor/bin/pint --dirty               # PHP-Codestyle (Pflicht vor Commit)
+vendor/bin/phpstan analyse            # Level 7, Baseline — muss grün bleiben
+npm run lint && npm run types:check   # ESLint + svelte-check
+php artisan wayfinder:generate        # Nach Routen-Änderungen (TS-Routen)
+npm run build                         # Produktions-Assets
+```
+
+- **Workflow:** Findings/Aufgaben laufen über die Analyse-Checklisten
+  (aktuell `ANALYSE-V2.md`) — erledigte Punkte werden mit ✅ am
+  Überschriftsende abgehakt + im Kurzprotokoll oben ergänzt.
+- Feature-Tests sind die Wahrheit: jeder Fix bekommt einen Test. CSRF ist in
+  Tests deaktiviert — Browser-relevante Dinge (PayPal-Button, Fetches) einmal
+  manuell gegen die Sandbox klicken.
+- Frontend-Konventionen und Layout-Auflösung: siehe `AGENTS.md`.
+
+---
+
+## Betrieb / Launch-Checkliste
+
+1. **Queue-Worker** (`php artisan queue:work` via Supervisor/systemd) — sonst keine Mails.
+2. `php artisan storage:link` — Produktbilder liegen auf dem public-Disk.
+3. `APP_ENV=production`, `APP_DEBUG=false`, `SESSION_SECURE_COOKIE=true`; `config:cache`/`route:cache` sind safe.
+4. Admin-Settings pflegen: SMTP (+ Testmail), PayPal-Credentials (+ Verbindungscheck), **PayPal-Webhook-ID** (ohne sie werden alle Webhooks abgelehnt — nur im Log sichtbar).
+5. Admin-Nutzer via `php artisan admin:add` (Seeder mit Default-Passwörtern laufen nur außerhalb von Produktion).
+6. DB-Backup-Strategie klären (aktuell SQLite-Datei).
+7. Scheduler-Cron aktuell **nicht nötig** (keine Scheduled Tasks).
+
+Offene Punkte vor/nach Launch: siehe `ANALYSE-V2.md` (unten „Empfohlene
+Reihenfolge") und `TODO.md`.
