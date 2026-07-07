@@ -161,8 +161,8 @@
 
     function holdStart() {
         if (!agreedToTerms || cart.is_empty || !addressComplete) {
-return;
-}
+            return;
+        }
 
         holdStartTime = performance.now();
         tick();
@@ -170,8 +170,8 @@ return;
 
     function tick() {
         if (holdStartTime === null) {
-return;
-}
+            return;
+        }
 
         const elapsed = performance.now() - holdStartTime;
         holdProgress = Math.min(100, (elapsed / HOLD_DURATION) * 100);
@@ -226,7 +226,7 @@ return;
                         <p class="mb-3 text-sm text-gray-600">
                             Bitte beachten Sie die
                             <Link
-                                href="/widerrufsbelehrung"
+                                href="/unternehmen/widerrufsbelehrung"
                                 class="text-[#1a6bbf] hover:underline"
                             >
                                 Widerrufsbelehrung
@@ -240,7 +240,7 @@ return;
                             <span class="text-sm text-gray-700">
                                 Ich habe die
                                 <Link
-                                    href="/agb"
+                                    href="/unternehmen/agb"
                                     class="text-[#1a6bbf] hover:underline"
                                     >AGB</Link
                                 >

@@ -427,8 +427,8 @@
                     </div>
 
                     <p class="text-sm text-[#1a6bbf] hover:underline">
-                        <a href="/versandkosten"
-                            >Preise inkl. MwSt. zzgl. Versandkosten</a
+                        <Link href="/informationen/versand"
+                            >Preise inkl. MwSt. zzgl. Versandkosten</Link
                         >
                     </p>
                 </div>

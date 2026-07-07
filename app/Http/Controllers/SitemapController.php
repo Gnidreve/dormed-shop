@@ -15,13 +15,13 @@ class SitemapController extends Controller
             $staticUrls = [
                 ['loc' => url('/'), 'changefreq' => 'weekly', 'priority' => '1.0'],
                 ['loc' => url('/products'), 'changefreq' => 'daily', 'priority' => '0.9'],
-                ['loc' => url('/faq'), 'changefreq' => 'monthly', 'priority' => '0.7'],
-                ['loc' => url('/agb'), 'changefreq' => 'monthly', 'priority' => '0.3'],
-                ['loc' => url('/impressum'), 'changefreq' => 'monthly', 'priority' => '0.3'],
-                ['loc' => url('/datenschutz'), 'changefreq' => 'monthly', 'priority' => '0.3'],
-                ['loc' => url('/widerrufsbelehrung'), 'changefreq' => 'monthly', 'priority' => '0.3'],
-                ['loc' => url('/versand'), 'changefreq' => 'monthly', 'priority' => '0.4'],
-                ['loc' => url('/zahlung'), 'changefreq' => 'monthly', 'priority' => '0.4'],
+                ['loc' => route('faq'), 'changefreq' => 'monthly', 'priority' => '0.7'],
+                ['loc' => route('agb'), 'changefreq' => 'monthly', 'priority' => '0.3'],
+                ['loc' => route('impressum'), 'changefreq' => 'monthly', 'priority' => '0.3'],
+                ['loc' => route('datenschutz'), 'changefreq' => 'monthly', 'priority' => '0.3'],
+                ['loc' => route('widerrufsbelehrung'), 'changefreq' => 'monthly', 'priority' => '0.3'],
+                ['loc' => route('versand'), 'changefreq' => 'monthly', 'priority' => '0.4'],
+                ['loc' => route('zahlung'), 'changefreq' => 'monthly', 'priority' => '0.4'],
             ];
 
             $products = Product::select('id', 'updated_at')->get();

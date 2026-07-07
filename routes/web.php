@@ -6,13 +6,19 @@ use Illuminate\Support\Facades\Route;
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 Route::inertia('/', 'Welcome')->name('home');
-Route::inertia('/versand', 'VersandUndZahlung')->name('versand');
-Route::inertia('/impressum', 'Impressum')->name('impressum');
-Route::inertia('/agb', 'AGB')->name('agb');
-Route::inertia('/datenschutz', 'Datenschutz')->name('datenschutz');
-Route::inertia('/zahlung', 'Zahlung')->name('zahlung');
-Route::inertia('/widerrufsbelehrung', 'Widerrufsbelehrung')->name('widerrufsbelehrung');
-Route::inertia('/faq', 'FAQ')->name('faq');
+
+Route::prefix('informationen')->group(function () {
+    Route::inertia('/versand', 'VersandUndZahlung')->name('versand');
+    Route::inertia('/zahlung', 'Zahlung')->name('zahlung');
+    Route::inertia('/faq', 'FAQ')->name('faq');
+});
+
+Route::prefix('unternehmen')->group(function () {
+    Route::inertia('/impressum', 'Impressum')->name('impressum');
+    Route::inertia('/agb', 'AGB')->name('agb');
+    Route::inertia('/datenschutz', 'Datenschutz')->name('datenschutz');
+    Route::inertia('/widerrufsbelehrung', 'Widerrufsbelehrung')->name('widerrufsbelehrung');
+});
 
 require __DIR__.'/admin.php';
 require __DIR__.'/products.php';

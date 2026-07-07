@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { page } from '@inertiajs/svelte';
+    import { Link, page } from '@inertiajs/svelte';
     import Mail from 'lucide-svelte/icons/mail';
     import Phone from 'lucide-svelte/icons/phone';
     import Printer from 'lucide-svelte/icons/printer';
@@ -23,18 +23,33 @@
                 <p class="text-sm font-bold text-[#1a3a5c]">
                     ein Angebot der Dormed medizinische Systeme GmbH
                 </p>
-                <p class="mt-3 text-sm text-muted-foreground">Unterstuetzung und Beratung unter:</p>
-                <p class="mt-2 flex items-center gap-2 text-sm font-bold text-[#1a3a5c]">
+                <p class="mt-3 text-sm text-muted-foreground">
+                    Unterstuetzung und Beratung unter:
+                </p>
+                <p
+                    class="mt-2 flex items-center gap-2 text-sm font-bold text-[#1a3a5c]"
+                >
                     <Phone class="size-4 shrink-0 text-gray-400" />
-                    <a href={contact.phone_href} class="hover:text-[#1a6bbf]">{contact.phone}</a>
+                    <a href={contact.phone_href} class="hover:text-[#1a6bbf]"
+                        >{contact.phone}</a
+                    >
                 </p>
-                <p class="mt-1 flex items-center gap-2 text-sm font-bold text-[#1a3a5c]">
+                <p
+                    class="mt-1 flex items-center gap-2 text-sm font-bold text-[#1a3a5c]"
+                >
                     <Printer class="size-4 shrink-0 text-gray-400" />
-                    <a href={contact.fax_href} class="hover:text-[#1a6bbf]">{contact.fax}</a>
+                    <a href={contact.fax_href} class="hover:text-[#1a6bbf]"
+                        >{contact.fax}</a
+                    >
                 </p>
-                <p class="mt-1 flex items-center gap-2 text-sm font-bold text-[#1a3a5c]">
+                <p
+                    class="mt-1 flex items-center gap-2 text-sm font-bold text-[#1a3a5c]"
+                >
                     <Mail class="size-4 shrink-0 text-gray-400" />
-                    <a href={`mailto:${contact.email}`} class="hover:text-[#1a6bbf]">{contact.email}</a>
+                    <a
+                        href={`mailto:${contact.email}`}
+                        class="hover:text-[#1a6bbf]">{contact.email}</a
+                    >
                 </p>
             </div>
 
@@ -42,42 +57,82 @@
                 <p class="text-sm font-bold text-[#1a3a5c]">Leistungen</p>
                 <ul class="mt-3 space-y-2">
                     <li>
-                        <a href="https://dormed.de/leistungen/beratung" target="_blank" rel="noopener noreferrer" class="text-sm text-[#1a6bbf] hover:underline">
+                        <a
+                            href="https://dormed.de/leistungen/beratung"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-sm text-[#1a6bbf] hover:underline"
+                        >
                             Beratung
                         </a>
                     </li>
                     <li>
-                        <a href="https://dormed.de/leistungen/finanzierung" target="_blank" rel="noopener noreferrer" class="text-sm text-[#1a6bbf] hover:underline">
+                        <a
+                            href="https://dormed.de/leistungen/finanzierung"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-sm text-[#1a6bbf] hover:underline"
+                        >
                             Finanzierung &amp; Leasing
                         </a>
                     </li>
                     <li>
-                        <a href="https://dormed.de/leistungen/lieferung" target="_blank" rel="noopener noreferrer" class="text-sm text-[#1a6bbf] hover:underline">
+                        <a
+                            href="https://dormed.de/leistungen/lieferung"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-sm text-[#1a6bbf] hover:underline"
+                        >
                             Lieferung &amp; Installation
                         </a>
                     </li>
                     <li>
-                        <a href="https://dormed.de/leistungen/wartung-reparatur" target="_blank" rel="noopener noreferrer" class="text-sm text-[#1a6bbf] hover:underline">
+                        <a
+                            href="https://dormed.de/leistungen/wartung-reparatur"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-sm text-[#1a6bbf] hover:underline"
+                        >
                             Wartung &amp; Reparatur
                         </a>
                     </li>
                     <li>
-                        <a href="https://dormed.de/leistungen/netzwerkanbindung" target="_blank" rel="noopener noreferrer" class="text-sm text-[#1a6bbf] hover:underline">
+                        <a
+                            href="https://dormed.de/leistungen/netzwerkanbindung"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-sm text-[#1a6bbf] hover:underline"
+                        >
                             Netzwerkanbindung
                         </a>
                     </li>
                     <li>
-                        <a href="https://dormed.de/leistungen/schulung-einweisung" target="_blank" rel="noopener noreferrer" class="text-sm text-[#1a6bbf] hover:underline">
+                        <a
+                            href="https://dormed.de/leistungen/schulung-einweisung"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-sm text-[#1a6bbf] hover:underline"
+                        >
                             Schulung &amp; Einweisung
                         </a>
                     </li>
                     <li>
-                        <a href="https://dormed.de/leistungen/garantie-versicherung" target="_blank" rel="noopener noreferrer" class="text-sm text-[#1a6bbf] hover:underline">
+                        <a
+                            href="https://dormed.de/leistungen/garantie-versicherung"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-sm text-[#1a6bbf] hover:underline"
+                        >
                             Garantie &amp; Versicherung
                         </a>
                     </li>
                     <li>
-                        <a href="https://dormed.de/leistungen/inzahlungnahme" target="_blank" rel="noopener noreferrer" class="text-sm text-[#1a6bbf] hover:underline">
+                        <a
+                            href="https://dormed.de/leistungen/inzahlungnahme"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-sm text-[#1a6bbf] hover:underline"
+                        >
                             Inzahlungnahme
                         </a>
                     </li>
@@ -88,13 +143,25 @@
                 <p class="text-sm font-bold text-[#1a3a5c]">Informationen</p>
                 <ul class="mt-3 space-y-2">
                     <li>
-                        <a href="/versand" class="text-sm text-[#1a6bbf] hover:underline">Versand</a>
+                        <Link
+                            href="/informationen/versand"
+                            class="text-sm text-[#1a6bbf] hover:underline"
+                            >Versand</Link
+                        >
                     </li>
                     <li>
-                        <a href="/zahlung" class="text-sm text-[#1a6bbf] hover:underline">Zahlung</a>
+                        <Link
+                            href="/informationen/zahlung"
+                            class="text-sm text-[#1a6bbf] hover:underline"
+                            >Zahlung</Link
+                        >
                     </li>
                     <li>
-                        <a href="/faq" class="text-sm text-[#1a6bbf] hover:underline">FAQ</a>
+                        <Link
+                            href="/informationen/faq"
+                            class="text-sm text-[#1a6bbf] hover:underline"
+                            >FAQ</Link
+                        >
                     </li>
                 </ul>
             </div>
@@ -103,19 +170,41 @@
                 <p class="text-sm font-bold text-[#1a3a5c]">Unternehmen</p>
                 <ul class="mt-3 space-y-2">
                     <li>
-                        <a href="/impressum" class="text-sm text-[#1a6bbf] hover:underline">Impressum</a>
+                        <Link
+                            href="/unternehmen/impressum"
+                            class="text-sm text-[#1a6bbf] hover:underline"
+                            >Impressum</Link
+                        >
                     </li>
                     <li>
-                        <a href="/agb" class="text-sm text-[#1a6bbf] hover:underline">AGB</a>
+                        <Link
+                            href="/unternehmen/agb"
+                            class="text-sm text-[#1a6bbf] hover:underline"
+                            >AGB</Link
+                        >
                     </li>
                     <li>
-                        <a href="/datenschutz" class="text-sm text-[#1a6bbf] hover:underline">Datenschutz</a>
+                        <Link
+                            href="/unternehmen/datenschutz"
+                            class="text-sm text-[#1a6bbf] hover:underline"
+                            >Datenschutz</Link
+                        >
                     </li>
                     <li>
-                        <a href="/widerrufsbelehrung" class="text-sm text-[#1a6bbf] hover:underline">Widerrufsbelehrung</a>
+                        <Link
+                            href="/unternehmen/widerrufsbelehrung"
+                            class="text-sm text-[#1a6bbf] hover:underline"
+                            >Widerrufsbelehrung</Link
+                        >
                     </li>
                     <li>
-                        <a href="https://dormed.de/kontakt" target="_blank" rel="noopener noreferrer" class="text-sm text-[#1a6bbf] hover:underline">Kontakt</a>
+                        <a
+                            href="https://dormed.de/kontakt"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="text-sm text-[#1a6bbf] hover:underline"
+                            >Kontakt</a
+                        >
                     </li>
                 </ul>
             </div>
