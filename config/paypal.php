@@ -1,34 +1,38 @@
 <?php
 
 /**
- * PayPal Setting & API Credentials
- * Created by Raza Mehdi <srmk@outlook.com>.
+ * PayPal client configuration (srmklive/paypal).
+ *
+ * Credentials und Webhook-ID leben als Settings in der Datenbank (Admin →
+ * Einstellungen → Zahlungsarten; initial befüllbar über den PaymentSeeder
+ * mit SEED_PAYPAL_*-env-Keys). Die leeren Werte hier sind nur die Struktur,
+ * die PayPalService::buildConfig() mit den Settings überlagert. Der Modus
+ * (sandbox/live) kommt aus App\Support\PaymentMode, nicht aus dieser Datei.
  */
 
 return [
-    'mode' => env('PAYPAL_MODE', 'sandbox'), // Can only be 'sandbox' Or 'live'. If empty or invalid, 'live' will be used.
     'sandbox' => [
-        'client_id' => env('PAYPAL_SANDBOX_CLIENT_ID', ''),
-        'client_secret' => env('PAYPAL_SANDBOX_CLIENT_SECRET', ''),
+        'client_id' => '',
+        'client_secret' => '',
         'app_id' => 'APP-80W284485P519543T', // Sandbox app_id is always this fixed value.
-        'merchant_id' => env('PAYPAL_SANDBOX_MERCHANT_ID', ''),
+        'merchant_id' => '',
     ],
     'live' => [
-        'client_id' => env('PAYPAL_LIVE_CLIENT_ID', ''),
-        'client_secret' => env('PAYPAL_LIVE_CLIENT_SECRET', ''),
-        // Live app_id: log in to developer.paypal.com → My Apps & Credentials →
-        // select your app → the App ID shown at the top (starts with "APP-").
-        'app_id' => env('PAYPAL_LIVE_APP_ID', ''),
-        'merchant_id' => env('PAYPAL_LIVE_MERCHANT_ID', ''),
+        'client_id' => '',
+        'client_secret' => '',
+        // Live app_id: developer.paypal.com → My Apps & Credentials → App ID ("APP-…").
+        'app_id' => '',
+        'merchant_id' => '',
     ],
 
-    'payment_action' => env('PAYPAL_PAYMENT_ACTION', 'Sale'), // Can only be 'Sale', 'Authorization' or 'Order'
-    'currency' => env('PAYPAL_CURRENCY', 'EUR'),
-    'notify_url' => env('PAYPAL_NOTIFY_URL', ''), // Change this accordingly for your application.
-    'webhook_id' => env('PAYPAL_WEBHOOK_ID', ''),
-    'locale' => env('PAYPAL_LOCALE', 'de_DE'), // force gateway language  i.e. it_IT, es_ES, en_US ... (for express checkout only)
-    'validate_ssl' => env('PAYPAL_VALIDATE_SSL', true), // Validate SSL when creating api client.
-    'timeout' => env('PAYPAL_TIMEOUT', 30), // Total request timeout in seconds.
-    'connect_timeout' => env('PAYPAL_CONNECT_TIMEOUT', 10), // Connection timeout in seconds.
-    'max_retries' => env('PAYPAL_MAX_RETRIES', 2), // Retries on 5xx / connection errors (0 to disable). Uses exponential backoff.
+    'webhook_id' => '',
+
+    'payment_action' => 'Sale', // Can only be 'Sale', 'Authorization' or 'Order'
+    'currency' => 'EUR',
+    'notify_url' => '',
+    'locale' => 'de_DE',
+    'validate_ssl' => true,
+    'timeout' => 30, // Total request timeout in seconds.
+    'connect_timeout' => 10, // Connection timeout in seconds.
+    'max_retries' => 2, // Retries on 5xx / connection errors (0 to disable). Uses exponential backoff.
 ];

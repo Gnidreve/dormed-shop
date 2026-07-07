@@ -22,6 +22,7 @@
 ### 🔴 is_admin aus User Fillable entfernen
 **Datei:** `app/Models/User.php:12`
 `is_admin` ist fillable → Mass Assignment Risiko. Aus Fillable entfernen, Änderung nur über separaten Admin-Command/Seeder erlauben.
+*(Stand 07/2026: weiterhin offen, Risiko aktuell gering — es gibt keinen Endpoint, der Request-Daten in User schreibt, und `EnsureAdmin` prüft das Flag inzwischen. Trotzdem sinnvoll.)*
 
 ### ✅ Hardcoded E-Mail-Empfänger im StripeWebhookController — erledigt
 Empfänger kommen jetzt aus Setting `shop.notification_emails` (kommagetrennt, Fallback `mail.admin_address` → `mail.from.address`), zentral in `App\Support\Orders\OrderManager`. Im Admin unter Einstellungen → Mailversand pflegbar.
@@ -29,6 +30,7 @@ Empfänger kommen jetzt aus Setting `shop.notification_emails` (kommagetrennt, F
 ### 🟡 Ratings ohne Auth + ohne Kaufverifizierung
 **Datei:** `app/Http/Controllers/RatingController.php`, `routes/public/rating.php`
 Jeder kann ohne Login beliebig viele Bewertungen erstellen. Route mit `auth`-Middleware absichern, optional Kaufnachweis prüfen.
+*(= ANALYSE-V2 S-C / ANALYSE-V1 Punkt 9 — auf Wiedervorlage bei Linus.)*
 
 ### 🟢 FormRequest authorize() gibt überall true zurück
 **Dateien:** `UpdateProductRequest`, `UpdateCategoryRequest`, `StoreRatingRequest`, etc.
@@ -38,18 +40,11 @@ Nur Route-Ebene schützt. Für feinere Permissions später Laravel Policies einf
 
 ## Zahlungen (Backlog aus Payment-Audit 2026-06-28)
 
-> Stripe ist aktuell nicht kriegsentscheidend — diese Punkte sind bewusst zurückgestellt.
-
-### 🟡 Stripe-Success-Seite verifiziert Zahlung nicht serverseitig (#2)
-**Datei:** `app/Http/Controllers/CheckoutController.php::success`
-Die Erfolgsseite rendert anhand der `session_id`, ohne den realen Zahlungs-/Sessionstatus bei Stripe abzufragen. Order wird ausschließlich vom Webhook auf `paid` gesetzt. Fällt der Webhook aus, sieht der Kunde „Erfolg", die Order bleibt aber `pending` und es geht keine Bestätigung raus. Lösung: in `success()` bei Stripe-Orders die Checkout-Session via API laden und Status prüfen (oder als bezahlt markieren, falls `payment_status === 'paid'`).
-
-### 🟡 Stripe legt keinen `Payment`-Record an (#8)
-PayPal schreibt in die `payments`-Tabelle, Stripe nur `stripe_*`-Spalten auf `orders`, Invoice gar nichts. Folge: Admin-Bestelldetail zeigt für Stripe-Zahlungen keine Transaktionszeile. Lösung: einheitliches `Payment`-Modell für alle Gateways (PaymentIntent-ID, Betrag, Status), in `OrderManager` zentralisiert.
-
-### 🟢 Nur ein Gateway gleichzeitig (#12) — bewusst so
-Per Design ist immer Invoice + genau **ein** Gateway (PayPal *oder* Stripe) aktiv (Setting `payment.provider`). Falls beide gleichzeitig angeboten werden sollen, müsste `CartService::paymentMethods()` mehrere aktive Provider zulassen und das Admin-Setting auf Mehrfachauswahl umgestellt werden.
--> Nur PayPal kein Stripe. ich sorge dafür das nicht beides aktiviert ist in env und später Datenbank
+> ✅ **Komplett hinfällig (07/2026):** Stripe wurde vollständig entfernt (siehe ANALYSE-V1 Kurzprotokoll). Alle drei Punkte betrafen Stripe:
+>
+> - ~~#2 Stripe-Success-Seite verifiziert Zahlung nicht serverseitig~~ — Stripe weg; die PayPal-Success-Seite prüft inzwischen Auth + Ownership, Rechnung bleibt bewusst `pending`.
+> - ~~#8 Stripe legt keinen `Payment`-Record an~~ — Stripe weg; PayPal schreibt `payments`, Rechnung hat systembedingt keinen Gateway-Record.
+> - ~~#12 Nur ein Gateway gleichzeitig~~ — durch die Stripe-Entfernung gegenstandslos (Invoice + PayPal, gesteuert über Setting `payment.provider`). Die toten env-Flags `PAYMENT_STRIPE_ENABLED`/`PAYMENT_PAYPAL_ENABLED` wurden aus der .env entfernt.
 
 ---
 
@@ -67,10 +62,9 @@ Per Design ist immer Invoice + genau **ein** Gateway (PayPal *oder* Stripe) akti
 
 - [ ] **Produktfilter fehlen** — `resources/js/pages/Products/Index.svelte`: Nur Sortierung vorhanden. Keine Filter nach Preis, Hersteller, Kategorie oder Rating.
 
-- [ ] **Bestelldetails fehlen** — `resources/js/pages/settings/Orders.svelte`: Liste zeigt Bestellungen, aber kein Link zu einer Detailseite. Keine Paginierung.
--> Keine Pagination. Aber die Detailsseite muss noch implementiert werden
+- [✓] **Bestelldetails** — Detailseite implementiert (`CustomerOrderController::show` + `settings/Orders/Show.svelte`, aus der Liste verlinkt). Keine Pagination — wie gewollt.
 
-- [ ] **Produkt-Bilder im Warenkorb** — `resources/js/pages/Checkout/Index.svelte`: Bilder sind leere Placeholder-Divs, keine echten Produktbilder.
+- [✓] **Produkt-Bilder im Warenkorb** — `CartService` liefert `image_url`, Warenkorb-Seite und CartSheet rendern echte Produktbilder (mit Platzhalter-Fallback).
 
 - [ ] **Registrierung** — `resources/js/pages/auth/Register.svelte`: Kein Passwort-Stärke-Indikator, keine AGB-Akzeptanz-Checkbox.
 
@@ -82,9 +76,9 @@ Per Design ist immer Invoice + genau **ein** Gateway (PayPal *oder* Stripe) akti
 
 - [✓] **Labels eingedeutscht** — `settings/Profile.svelte` + `settings/Security.svelte`: alle sichtbaren Texte (Titel, Labels, Platzhalter, Buttons) auf Deutsch
 
-- [ ] **Such-Dropdown: "Keine Ergebnisse"** — `resources/js/components/ShopHeader.svelte`: Kein leerer Zustand wenn Suche nichts findet.
+- [✓] **Such-Dropdown: "Keine Ergebnisse"** — leerer Zustand existiert („Keine Ergebnisse für …").
 
-- [ ] **Breadcrumb auf Shop-Seiten** — Keine Orientierungshilfe auf Produkt-Detail- und Kategorie-Seiten.
+- [ ] **Breadcrumb auf Shop-Seiten** — *teilweise:* Produkt-Detailseite hat Breadcrumb (Alle Produkte → Kategorie → Produkt); Kategorie-Seite noch nicht.
 
 - [ ] **Bestellzusammenfassung im Checkout** — `resources/js/pages/Checkout/Confirm.svelte`: Produktliste fehlt in der finalen Zusammenfassung (nur Preise sichtbar).
 
@@ -96,7 +90,7 @@ Per Design ist immer Invoice + genau **ein** Gateway (PayPal *oder* Stripe) akti
 
 ### 🔴 Kritisch
 
-- [ ] **Bestelldetail-Seite fehlt** — `resources/js/pages/Admin/Orders/`: Keine Show-Seite (oder nicht verlinkt). Admin kann Bestellungen nicht im Detail einsehen.
+- [✓] **Bestelldetail-Seite** — `Admin/Orders/Show.svelte` existiert, aus der Liste verlinkt, inkl. Status-Änderung (mit Kunden-Benachrichtigung) und PayPal-Refund.
 
 - [ ] **Bulk-Aktionen ohne Funktion** — `resources/js/pages/Admin/Products/Index.svelte`: Checkboxes für Mehrfachauswahl vorhanden, aber keine Aktion dahinter (kein Bulk-Delete, kein Bulk-Update).
 
@@ -106,7 +100,7 @@ Per Design ist immer Invoice + genau **ein** Gateway (PayPal *oder* Stripe) akti
 
 - [ ] **Dashboard: nur Basis-Stats** — `resources/js/pages/Admin/Dashboard.svelte`: Nur 2 Charts (Orders + Revenue). Keine Top-Produkte, keine Top-Kunden, keine Conversion-Rate.
 
-- [ ] **Produkt anlegen fehlt** — `resources/js/pages/Admin/Products/Index.svelte`: Kein "Neues Produkt"-Button sichtbar.
+- [✓] **Produkt anlegen** — „Neues Produkt"-Button existiert in `Admin/Products/Index.svelte` (→ Create-Seite).
 
 - [ ] **Kategorie-Slug nicht editierbar** — `resources/js/pages/Admin/Categories/Index.svelte`: Slug wird angezeigt aber kann nicht inline bearbeitet werden.
 

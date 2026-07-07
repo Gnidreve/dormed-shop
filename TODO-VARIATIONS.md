@@ -1,5 +1,25 @@
 # TODO - Variantenmodell
 
+> **Status 07.07.2026 — für 1.0 weitgehend hinfällig, als 1.1-Idee behalten.**
+>
+> Der eigentliche Bug hinter diesem Dokument (angezeigter Variantenpreis ≠
+> berechneter Preis, unklare Semantik) ist mit ANALYSE-V2 Businesslogik 5
+> gelöst — allerdings mit dem **absoluten** Preismodell, konsequent
+> durchgezogen: Produkte mit Varianten sind nur noch als konkrete Variante
+> bestellbar, `product_variants.price` ist der volle Endpreis und wandert
+> exakt so in Warenkorb und Order-Snapshot. Das Modell ist damit in sich
+> konsistent; `products.price` gilt nur noch für variantenlose Produkte.
+>
+> Was von diesem Dokument übrig bleibt (optionaler 1.1-Refactor, kein Bug):
+>
+> - Admin-Ergonomie „Aufpreis statt Endpreis" (additives Modell) — reine
+>   Geschmacks-/UX-Frage der Datenpflege.
+> - Listing-Preise: Karten/Listen zeigen `products.price`. Bei Produkten mit
+>   Varianten sollte der Basispreis dem Preis der Default-Variante
+>   entsprechen (Pflege-Konvention) — oder später „ab X €"-Anzeige.
+>
+> Der Rest des Dokuments ist als Ideensammlung für Option A erhalten.
+
 ## Problem
 
 Das aktuelle Variantenmodell ist fachlich unsauber:
