@@ -46,6 +46,12 @@ composer audit + npm audit sauber.
   jetzt Payment + Order konsistent; dabei entdeckt und mitgefixt, dass der
   Refund-Handler wegen Refund-ID ≠ Capture-ID nie gematcht hatte (Capture-ID
   kommt aus dem `up`-Link). Neue `PayPalWebhookTest`-Datei, Suite 178/178.
+- **Businesslogik 3 + 5 erledigt** (07.07.2026): `createFromCart` in
+  `DB::transaction` (+ Rollback-Test). Varianten voll durchgezogen
+  (Entscheidung Linus) — Details unter Businesslogik 5. Suite 187/187,
+  PHPStan grün, Build grün. Damit ist auch der letzte ANALYSIS.md-Blocker
+  (Punkt 2, Varianten) vom Tisch; offen auf Wiedervorlage bleibt nur noch
+  die Rating-Bremse (Punkt 9 / S-C).
 
 ---
 
@@ -167,19 +173,40 @@ Refund-Resource extrahiert (Fallback: `resource.id`); gemeinsamer
 Neue Testdatei `PayPalWebhookTest` (Verifikation abgelehnt, Refund, Denied,
 unbekannte Capture-ID).
 
-### 3. OrderManager::createFromCart läuft ohne Transaktion
+### 3. OrderManager::createFromCart läuft ohne Transaktion ✅
 
-Schlägt ein Item-Insert fehl, bleibt eine Order ohne Items stehen.
-**Vorgehen:** `DB::transaction()` um Order- + Items-Erstellung.
+Schlug ein Item-Insert fehl, blieb eine Order ohne Items stehen.
+**Erledigt (07.07.2026):** `DB::transaction()` um Order- + Items-Erstellung;
+Rollback-Test `test_create_from_cart_rolls_back_order_when_an_item_fails`.
 
 ### 4. Kein Bestandskonzept
 
 Nur `is_available`-Flag, Menge bis 99 pro Produkt frei wählbar. Wenn das für
 1.0 die bewusste Entscheidung ist: ok — hier nur festgehalten.
 
-### 5. Varianten werden beim Kauf ignoriert (Wiedervorlage, ANALYSIS.md Punkt 2)
+### 5. Varianten werden beim Kauf ignoriert ✅ (voll durchgezogen)
 
-Show.svelte zeigt Variantenpreis an, `addToCart` sendet nur `product_id`.
+Show.svelte zeigte Variantenpreis an, `addToCart` sendete nur `product_id` —
+Kunde wählte „Variante XY für 99 €", bestellte Basisprodukt zum Basispreis.
+**Erledigt (07.07.2026, Entscheidung Linus: voll durchziehen statt ausblenden):**
+
+- Cart-Lines sind jetzt `productId` bzw. `productId:variantId` — dasselbe
+  Produkt kann pro Variante als eigene Zeile im Warenkorb liegen. Alte
+  Sessions bleiben kompatibel (Normalisierung in `state()`).
+- `CartService::items()` löst Variantenpreis + Label auf; das Label wird Teil
+  des Zeilennamens („Produkt – Label"), wodurch Cart-UI, Checkout, Order-
+  Snapshot und Mails ohne weitere Anpassung konsistent sind. Keine Migration
+  nötig: `order_items.product_name`/`unit_price` snapshotten wie gehabt.
+- Validierung: `variant_id` muss zum Produkt gehören; Produkte **mit**
+  Varianten sind ohne Variantenwahl nicht bestellbar (after-Hook im
+  `AddCartItemRequest`). Gelöschte Varianten machen die Zeile unbuyable
+  (`hasUnavailableItems` läuft jetzt über die Zeilen-Logik).
+- Routes: `PATCH/DELETE /cart/items/{product}/{variant?}` mit
+  Belongs-To-Check; Frontend (Show, CartSheet, Checkout-Index) sendet
+  `variant_id` bzw. adressiert Zeilen über `line_key`.
+- 8 neue Feature-Tests in `CartFlowTest` (Variantenpreis, Pflicht-Auswahl,
+  Fremd-Variante, getrennte Zeilen, Update/Remove, Order-Snapshot,
+  gelöschte Variante blockiert Checkout).
 
 ### 6. Zahlartauswahl-UI ✅ (war ANALYSIS.md Blocker 1)
 
