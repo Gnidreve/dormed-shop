@@ -132,6 +132,9 @@
 
     const contact = $derived(page.props.contact as ContactInfo);
 
+    let scrollY = $state(0);
+    const heroParallaxOffset = $derived(Math.min(scrollY * 0.22, 130));
+
     let activeProductIndex = $state(0);
     const activeProduct = $derived(
         randomProducts[activeProductIndex] ?? randomProducts[0],
@@ -166,6 +169,8 @@
     }
 </script>
 
+<svelte:window bind:scrollY />
+
 <AppHead
     title="Willkommen"
     description="Verlässliche Medizintechnik für Praxis, MVZ und Klinik – direkt bestellen mit Beratung, Einweisung und Gewährleistung. Ihr Partner für Diagnostik, Monitoring und Zubehör."
@@ -184,10 +189,12 @@
             alt=""
             aria-hidden="true"
             class="absolute inset-x-0 -top-20 h-[calc(100%+5rem)] w-full object-cover object-center md:-top-28 md:h-[calc(100%+7rem)]"
+            style:transform={`translate3d(0, ${heroParallaxOffset}px, 0)`}
         />
         <!-- Content -->
         <div
-            class="relative z-10 mx-auto flex min-h-[72svh] max-w-7xl items-center px-8 py-16 lg:min-h-[calc(100svh-4.5rem)] lg:px-8 lg:py-20"
+            class="relative z-10 mx-auto flex min-h-[72svh] max-w-7xl items-center px-8 py-16 will-change-transform lg:min-h-[calc(100svh-4.5rem)] lg:px-8 lg:py-20"
+            style:transform={`translate3d(0, ${heroParallaxOffset * 0.45}px, 0)`}
         >
             <div class="max-w-lg">
                 <h1
