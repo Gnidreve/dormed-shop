@@ -335,19 +335,18 @@ class PayPalController extends Controller
     }
 
     /**
-     * Handle PAYMENT.CAPTURE.REFUNDED webhook.
+     * Handle PAYMENT.CAPTURE.REFUNDED webhook (e.g. refund issued directly
+     * in the PayPal dashboard).
      */
     private function handleCaptureRefunded(array $resource): void
     {
-        $captureId = $resource['id'] ?? null;
+        $captureId = $this->captureIdFromRefundResource($resource);
 
         if (! $captureId) {
             return;
         }
 
-        Payment::query()
-            ->where('paypal_capture_id', $captureId)
-            ->update(['status' => 'REFUNDED']);
+        $this->markPaymentAndOrder($captureId, 'REFUNDED', 'refunded');
     }
 
     /**
@@ -361,9 +360,48 @@ class PayPalController extends Controller
             return;
         }
 
-        Payment::query()
+        $this->markPaymentAndOrder($captureId, 'FAILED', 'failed');
+    }
+
+    /**
+     * Update payment and its order together so webhook-driven status changes
+     * (refund/denial) stay consistent with the admin refund flow.
+     */
+    private function markPaymentAndOrder(string $captureId, string $paymentStatus, string $orderStatus): void
+    {
+        /** @var Payment|null $payment */
+        $payment = Payment::query()
             ->where('paypal_capture_id', $captureId)
-            ->update(['status' => 'FAILED']);
+            ->with('order')
+            ->first();
+
+        if (! $payment) {
+            Log::info('PayPal webhook: no payment for capture', ['capture_id' => $captureId]);
+
+            return;
+        }
+
+        $payment->update(['status' => $paymentStatus]);
+        $payment->order?->update(['status' => $orderStatus]);
+    }
+
+    /**
+     * PAYMENT.CAPTURE.REFUNDED delivers a *refund* resource: its "id" is the
+     * refund id, the capture id only appears in the "up" link
+     * (/v2/payments/captures/{id}).
+     *
+     * @param  array<string, mixed>  $resource
+     */
+    private function captureIdFromRefundResource(array $resource): ?string
+    {
+        foreach ($resource['links'] ?? [] as $link) {
+            if (($link['rel'] ?? '') === 'up' && str_contains((string) ($link['href'] ?? ''), '/captures/')) {
+                return basename((string) parse_url($link['href'], PHP_URL_PATH));
+            }
+        }
+
+        // Defensive fallback in case PayPal ever sends the capture itself.
+        return $resource['id'] ?? null;
     }
 
     private function cancelStalePendingPayPalOrders(Customer $customer): void
