@@ -73,6 +73,25 @@ class ProductBrowsingTest extends TestCase
             );
     }
 
+    /**
+     * Bewusste Entscheidung (ANALYSE-V2, Businesslogik 1): Detailseiten nicht
+     * verfügbarer Produkte bleiben erreichbar (SEO/Bookmarks); das Frontend
+     * zeigt den "nicht verfügbar"-Zustand und JSON-LD meldet OutOfStock.
+     */
+    public function test_show_keeps_unavailable_products_reachable(): void
+    {
+        $product = Product::factory()->create(['is_available' => false]);
+
+        $this->get(route('products.show', $product))
+            ->assertOk()
+            ->assertInertia(
+                fn ($page) => $page
+                    ->component('Products/Show')
+                    ->where('product.id', $product->id)
+                    ->where('product.is_available', false)
+            );
+    }
+
     public function test_show_returns_404_for_unknown_product(): void
     {
         $this->get('/products/999999')->assertNotFound();
