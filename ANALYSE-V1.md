@@ -23,10 +23,11 @@ Komplettanalyse dormed-shop — Stand vor Release 1.0
 Der Endpoint `checkout.payment.update` funktioniert jetzt, aber **kein Frontend ruft ihn auf** — es gibt weder im Warenkorb noch auf der Confirm-Seite eine Auswahl. Default ist immer „Rechnung" (erste Methode), PayPal ist für Kunden nur erreichbar, wenn sie nie wechseln müssen — also faktisch gar nicht wählbar.
 **Vorgehen:** Radio-Auswahl analog zur Versandart im Checkout bauen (`cart.payment_methods` liegt schon in den Props), PATCH auf `checkout.payment.update`, Feature-Test für den Wechsel + PayPal-Button-Anzeige auf Confirm.
 
-### 2. Produktvarianten werden beim Kauf ignoriert
+### 2. Produktvarianten werden beim Kauf ignoriert ✅ (erledigt via ANALYSE-V2 Businesslogik 5)
 
 `addToCart()` sendet nur `product_id` + `quantity` (Show.svelte); der Warenkorb kennt keine Varianten — Kunde wählt „Variante XY für 99 €", bestellt Basisprodukt zum Basispreis.
 **Vorgehen:** Entweder Varianten durchziehen (Cart + OrderItem um `variant_id`/Variantenpreis erweitern) oder für 1.0 komplett entfernen und in 1.1 sauber bauen.
+**Erledigt 07.07.2026 (Entscheidung: voll durchziehen):** Varianten laufen jetzt durch Cart (`productId:variantId`-Lines), Validierung, Checkout und Order-Snapshot; Details in ANALYSE-V2.md Businesslogik 5.
 
 ## 🟠 Sicherheitslücken
 
