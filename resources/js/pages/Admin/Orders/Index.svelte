@@ -5,25 +5,30 @@
 </script>
 
 <script lang="ts">
+    import { router } from '@inertiajs/svelte';
     import {
-        
-        
-        
-        
-        
-        
         getCoreRowModel,
         getFilteredRowModel,
         getPaginationRowModel,
-        getSortedRowModel
+        getSortedRowModel,
     } from '@tanstack/table-core';
-import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, SortingState, VisibilityState} from '@tanstack/table-core';
+    import type {
+        ColumnDef,
+        ColumnFiltersState,
+        PaginationState,
+        RowSelectionState,
+        SortingState,
+        VisibilityState,
+    } from '@tanstack/table-core';
     import ChevronDown from 'lucide-svelte/icons/chevron-down';
     import AppHead from '@/components/AppHead.svelte';
-    import TableCellLink from '@/components/TableCellLink.svelte';
     import { Button } from '@/components/ui/button';
     import { Checkbox } from '@/components/ui/checkbox';
-    import { FlexRender, createSvelteTable, renderComponent } from '@/components/ui/data-table';
+    import {
+        FlexRender,
+        createSvelteTable,
+        renderComponent,
+    } from '@/components/ui/data-table';
     import {
         DropdownMenu,
         DropdownMenuCheckboxItem,
@@ -33,6 +38,8 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
     import { Input } from '@/components/ui/input';
     import * as Table from '@/components/ui/table';
     import { formatPrice } from '@/lib/currency';
+    import CustomerCell from './CustomerCell.svelte';
+    import StatusBadge from './StatusBadge.svelte';
 
     type Order = {
         id: number;
@@ -54,9 +61,29 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
     const statusLabels: Record<string, string> = {
         pending: 'Ausstehend',
         processing: 'In Bearbeitung',
+        paid: 'Bezahlt',
         completed: 'Abgeschlossen',
         cancelled: 'Storniert',
+        failed: 'Fehlgeschlagen',
+        refunded: 'Rückerstattet',
     };
+
+    const formatDate = (date: string) =>
+        new Date(date).toLocaleDateString('de-DE', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+        });
+
+    function openOrder(event: MouseEvent | KeyboardEvent, order: Order) {
+        const target = event.target as HTMLElement | null;
+
+        if (target?.closest('a, button, input, select, textarea')) {
+            return;
+        }
+
+        router.visit(`/admin/orders/${order.id}`);
+    }
 
     const columns: ColumnDef<Order>[] = [
         {
@@ -64,8 +91,11 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
             header: ({ table }) =>
                 renderComponent(Checkbox, {
                     checked: table.getIsAllPageRowsSelected(),
-                    indeterminate: table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected(),
-                    onCheckedChange: (v) => table.toggleAllPageRowsSelected(!!v),
+                    indeterminate:
+                        table.getIsSomePageRowsSelected() &&
+                        !table.getIsAllPageRowsSelected(),
+                    onCheckedChange: (v) =>
+                        table.toggleAllPageRowsSelected(!!v),
                     'aria-label': 'Alle auswählen',
                 }),
             cell: ({ row }) =>
@@ -78,33 +108,37 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
             enableHiding: false,
         },
         {
-            accessorKey: 'id',
-            header: '#',
-            cell: ({ row }) =>
-                renderComponent(TableCellLink, {
-                    href: `/admin/orders/${row.original.id}`,
-                    label: `#${row.original.id}`,
-                }),
+            accessorKey: 'created_at',
+            header: 'Datum',
+            cell: ({ row }) => formatDate(row.original.created_at),
         },
         {
             id: 'customer',
             header: 'Kunde',
-            accessorFn: (row) => row.customer?.name ?? '',
+            accessorFn: (row) =>
+                row.customer
+                    ? `${row.customer.name} ${row.customer.email}`
+                    : '',
+            cell: ({ row }) =>
+                renderComponent(CustomerCell, {
+                    customer: row.original.customer,
+                }),
         },
         {
             accessorKey: 'status',
             header: 'Status',
-            cell: ({ row }) => statusLabels[row.original.status] ?? row.original.status,
+            cell: ({ row }) =>
+                renderComponent(StatusBadge, {
+                    status: row.original.status,
+                    label:
+                        statusLabels[row.original.status] ??
+                        row.original.status,
+                }),
         },
         {
             accessorKey: 'total_amount',
             header: 'Gesamt',
             cell: ({ row }) => formatPrice(row.original.total_amount),
-        },
-        {
-            accessorKey: 'created_at',
-            header: 'Datum',
-            cell: ({ row }) => new Date(row.original.created_at).toLocaleDateString('de-DE'),
         },
     ];
 
@@ -116,44 +150,45 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
 
     const table = createSvelteTable({
         get data() {
- return orders.data; 
-},
+            return orders.data;
+        },
         columns,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         onSortingChange: (u) => {
- sorting = typeof u === 'function' ? u(sorting) : u; 
-},
+            sorting = typeof u === 'function' ? u(sorting) : u;
+        },
         onColumnFiltersChange: (u) => {
- columnFilters = typeof u === 'function' ? u(columnFilters) : u; 
-},
+            columnFilters = typeof u === 'function' ? u(columnFilters) : u;
+        },
         onRowSelectionChange: (u) => {
- rowSelection = typeof u === 'function' ? u(rowSelection) : u; 
-},
+            rowSelection = typeof u === 'function' ? u(rowSelection) : u;
+        },
         onPaginationChange: (u) => {
- pagination = typeof u === 'function' ? u(pagination) : u; 
-},
+            pagination = typeof u === 'function' ? u(pagination) : u;
+        },
         onColumnVisibilityChange: (u) => {
- columnVisibility = typeof u === 'function' ? u(columnVisibility) : u; 
-},
+            columnVisibility =
+                typeof u === 'function' ? u(columnVisibility) : u;
+        },
         state: {
             get sorting() {
- return sorting; 
-},
+                return sorting;
+            },
             get columnFilters() {
- return columnFilters; 
-},
+                return columnFilters;
+            },
             get rowSelection() {
- return rowSelection; 
-},
+                return rowSelection;
+            },
             get pagination() {
- return pagination; 
-},
+                return pagination;
+            },
             get columnVisibility() {
- return columnVisibility; 
-},
+                return columnVisibility;
+            },
         },
     });
 </script>
@@ -169,8 +204,12 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
     <div class="flex items-center gap-2">
         <Input
             placeholder="Kunde filtern…"
-            value={(table.getColumn('customer')?.getFilterValue() as string) ?? ''}
-            oninput={(e) => table.getColumn('customer')?.setFilterValue(e.currentTarget.value)}
+            value={(table.getColumn('customer')?.getFilterValue() as string) ??
+                ''}
+            oninput={(e) =>
+                table
+                    .getColumn('customer')
+                    ?.setFilterValue(e.currentTarget.value)}
             class="max-w-sm"
         />
 
@@ -183,12 +222,16 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
                 {/snippet}
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-                {#each table.getAllColumns().filter((c) => c.getCanHide()) as column (column.id)}
+                {#each table
+                    .getAllColumns()
+                    .filter((c) => c.getCanHide()) as column (column.id)}
                     <DropdownMenuCheckboxItem
                         checked={column.getIsVisible()}
                         onCheckedChange={(v) => column.toggleVisibility(v)}
                     >
-                        {typeof column.columnDef.header === 'string' ? column.columnDef.header : column.id}
+                        {typeof column.columnDef.header === 'string'
+                            ? column.columnDef.header
+                            : column.id}
                     </DropdownMenuCheckboxItem>
                 {/each}
             </DropdownMenuContent>
@@ -203,7 +246,10 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
                         {#each headerGroup.headers as header (header.id)}
                             <Table.Head class="has-[[role=checkbox]]:ps-3">
                                 {#if !header.isPlaceholder}
-                                    <FlexRender content={header.column.columnDef.header} context={header.getContext()} />
+                                    <FlexRender
+                                        content={header.column.columnDef.header}
+                                        context={header.getContext()}
+                                    />
                                 {/if}
                             </Table.Head>
                         {/each}
@@ -212,16 +258,35 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
             </Table.Header>
             <Table.Body>
                 {#each table.getRowModel().rows as row (row.id)}
-                    <Table.Row data-state={row.getIsSelected() && 'selected'}>
+                    <Table.Row
+                        data-state={row.getIsSelected() && 'selected'}
+                        class="h-14 cursor-pointer"
+                        tabindex={0}
+                        role="link"
+                        aria-label={`Bestellung ${formatDate(row.original.created_at)} öffnen`}
+                        onclick={(event) => openOrder(event, row.original)}
+                        onkeydown={(event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                                event.preventDefault();
+                                openOrder(event, row.original);
+                            }
+                        }}
+                    >
                         {#each row.getVisibleCells() as cell (cell.id)}
                             <Table.Cell class="has-[[role=checkbox]]:ps-3">
-                                <FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
+                                <FlexRender
+                                    content={cell.column.columnDef.cell}
+                                    context={cell.getContext()}
+                                />
                             </Table.Cell>
                         {/each}
                     </Table.Row>
                 {:else}
                     <Table.Row>
-                        <Table.Cell colspan={columns.length} class="h-24 text-center text-muted-foreground">
+                        <Table.Cell
+                            colspan={columns.length}
+                            class="h-24 text-center text-muted-foreground"
+                        >
                             Keine Bestellungen vorhanden.
                         </Table.Cell>
                     </Table.Row>
@@ -240,9 +305,18 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
             <span class="text-sm text-muted-foreground">
                 Seite {table.getState().pagination.pageIndex + 1} von {table.getPageCount()}
             </span>
-            <Button variant="outline" size="sm" onclick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>Zurück</Button>
-            <Button variant="outline" size="sm" onclick={() => table.nextPage()} disabled={!table.getCanNextPage()}>Weiter</Button>
+            <Button
+                variant="outline"
+                size="sm"
+                onclick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}>Zurück</Button
+            >
+            <Button
+                variant="outline"
+                size="sm"
+                onclick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}>Weiter</Button
+            >
         </div>
     </div>
--e 
 </div>
