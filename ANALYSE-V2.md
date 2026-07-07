@@ -52,6 +52,9 @@ composer audit + npm audit sauber.
   PHPStan grün, Build grün. Damit ist auch der letzte ANALYSIS.md-Blocker
   (Punkt 2, Varianten) vom Tisch; offen auf Wiedervorlage bleibt nur noch
   die Rating-Bremse (Punkt 9 / S-C).
+- **S-B erledigt** (07.07.2026): E-Mail-Verifikation echt gemacht
+  (`MustVerifyEmail` + deutsche Mail) und Bestell-Hebel gesetzt — Checkout
+  und PayPal-Endpoints verlangen `verified`. 5 neue Tests, Suite 192/192.
 
 ---
 
@@ -120,14 +123,24 @@ loggt bei fehlendem Kunden statt zu crashen. Migration auf SQLite in beide
 Richtungen verifiziert; Test:
 `test_deleting_account_keeps_the_order_history`.
 
-### S-B. E-Mail-Verifikation ist ein No-op
+### S-B. E-Mail-Verifikation ist ein No-op ✅ (implementiert + Bestell-Hebel)
 
-`Features::emailVerification()` aktiv, zwei Routen tragen `verified`-Middleware —
-aber `Customer` implementiert `MustVerifyEmail` nicht (Import auskommentiert).
-Es wird nie eine Verifikationsmail verschickt, die Middleware lässt jeden durch.
-**Vorgehen:** Entweder Interface implementieren (dann auch für Checkout erwägen)
-oder Feature + Middleware entfernen (Simplifizierung). Jetziger Zustand täuscht
-eine Schutzschicht vor.
+`Features::emailVerification()` war aktiv, aber `Customer` implementierte
+`MustVerifyEmail` nicht — keine Verifikationsmail, `verified`-Middleware wirkungslos.
+**Erledigt (07.07.2026, Entscheidung Linus: echt machen + Hebel):**
+
+- `Customer` implementiert `MustVerifyEmail` → Registrierung verschickt die
+  Verifikationsmail (deutscher Text via `VerifyEmail::toMailUsing()` im
+  FortifyServiceProvider).
+- **Bestell-Hebel:** `verified`-Middleware auf `checkout.confirm`,
+  `checkout.address.update`, `checkout.submit` sowie `paypal.order.create`
+  + `paypal.order.capture` — ohne bestätigte Mail keine Bestellung, weder
+  Rechnung noch PayPal. Warenkorb befüllen bleibt frei; unbestätigte Nutzer
+  landen auf der Verifikations-Seite (Resend-Button existiert).
+- E-Mail-Änderung im Profil setzt `email_verified_at` zurück (war schon so)
+  → greift jetzt auch für den Bestell-Hebel.
+- 5 neue Tests (`CheckoutVerificationTest`): Confirm/Submit/PayPal blockiert,
+  Registrierung sendet Mail, verifizierter Kunde kommt durch.
 
 ### S-C. Kleinere Härtungen
 
@@ -281,5 +294,5 @@ dieselben „default shipping/billing"-Queries → Relation/Helper am Customer
 2. ~~Businesslogik 1 (is_available-Strategie + korrektes JSON-LD inkl.
    S-C-Escaping)~~ ✅
 3. ~~B3~~ ✅ (revidiert: Mechanik entfernt) → ~~B4 (Relation + Test)~~ ✅
-4. ~~S-A (FK-Migration)~~ ✅ → S-B (Entscheidung Verifikation)
+4. ~~S-A (FK-Migration)~~ ✅ → ~~S-B (Verifikation + Bestell-Hebel)~~ ✅
 5. Rest (S-C, Businesslogik 2–3, Simplifizierung) nach Gelegenheit
