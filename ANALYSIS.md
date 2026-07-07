@@ -65,8 +65,9 @@ Nicht verfügbare/gelöschte Produkte sind list-, such- und bestellbar (Session-
 `CartService::add()` friert Preis/Name ein; Snapshot gehört erst in die Order.
 **Vorgehen:** Cart auf `product_id => quantity` reduzieren, Preise live lesen — vereinfacht den Cart-State deutlich.
 
-### 13. Jeder PayPal-Button-Klick erzeugt eine verwaiste Order ✅
+### 13. Jeder PayPal-Button-Klick erzeugt eine verwaiste Order ✅ (teilweise revidiert, siehe ANALYSE-V2 B3)
 **Vorgehen:** pending-Order wiederverwenden/canceln + Cleanup-Command für alte pending-Orders ohne Payment.
+**Revidiert 07.07.2026:** Der hier empfohlene Cleanup-Command hätte mangels `payment_method`-Filter auch Rechnungskäufe storniert und wurde für 1.0 vollständig entfernt (Command, Scheduler, Tests). Der klick-basierte Cancel in `PayPalController::cancelStalePendingPayPalOrders()` bleibt bestehen.
 
 ### 14. Dashboard-Umsatz zählt Test-/failed-/pending-Orders ✅
 **Vorgehen:** `->where('is_test', false)->whereIn('status', ['paid', 'processing', 'completed'])`.

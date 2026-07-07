@@ -1,0 +1,209 @@
+Vollanalyse V2 dormed-shop — zweite Schleife nach Abarbeitung von ANALYSIS.md
+(Arbeitsstand 07.07.2026 — erledigte Punkte werden abgehakt)
+
+Basis: Alle Punkte aus ANALYSIS.md gelten als erledigt bzw. liegen bei Linus auf
+Wiedervorlage (Zahlartauswahl-UI ist inzwischen umgesetzt, siehe Businesslogik 6;
+Varianten und Rating-Bremse weiterhin offen auf Wiedervorlage).
+Teststatus bei Analyse: 174 Tests / 712 Assertions grün, PHPStan grün (Baseline),
+composer audit + npm audit sauber.
+
+## ✅ Bereits erledigt (Kurzprotokoll)
+- **B1 + B2 + S1 gefixt** (07.07.2026): Gemeinsamer `fetchJson()`-Helper in
+  `resources/js/lib/http.ts` (liest `XSRF-TOKEN`-Cookie, sendet `X-XSRF-TOKEN` —
+  derselbe Mechanismus wie Inertias XHR-Client). PayPalButton auf Helper +
+  Wayfinder-Routen umgestellt (`getCsrfToken()`/Meta-Tag entfernt), Confirm-
+  `saveAddress` auf idiomatisches `router.patch` umgebaut (toter 302-Zweig weg),
+  Admin Mail/Payment/Orders-Show nutzen ebenfalls den Helper statt dreier
+  Cookie-Parsing-Kopien. Nebenbei: Fehler-Key-Mismatch behoben (Server liefert
+  `shipping_address.first_name`, AddressForm liest `shipping.first_name` —
+  Validierungsfehler wären nie an den Feldern erschienen). Verifiziert per
+  ESLint, svelte-check (kein neuer Fehler), `npm run build`, Checkout-Tests
+  30/30. **Manueller Browser-Test gegen PayPal-Sandbox steht noch aus** (CSRF
+  ist in PHPUnit deaktiviert, serverseitig nicht testbar).
+- **Businesslogik 1 + JSON-LD-Upgrade erledigt** (07.07.2026): Entscheidung —
+  Detailseiten nicht verfügbarer Produkte bleiben online (SEO/Bookmarks), das
+  UI zeigte den „nicht verfügbar"-Zustand bereits korrekt; Sitemap behält
+  bewusst alle Produkte. JSON-LD in `Products/Show.svelte` jetzt vollständig:
+  `availability` dynamisch (InStock/OutOfStock), `aggregateRating` (Sterne-
+  Snippets), `sku`, absolute `url`, plus `<`-Escaping gegen Script-Breakout
+  (S-C erster Punkt). Feature-Test dokumentiert die Entscheidung
+  (`test_show_keeps_unavailable_products_reachable`). Lint/Build grün,
+  Shop-Tests 15/15.
+- **B3 revidiert statt gefixt** (07.07.2026, Entscheidung Linus): Die
+  Orphan-Cleanup-Mechanik (Empfehlung aus ANALYSIS.md Punkt 13) für 1.0
+  vollständig entfernt — `CleanupOrphanedOrders`-Command, Scheduler-Eintrag
+  und Testdatei gelöscht. Der klick-basierte
+  `cancelStalePendingPayPalOrders()` bleibt (kunden-/paypal-scoped, unkritisch).
+  Suite danach 171/171 grün, `schedule:list` leer.
+
+---
+
+## 🔴 Release-Blocker
+
+### B1. PayPal-Buttons senden leeren CSRF-Token → 419 ✅
+`PayPalButton.svelte` las `meta[name="csrf-token"]` — das Meta-Tag existiert in
+`resources/app.blade.php` nicht. `getCsrfToken()` lieferte `''`, die fetch-POSTs
+auf `/paypal/order/create` + `/capture` liefen in Laravels CSRF-Prüfung (419).
+Feature-Tests merkten es nicht (CSRF-Middleware in Tests deaktiviert).
+**Erledigt:** `fetchJson()`-Helper mit XSRF-Cookie (siehe Kurzprotokoll).
+
+### B2. „Adresse speichern" auf Confirm sendet gar keinen CSRF-Token ✅
+`Confirm.svelte::saveAddress` machte einen rohen fetch-PATCH ohne Token → 419,
+nur generische Fehlermeldung. Zusätzlich toter `resp.status === 302`-Zweig.
+**Erledigt:** `router.patch` mit `onError`-Mapping der Fehler-Keys (siehe
+Kurzprotokoll).
+
+### B3. Täglicher Cleanup storniert alle Rechnungsbestellungen ✅ (revidiert: Mechanik entfernt)
+`orders:cleanup-orphaned` (täglich via Scheduler) cancelte jede `pending`-Order
+älter als 24 h ohne COMPLETED-Payment — ohne Filter auf
+`payment_method = 'paypal'`. Rechnungskäufe bleiben bewusst tagelang `pending`
+bis die Überweisung eintrifft → jeder Rechnungskauf wäre nach 24 h automatisch
+storniert worden.
+**Revidiert (07.07.2026, Entscheidung Linus):** Die Cleanup-Mechanik aus
+ANALYSIS.md Punkt 13 wird für 1.0 vollständig entfernt statt gefixt —
+Command, Scheduler-Eintrag und Tests gelöscht (`schedule:list` ist jetzt leer).
+**Bewusst behalten:** der klick-basierte
+`PayPalController::cancelStalePendingPayPalOrders()` — der ist kunden- und
+paypal-scoped, verhindert die Orphan-Anhäufung an der Quelle und war nie das
+Problem. Verwaiste pending-PayPal-Orders anderer Kunden bleiben bis auf
+Weiteres einfach stehen (im Admin sichtbar); ein Auto-Cleanup kann in 1.1
+sauber mit `payment_method`-Filter zurückkommen.
+
+### B4. Produkt-Löschen im Admin wirft immer 500
+`Admin\ProductController::destroy` ruft `$product->orderItems()` auf — die
+Relation existiert im Product-Model nicht → `BadMethodCallException` bei jedem
+Löschversuch. Kein Test vorhanden.
+**Vorgehen:** `orderItems(): HasMany` am Product ergänzen + Feature-Test für
+beide Zweige (bereits bestellt → Fehlermeldung / nie bestellt → gelöscht).
+
+## 🟠 Sicherheitslücken
+
+### S-A. Kontolöschung vernichtet die Bestellhistorie (GoBD/§147 AO)
+`orders.customer_id` ist `cascadeOnDelete`, und jeder verifizierte Kunde kann
+sein Konto über `settings/profile` selbst löschen → Orders, OrderItems und
+Payments werden mitgelöscht, inkl. bezahlter Rechnungen. Kollision mit
+Aufbewahrungspflichten; Buchhaltung/Streitfälle unmöglich.
+**Vorgehen:** FK-Migration auf `restrictOnDelete`/`nullOnDelete` + beim
+Konto-Löschen anonymisieren statt kaskadieren. Aus meiner Sicht
+Launch-Voraussetzung.
+
+### S-B. E-Mail-Verifikation ist ein No-op
+`Features::emailVerification()` aktiv, zwei Routen tragen `verified`-Middleware —
+aber `Customer` implementiert `MustVerifyEmail` nicht (Import auskommentiert).
+Es wird nie eine Verifikationsmail verschickt, die Middleware lässt jeden durch.
+**Vorgehen:** Entweder Interface implementieren (dann auch für Checkout erwägen)
+oder Feature + Middleware entfernen (Simplifizierung). Jetziger Zustand täuscht
+eine Schutzschicht vor.
+
+### S-C. Kleinere Härtungen
+- **JSON-LD-Injection (niedrig): ✅** `Products/Show.svelte` renderte
+  `JSON.stringify(schema)` per `{@html}` ohne Escaping — mit Businesslogik 1
+  erledigt (`<` wird als `\u003c` escaped).
+- **Settings-Werte unvalidiert:** Key-Whitelist steht, aber z. B. `payment.mode`
+  akzeptiert jeden String und fällt still auf den env-Modus zurück.
+  `Rule::in(['sandbox','live'])` für die Enum-Keys.
+- **Kein Throttle auf `paypal/order/create`:** jeder Klick = PayPal-API-Call +
+  DB-Order. Auth-pflichtig, aber `throttle:10,1` kostet nichts.
+- **`afterPayment` ohne Auth/Ownership:** Capture durch Dritte mit bekanntem
+  Token triggerbar (Geld fließt an den Shop, Success-Seite prüft Ownership —
+  Risiko gering). `auth`-Middleware wäre unschädlich, PayPal leitet den
+  eingeloggten Käufer zurück.
+- Bekannt, auf Wiedervorlage (ANALYSIS.md Punkt 9): **Ratings ohne
+  Throttle/Moderation** — `POST /products/{product}/ratings` weiter anonym und
+  ungedrosselt.
+
+## 🟡 Businesslogik
+
+### 1. is_available gilt nicht für Detailseite und Sitemap ✅ (bewusste Strategie + JSON-LD-Fix)
+`ProductController::show` hat keinen `available()`-Scope und der
+`SitemapController` listet *alle* Produkte; JSON-LD sagte hart `InStock`.
+**Entscheidung (07.07.2026):** Detailseiten bleiben bewusst online — das UI
+zeigt „Derzeit nicht verfügbar" + disabled Button (war schon korrekt), Kauf
+scheitert serverseitig an der Cart-Validierung. Sitemap behält bewusst alle
+Produkte. JSON-LD meldet jetzt dynamisch InStock/OutOfStock (+ aggregateRating,
+sku, url, Escaping). Test: `test_show_keeps_unavailable_products_reachable`.
+
+### 2. PayPal-seitige Refunds/Denials aktualisieren die Order nicht
+Webhook-Handler `handleCaptureRefunded/Denied` setzen nur den Payment-Status;
+die Order bleibt `paid`. Der Admin-Refund-Button setzt beides — ein Refund
+direkt im PayPal-Dashboard erzeugt inkonsistente Daten.
+**Vorgehen:** In beiden Handlern auch `$payment->order` auf
+`refunded`/`failed` setzen (+ Tests).
+
+### 3. OrderManager::createFromCart läuft ohne Transaktion
+Schlägt ein Item-Insert fehl, bleibt eine Order ohne Items stehen.
+**Vorgehen:** `DB::transaction()` um Order- + Items-Erstellung.
+
+### 4. Kein Bestandskonzept
+Nur `is_available`-Flag, Menge bis 99 pro Produkt frei wählbar. Wenn das für
+1.0 die bewusste Entscheidung ist: ok — hier nur festgehalten.
+
+### 5. Varianten werden beim Kauf ignoriert (Wiedervorlage, ANALYSIS.md Punkt 2)
+Show.svelte zeigt Variantenpreis an, `addToCart` sendet nur `product_id`.
+
+### 6. Zahlartauswahl-UI ✅ (war ANALYSIS.md Blocker 1)
+Radio-Auswahl existiert in `Confirm.svelte` inkl. PATCH auf
+`checkout.payment.update`; durch B1/B2-Fix jetzt auch im Browser durchgängig
+testbar.
+
+## 🔵 Simplifizierung & Code-Refinement
+
+### S1. Vier verschiedene Fetch/CSRF-Implementierungen ✅
+PayPalButton (Meta-Tag, kaputt), Confirm (keiner, kaputt), Admin
+Mail/Payment/Orders (XSRF-Cookie, 3× copy-paste).
+**Erledigt:** ein gemeinsamer `fetchJson()`-Helper in `resources/js/lib/http.ts`,
+alle fünf Call-Sites umgestellt (Confirm idiomatisch via `router.patch`).
+
+### S2. Ungenutzte ShopHeader-Varianten
+`ShopHeader-left-align.svelte` und `ShopHeader-with-hover.svelte` werden nirgends
+importiert. **Entscheidung Linus: die Hover-Variante bleibt bewusst erhalten
+und darf nicht gelöscht werden.** Left-align bei Gelegenheit klären.
+
+### S3. Capture-Logik doppelt im PayPalController
+`captureOrder()` und `afterPayment()` duplizieren Betragsabgleich +
+COMPLETED-Handling fast zeilengleich → private Methode
+`completeCapture(Payment $payment, array $response): bool` extrahieren.
+
+### S4. StoreProductRequest == UpdateProductRequest
+Identische Rules — eine Klasse reicht.
+
+### S5. Default-Adress-Queries dupliziert
+`CheckoutController::prefillAddressFromProfile` und `AddressController` bauen
+dieselben „default shipping/billing"-Queries → Relation/Helper am Customer
+(z. B. `defaultShippingAddress()`).
+
+### S6. Kleinkram
+- Ungenutzte `total`-Prop in PayPalButton (`_total`).
+- `checkout.payment.update` als einzige Checkout-Route ohne `auth`-Middleware
+  (harmlos, Session-scoped — aber inkonsistent).
+- `sessions`-Tabelle hat `user_id`-Spalte, Auth läuft über `customers` —
+  kosmetisch.
+
+## 🚀 Launch-Checkliste (Deployment)
+
+1. **Queue-Worker ist Pflicht:** beide Mails sind `ShouldQueue`,
+   `QUEUE_CONNECTION=database` — ohne laufenden `php artisan queue:work`
+   (Supervisor/systemd) geht keine einzige Bestellmail raus.
+2. ~~Scheduler-Cron für den Cleanup~~ — obsolet, B3-Mechanik für 1.0 entfernt;
+   aktuell existieren keine Scheduled Tasks (Cron erst nötig, wenn wieder
+   welche dazukommen).
+3. `php artisan storage:link` (Produktbilder auf public-Disk).
+4. `APP_DEBUG=false`, `APP_ENV=production`, `SESSION_SECURE_COOKIE=true`;
+   `config:cache` ist seit dem env()-Fix aus Schleife 1 sicher.
+5. PayPal-Webhook-ID im Admin pflegen — ohne sie lehnt `verifyWebhook()` alle
+   Webhooks ab (nur im Log sichtbar).
+6. Backup-Strategie für die Datenbank klären (aktuell SQLite).
+
+## 🧪 Testing — fehlende Abdeckung
+- Manueller Browser-Test PayPal-Sandbox + „Adresse speichern" (nach B1/B2-Fix)
+- ~~B3: Cleanup verschont invoice-Orders~~ (obsolet — Mechanik entfernt)
+- B4: Produkt-Löschen mit/ohne Bestellungen (Test bei Fix)
+- Webhook Refund/Denied → Order-Status (bei Businesslogik 2)
+
+## Empfohlene Reihenfolge
+1. ~~B1 + B2 via S1 (gemeinsamer Fetch-Helper)~~ ✅
+2. ~~Businesslogik 1 (is_available-Strategie + korrektes JSON-LD inkl.
+   S-C-Escaping)~~ ✅
+3. ~~B3~~ ✅ (revidiert: Mechanik entfernt) → B4 (Relation + Test)
+4. S-A (FK-Migration + Anonymisierung) → S-B (Entscheidung Verifikation)
+5. Rest (S-C, Businesslogik 2–3, Simplifizierung) nach Gelegenheit
