@@ -1,7 +1,9 @@
 <script lang="ts">
     import { router } from '@inertiajs/svelte';
     import { onMount } from 'svelte';
+    import { fetchJson } from '@/lib/http';
     import checkout from '@/routes/checkout';
+    import paypalOrder from '@/routes/paypal/order';
 
     let {
         total: _total = 0,
@@ -13,7 +15,9 @@
         disabled?: boolean;
     } = $props();
 
-    let containerId = $state(`paypal-button-${Math.random().toString(36).slice(2, 9)}`);
+    let containerId = $state(
+        `paypal-button-${Math.random().toString(36).slice(2, 9)}`,
+    );
     let isProcessing = $state(false);
     let errorMessage = $state<string | null>(null);
 
@@ -23,7 +27,8 @@
 
     function loadPayPalSDK(clientId: string) {
         if (!clientId || clientId.length < 10) {
-            errorMessage = 'PayPal ist nicht konfiguriert. Bitte hinterlegen Sie eine gültige Client-ID in den Einstellungen.';
+            errorMessage =
+                'PayPal ist nicht konfiguriert. Bitte hinterlegen Sie eine gültige Client-ID in den Einstellungen.';
 
             return;
         }
@@ -33,7 +38,8 @@
         script.async = true;
         script.onload = () => renderButtons();
         script.onerror = () => {
-            errorMessage = 'PayPal SDK konnte nicht geladen werden. Bitte prüfen Sie die Client-ID in den Einstellungen.';
+            errorMessage =
+                'PayPal SDK konnte nicht geladen werden. Bitte prüfen Sie die Client-ID in den Einstellungen.';
         };
         document.head.appendChild(script);
     }
@@ -48,8 +54,8 @@
         const container = document.getElementById(containerId);
 
         if (!container) {
-return;
-}
+            return;
+        }
 
         paypal
             .Buttons({
@@ -70,70 +76,66 @@ return;
                     isProcessing = true;
                     errorMessage = null;
 
-                    const response = await fetch('/paypal/order/create', {
+                    const { ok, data } = await fetchJson<{
+                        id?: string;
+                        error?: string;
+                    }>(paypalOrder.create.url(), {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': getCsrfToken(),
-                            Accept: 'application/json',
-                        },
                         // The PayPal button can't be truly disabled after render, so the
                         // guard above blocks unconfirmed orders; agreement is real here.
-                        body: JSON.stringify({ agreed_to_terms: !disabled }),
+                        body: { agreed_to_terms: !disabled },
                     });
 
-                    const data = await response.json();
-
-                    if (!response.ok) {
+                    if (!ok || !data.id) {
                         isProcessing = false;
 
-                        throw new Error(data.error || 'PayPal-Order konnte nicht erstellt werden.');
+                        throw new Error(
+                            data.error ||
+                                'PayPal-Order konnte nicht erstellt werden.',
+                        );
                     }
 
                     return data.id;
                 },
-                onApprove: async (data: { orderID: string }) => {
+                onApprove: async (approval: { orderID: string }) => {
                     isProcessing = true;
 
-                    const response = await fetch('/paypal/order/capture', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': getCsrfToken(),
-                            Accept: 'application/json',
+                    const { ok, data } = await fetchJson<{ error?: string }>(
+                        paypalOrder.capture.url(),
+                        {
+                            method: 'POST',
+                            body: { paypal_order_id: approval.orderID },
                         },
-                        body: JSON.stringify({ paypal_order_id: data.orderID }),
-                    });
+                    );
 
-                    const result = await response.json();
-
-                    if (!response.ok) {
-                        errorMessage = result.error || 'Zahlung konnte nicht abgeschlossen werden.';
+                    if (!ok) {
+                        errorMessage =
+                            data.error ||
+                            'Zahlung konnte nicht abgeschlossen werden.';
                         isProcessing = false;
 
                         return;
                     }
 
                     // Redirect to success page
-                    router.visit(checkout.success.url({ query: { paypal_order_id: data.orderID } }));
+                    router.visit(
+                        checkout.success.url({
+                            query: { paypal_order_id: approval.orderID },
+                        }),
+                    );
                 },
                 onCancel: () => {
                     errorMessage = 'Zahlung abgebrochen.';
                     isProcessing = false;
                 },
                 onError: (err: unknown) => {
-                    errorMessage = 'Ein PayPal-Fehler ist aufgetreten. Bitte versuchen Sie es erneut.';
+                    errorMessage =
+                        'Ein PayPal-Fehler ist aufgetreten. Bitte versuchen Sie es erneut.';
                     isProcessing = false;
                     console.error('PayPal error:', err);
                 },
             })
             .render(`#${containerId}`);
-    }
-
-    function getCsrfToken(): string {
-        const meta = document.querySelector('meta[name="csrf-token"]');
-
-        return meta?.getAttribute('content') ?? '';
     }
 </script>
 
@@ -148,7 +150,9 @@ return;
 
     {#if isProcessing}
         <div class="mt-2 flex items-center justify-center gap-2">
-            <div class="size-4 animate-spin rounded-full border-2 border-[#1a6bbf] border-t-transparent"></div>
+            <div
+                class="size-4 animate-spin rounded-full border-2 border-[#1a6bbf] border-t-transparent"
+            ></div>
             <span class="text-sm text-gray-600">Zahlung wird verarbeitet…</span>
         </div>
     {/if}

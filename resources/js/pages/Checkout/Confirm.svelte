@@ -66,7 +66,7 @@
         }
 
         // Clear error for this field
-        const errorKey = `${prefix}_address.${key}`;
+        const errorKey = `${prefix}.${key}`;
 
         if (addressErrors[errorKey]) {
             const next = { ...addressErrors };
@@ -101,47 +101,40 @@
         billingAddress = null;
     }
 
-    async function saveAddress() {
+    function saveAddress() {
         isSavingAddress = true;
         addressErrors = {};
 
-        const payload: Record<string, unknown> = {};
-
-        // Build shipping_address
-        payload.shipping_address = shippingAddress;
-        payload.billing_same_as_shipping = billingSameAsShipping;
+        const payload: {
+            shipping_address: AddressData;
+            billing_same_as_shipping: boolean;
+            billing_address?: AddressData;
+        } = {
+            shipping_address: shippingAddress,
+            billing_same_as_shipping: billingSameAsShipping,
+        };
 
         if (!billingSameAsShipping && billingAddress) {
             payload.billing_address = billingAddress;
         }
 
-        try {
-            const resp = await fetch(checkout.address.update.url(), {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                body: JSON.stringify(payload),
-            });
-
-            if (resp.status === 302) {
-                // Inertia redirect — reload errors from flash
-                router.reload({ only: ['errors'], preserveScroll: true });
-            } else if (!resp.ok) {
-                const body = await resp.json();
-
-                if (body.errors) {
-                    addressErrors = body.errors;
-                }
-            }
-        } catch {
-            addressErrors = {
-                _form: 'Adresse konnte nicht gespeichert werden.',
-            };
-        } finally {
-            isSavingAddress = false;
-        }
+        router.patch(checkout.address.update.url(), payload, {
+            preserveScroll: true,
+            preserveState: true,
+            onError: (errors) => {
+                // The server validates "shipping_address.first_name" etc.;
+                // AddressForm looks errors up as "shipping.first_name".
+                addressErrors = Object.fromEntries(
+                    Object.entries(errors).map(([key, message]) => [
+                        key.replace('_address.', '.'),
+                        message,
+                    ]),
+                );
+            },
+            onFinish: () => {
+                isSavingAddress = false;
+            },
+        });
     }
 
     function updatePayment(paymentMethod: string) {
@@ -167,15 +160,22 @@
     let holdRaf: number | null = null;
 
     function holdStart() {
-        if (!agreedToTerms || cart.is_empty || !addressComplete) return;
+        if (!agreedToTerms || cart.is_empty || !addressComplete) {
+return;
+}
+
         holdStartTime = performance.now();
         tick();
     }
 
     function tick() {
-        if (holdStartTime === null) return;
+        if (holdStartTime === null) {
+return;
+}
+
         const elapsed = performance.now() - holdStartTime;
         holdProgress = Math.min(100, (elapsed / HOLD_DURATION) * 100);
+
         if (holdProgress < 100) {
             holdRaf = requestAnimationFrame(tick);
         } else {
@@ -190,6 +190,7 @@
             cancelAnimationFrame(holdRaf);
             holdRaf = null;
         }
+
         holdStartTime = null;
         holdProgress = 0;
     }
@@ -274,11 +275,6 @@
                                 legend=""
                             />
                         </div>
-                        {#if addressErrors._form}
-                            <p class="mt-2 text-sm text-red-500">
-                                {addressErrors._form}
-                            </p>
-                        {/if}
                     </div>
 
                     <!-- Rechnungsadresse -->
@@ -358,7 +354,9 @@
 
                         {#if cart.payment_methods.length > 1}
                             <div class="mt-4 border-t pt-4">
-                                <h3 class="mb-3 text-sm font-bold text-gray-900">
+                                <h3
+                                    class="mb-3 text-sm font-bold text-gray-900"
+                                >
                                     Zahlungsart
                                 </h3>
                                 <div class="flex flex-col gap-3">
@@ -382,8 +380,7 @@
                                                 >
                                                 {#if method.description}
                                                     <br />
-                                                    <span
-                                                        class="text-gray-500"
+                                                    <span class="text-gray-500"
                                                         >{method.description}</span
                                                     >
                                                 {/if}

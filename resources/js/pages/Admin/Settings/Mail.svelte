@@ -16,6 +16,8 @@
     import { Button } from '@/components/ui/button';
     import { Input } from '@/components/ui/input';
     import { Label } from '@/components/ui/label';
+    import { fetchJson } from '@/lib/http';
+    import { check as mailCheck } from '@/routes/admin/settings/mail';
 
     let {
         settings,
@@ -32,7 +34,8 @@
             'mail.smtp_port': settings['mail.smtp_port'] ?? '',
             'mail.smtp_user': settings['mail.smtp_user'] ?? '',
             'mail.smtp_password': '',
-            'shop.notification_emails': settings['shop.notification_emails'] ?? '',
+            'shop.notification_emails':
+                settings['shop.notification_emails'] ?? '',
         },
     });
 
@@ -47,22 +50,15 @@
         checkingMail = true;
 
         try {
-            const token = decodeURIComponent(
-                document.cookie
-                    .split('; ')
-                    .find((r) => r.startsWith('XSRF-TOKEN='))
-                    ?.split('=')[1] ?? '',
+            const { ok, data } = await fetchJson<{ message?: string }>(
+                mailCheck.url(),
+                { method: 'POST' },
             );
-            const res = await fetch('/admin/settings/mail/check', {
-                method: 'POST',
-                headers: { 'X-XSRF-TOKEN': token, Accept: 'application/json' },
-            });
-            const data = await res.json();
 
-            if (res.ok) {
-                toast.success(data.message);
+            if (ok) {
+                toast.success(data.message ?? 'Testmail versendet.');
             } else {
-                toast.error(data.message);
+                toast.error(data.message ?? 'Verbindungsfehler');
             }
         } catch {
             toast.error('Verbindungsfehler');
@@ -82,38 +78,66 @@
             <div class="grid grid-cols-2 gap-4">
                 <div class="flex flex-col gap-1.5">
                     <Label for="smtp_host">SMTP Host</Label>
-                    <Input id="smtp_host" bind:value={form.settings['mail.smtp_host']} />
+                    <Input
+                        id="smtp_host"
+                        bind:value={form.settings['mail.smtp_host']}
+                    />
                 </div>
                 <div class="flex flex-col gap-1.5">
                     <Label for="smtp_port">Port</Label>
-                    <Input id="smtp_port" bind:value={form.settings['mail.smtp_port']} />
+                    <Input
+                        id="smtp_port"
+                        bind:value={form.settings['mail.smtp_port']}
+                    />
                 </div>
             </div>
             <div class="flex flex-col gap-1.5">
                 <Label for="smtp_user">Benutzername</Label>
-                <Input id="smtp_user" bind:value={form.settings['mail.smtp_user']} />
+                <Input
+                    id="smtp_user"
+                    bind:value={form.settings['mail.smtp_user']}
+                />
             </div>
             <div class="flex flex-col gap-1.5">
                 <Label for="smtp_password">
                     Passwort
                     {#if hasSensitive['mail.smtp_password']}
-                        <span class="text-xs text-muted-foreground ml-1">(gesetzt — leer lassen zum Beibehalten)</span>
+                        <span class="text-xs text-muted-foreground ml-1"
+                            >(gesetzt — leer lassen zum Beibehalten)</span
+                        >
                     {/if}
                 </Label>
-                <Input id="smtp_password" type="password" placeholder={hasSensitive['mail.smtp_password'] ? '••••••••' : ''} bind:value={form.settings['mail.smtp_password']} />
+                <Input
+                    id="smtp_password"
+                    type="password"
+                    placeholder={hasSensitive['mail.smtp_password']
+                        ? '••••••••'
+                        : ''}
+                    bind:value={form.settings['mail.smtp_password']}
+                />
             </div>
         </div>
 
         <div class="rounded-lg border bg-card p-5 flex flex-col gap-1.5">
             <Label for="notification_emails">Benachrichtigungs-Empfänger</Label>
-            <Input id="notification_emails" placeholder="bestellungen@dormed.de, info@dormed.de" bind:value={form.settings['shop.notification_emails']} />
+            <Input
+                id="notification_emails"
+                placeholder="bestellungen@dormed.de, info@dormed.de"
+                bind:value={form.settings['shop.notification_emails']}
+            />
             <p class="text-xs text-muted-foreground">
-                Empfänger der Bestell-Benachrichtigung (mehrere durch Komma getrennt). Leer = Absenderadresse.
+                Empfänger der Bestell-Benachrichtigung (mehrere durch Komma
+                getrennt). Leer = Absenderadresse.
             </p>
         </div>
 
         <div class="flex justify-end gap-2">
-            <Button type="button" variant="secondary" onclick={checkMail} disabled={checkingMail}>
+            <Button
+                type="button"
+                variant="secondary"
+                onclick={checkMail}
+                disabled={checkingMail}
+            >
                 {#if checkingMail}
                     <Loader2 class="size-4 animate-spin" />
                 {/if}
