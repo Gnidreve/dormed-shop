@@ -9,7 +9,7 @@ class AddressRules
      */
     private const BASE = [
         'company' => ['nullable', 'string', 'max:255'],
-        'salutation' => ['nullable', 'string', 'in:Herr,Frau'],
+        'salutation' => ['nullable', 'string', 'in:Herr,Frau,Firma'],
         'first_name' => ['required', 'string', 'max:255'],
         'last_name' => ['required', 'string', 'max:255'],
         'street' => ['required', 'string', 'max:255'],

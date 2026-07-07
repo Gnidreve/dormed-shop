@@ -42,6 +42,37 @@ class AddressSettingsTest extends TestCase
     }
 
     /**
+     * DHL-Stil: "Firma" ist eine Anrede-Option; der Firmenname kommt dann mit.
+     */
+    public function test_company_salutation_is_accepted(): void
+    {
+        $customer = Customer::factory()->create();
+
+        $this->actingAs($customer)
+            ->put(route('addresses.update'), [
+                'billing_same_as_shipping' => true,
+                'shipping' => [
+                    'salutation' => 'Firma',
+                    'company' => 'Praxis Dr. Muster GmbH',
+                    'first_name' => 'Erika',
+                    'last_name' => 'Mustermann',
+                    'street' => 'Musterstraße',
+                    'house_number' => '1',
+                    'zip' => '44135',
+                    'city' => 'Dortmund',
+                    'country' => 'DE',
+                ],
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('addresses', [
+            'customer_id' => $customer->id,
+            'salutation' => 'Firma',
+            'company' => 'Praxis Dr. Muster GmbH',
+        ]);
+    }
+
+    /**
      * Das User-Settings-Modal lädt die Formulardaten per fetch (Accept: json).
      */
     public function test_addresses_are_returned_as_json_for_the_settings_modal(): void
