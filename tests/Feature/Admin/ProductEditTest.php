@@ -3,6 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\Manufacturer;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -129,5 +130,36 @@ class ProductEditTest extends TestCase
                 'manufacturer_id' => 99999,
             ])
             ->assertSessionHasErrors(['manufacturer_id']);
+    }
+
+    public function test_destroy_deletes_product_without_orders(): void
+    {
+        $product = Product::factory()->create();
+
+        $this->actingAsAdmin()
+            ->delete(route('admin.products.destroy', $product))
+            ->assertRedirect(route('admin.products.index'));
+
+        $this->assertDatabaseMissing('products', ['id' => $product->id]);
+    }
+
+    public function test_destroy_refuses_product_that_was_ordered(): void
+    {
+        $product = Product::factory()->create();
+        $order = Order::factory()->create();
+        $order->items()->create([
+            'product_id' => $product->id,
+            'product_name' => $product->name,
+            'unit_price' => $product->price,
+            'quantity' => 1,
+        ]);
+
+        $this->actingAsAdmin()
+            ->from(route('admin.products.index'))
+            ->delete(route('admin.products.destroy', $product))
+            ->assertRedirect(route('admin.products.index'))
+            ->assertSessionHas('error');
+
+        $this->assertDatabaseHas('products', ['id' => $product->id]);
     }
 }

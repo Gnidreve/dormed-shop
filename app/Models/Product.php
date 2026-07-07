@@ -57,6 +57,14 @@ class Product extends Model
         return $this->hasMany(Rating::class)->latest();
     }
 
+    /**
+     * @return HasMany<OrderItem, $this>
+     */
+    public function orderItems(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
+    }
+
     public function scopeAvailable(Builder $query): Builder
     {
         return $query->where('is_available', true);
