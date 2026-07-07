@@ -220,7 +220,7 @@ erhalten und darf nicht gelöscht werden.**
 
 ## Zahlungen (Payments)
 
-Zwei Bezahlarten, ein gemeinsamer Order-/Mail-Pfad über **`App\Support\Orders\OrderManager`**. Stripe wurde vollständig entfernt (Commit `110890c`).
+Zwei Bezahlarten — mehr gibt es nicht —, ein gemeinsamer Order-/Mail-Pfad über **`App\Support\Orders\OrderManager`**.
 
 | Bezahlart | Flow | Order-Status nach Abschluss |
 | --------- | ---- | --------------------------- |
@@ -231,7 +231,7 @@ Regeln:
 
 - **`OrderManager` ist die einzige Stelle**, die aus dem Cart eine Order baut (`createFromCart`, in DB-Transaktion), Bestätigungsmails versendet (`sendConfirmations`) und „bezahlt"-Übergänge idempotent macht (`markPaid`, atomarer Statuswechsel → keine Doppel-Mails). Neue Gateways hier andocken, nicht in den Controllern duplizieren.
 - **Bestellen nur mit bestätigter E-Mail** (`verified`-Middleware, siehe Auth-Abschnitt).
-- **Angebotene Zahlarten** = Admin-Setting `payment.provider` (`paypal` = PayPal + Rechnung, `invoice` = nur Rechnung). Die `methods`-Labels liegen in `config/shop.php`. Auswahl-UI: Radio auf `Checkout/Confirm`.
+- **Angebotene Zahlarten sind fest verdrahtet**: Kauf auf Rechnung + PayPal (kein Admin-Setting, kein Provider-Umschalter). Labels/Reihenfolge in `config/shop.php`, Auswahl-UI: Radio auf `Checkout/Confirm`.
 - **Sandbox/Live** = `App\Support\PaymentMode`. Setting `payment.mode` (sandbox|live) gewinnt, sonst Fallback auf `APP_ENV` (production = live). Im Admin unter Einstellungen → Zahlungsarten umschaltbar.
 - **Secrets** liegen verschlüsselt in `settings` (`Setting::$encryptedKeys`) — **Single Source of Truth**. Es gibt keine `PAYPAL_*`-env-Fallbacks mehr; Erstbefüllung nur über `SEED_PAYPAL_*` + `PaymentSeeder`.
 - **Webhooks** (`/paypal/webhook`): signaturverifiziert; `CAPTURE.COMPLETED` → `markPaid`; `CAPTURE.REFUNDED`/`DENIED` setzen Payment **und** Order (Achtung: beim Refund ist `resource.id` die Refund-ID, die Capture-ID steckt im `up`-Link).

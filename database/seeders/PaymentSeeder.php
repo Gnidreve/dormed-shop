@@ -10,9 +10,6 @@ class PaymentSeeder extends Seeder
     public function run(): void
     {
         $settings = [
-            // General
-            'payment.provider' => env('SEED_PAYMENT_PROVIDER'),
-
             // PayPal — Sandbox
             'paypal.sandbox.client_id' => env('SEED_PAYPAL_SANDBOX_CLIENT_ID'),
             'paypal.sandbox.client_secret' => env('SEED_PAYPAL_SANDBOX_CLIENT_SECRET'),

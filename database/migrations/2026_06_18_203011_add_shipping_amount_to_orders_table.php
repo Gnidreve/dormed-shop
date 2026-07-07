@@ -12,8 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table): void {
-            $table->string('stripe_checkout_session_id')->nullable()->unique()->after('status');
-            $table->string('stripe_payment_intent_id')->nullable()->after('stripe_checkout_session_id');
             $table->decimal('shipping_amount', 10, 2)->default(0)->after('total_amount');
         });
     }
@@ -21,7 +19,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('orders', function (Blueprint $table): void {
-            $table->dropColumn(['stripe_checkout_session_id', 'stripe_payment_intent_id', 'shipping_amount']);
+            $table->dropColumn(['shipping_amount']);
         });
     }
 };

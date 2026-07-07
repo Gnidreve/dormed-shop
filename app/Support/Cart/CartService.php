@@ -5,7 +5,6 @@ namespace App\Support\Cart;
 use App\Contracts\CartStore;
 use App\Models\Product;
 use App\Models\ProductVariant;
-use App\Models\Setting;
 use App\Models\ShippingMethod;
 use Illuminate\Support\Collection;
 
@@ -273,15 +272,9 @@ class CartService
     {
         $methods = [];
         $index = 0;
-        $activeProvider = Setting::get('payment.provider') ?? 'paypal';
-        $providers = config('shop.cart.providers', []);
 
-        // Invoice is always available; PayPal is shown additionally when active.
-        $visibleProviders = array_unique(array_filter(['invoice', $activeProvider]));
-
-        foreach ($visibleProviders as $provider) {
-            $config = $providers[$provider] ?? [];
-
+        // Fixed line-up: invoice + PayPal (order and labels from config/shop.php).
+        foreach (config('shop.cart.providers', []) as $provider => $config) {
             foreach ($config['methods'] ?? [] as $method) {
                 $methodId = (string) $method['id'];
 

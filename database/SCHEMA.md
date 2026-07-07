@@ -200,9 +200,8 @@ Bestellungen mit JSON-Adress-Snapshots (immutable zum Zeitpunkt der Bestellung).
 | `created_at`                | datetime | YES      | —           |                                     |
 | `updated_at`                | datetime | YES      | —           |                                     |
 
-> Die `stripe_*`-Spalten wurden mit der Stripe-Entfernung gedroppt
-> (Migration `2026_07_04_000001`). `customer_id` ist seit Migration
-> `2026_07_07_175921` nullable mit `ON DELETE SET NULL`.
+> `customer_id` ist seit Migration `2026_07_07_175921` nullable mit
+> `ON DELETE SET NULL` (Bestellhistorie überlebt die Kontolöschung).
 
 JSON-Struktur (shipping_address / billing_address):
 ```json

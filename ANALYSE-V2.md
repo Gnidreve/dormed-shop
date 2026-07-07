@@ -55,6 +55,14 @@ composer audit + npm audit sauber.
 - **S-B erledigt** (07.07.2026): E-Mail-Verifikation echt gemacht
   (`MustVerifyEmail` + deutsche Mail) und Bestell-Hebel gesetzt — Checkout
   und PayPal-Endpoints verlangen `verified`. 5 neue Tests, Suite 192/192.
+- **Zahlarten fest verdrahtet + Stripe-freie Migrationshistorie**
+  (07.07.2026, Entscheidung Linus): Setting `payment.provider` komplett
+  entfernt (Seeder, Admin-UI-Umschalter, Whitelist, CartService) — es gibt
+  fix Rechnung + PayPal. Migrationen umgeschrieben, als hätte Stripe nie
+  existiert (2 Dateien gelöscht, add-Migration auf `shipping_amount`
+  reduziert); Schema-Diff vor/nach `migrate:fresh` byte-identisch.
+  Damit ist auch die S-C-Anmerkung zu `payment.provider`-Validierung
+  gegenstandslos (nur noch `payment.mode` offen).
 
 ---
 

@@ -9,9 +9,8 @@ return [
         |--------------------------------------------------------------------------
         | Payment Providers
         |--------------------------------------------------------------------------
-        | Invoice ist immer verfügbar. Ob PayPal zusätzlich angeboten wird,
-        | steuert das Admin-Setting `payment.provider`
-        | (siehe CartService::paymentMethods()).
+        | Festes Line-up: Kauf auf Rechnung + PayPal — mehr gibt es nicht.
+        | Reihenfolge hier = Anzeige-Reihenfolge (erste Methode ist Default).
         */
         'providers' => [
             'invoice' => [
