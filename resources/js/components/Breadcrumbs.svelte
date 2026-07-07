@@ -12,8 +12,10 @@
 
     let {
         breadcrumbs = [],
+        currentClass = '',
     }: {
         breadcrumbs: BreadcrumbItemType[];
+        currentClass?: string;
     } = $props();
 </script>
 
@@ -22,7 +24,9 @@
         {#each breadcrumbs as item, index (item.href)}
             <BreadcrumbItem>
                 {#if index === breadcrumbs.length - 1}
-                    <BreadcrumbPage>{item.title}</BreadcrumbPage>
+                    <BreadcrumbPage>
+                        <span class={currentClass}>{item.title}</span>
+                    </BreadcrumbPage>
                 {:else}
                     <BreadcrumbLink asChild>
                         {#snippet children(props)}

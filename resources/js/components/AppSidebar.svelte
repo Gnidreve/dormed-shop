@@ -2,7 +2,6 @@
     import { Link } from '@inertiajs/svelte';
     import Building2 from 'lucide-svelte/icons/building-2';
     import CreditCard from 'lucide-svelte/icons/credit-card';
-    import Layers from 'lucide-svelte/icons/layers';
     import LayoutGrid from 'lucide-svelte/icons/layout-grid';
     import Mail from 'lucide-svelte/icons/mail';
     import Package from 'lucide-svelte/icons/package';
@@ -14,7 +13,6 @@
     import type { Snippet } from 'svelte';
     import AppLogo from '@/components/AppLogo.svelte';
     import NavAdmin from '@/components/NavAdmin.svelte';
-    import NavGroup from '@/components/NavGroup.svelte';
     import NavMain from '@/components/NavMain.svelte';
     import {
         Sidebar,
@@ -74,8 +72,6 @@
 
     <SidebarContent>
         <NavMain items={mainNavItems} />
-        <NavGroup title="Katalog" icon={Layers} items={catalogItems} />
-        <NavGroup title="Einstellungen" icon={Settings} items={settingsItems} />
         <NavMain title="Katalog" items={catalogItems} />
         <NavMain title="Einstellungen" items={settingsItems} />
     </SidebarContent>

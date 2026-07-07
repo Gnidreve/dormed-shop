@@ -16,7 +16,7 @@
     <div class="flex items-center gap-2">
         <SidebarTrigger class="-ml-1 md:hidden" />
         {#if breadcrumbs && breadcrumbs.length > 0}
-            <Breadcrumbs {breadcrumbs} />
+            <Breadcrumbs {breadcrumbs} currentClass="text-base font-semibold" />
         {/if}
     </div>
 </header>
