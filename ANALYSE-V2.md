@@ -42,6 +42,10 @@ composer audit + npm audit sauber.
   `nullOnDelete` umgestellt: Kontolöschung entkoppelt Orders nur noch, statt
   Historie zu kaskadieren (GoBD; Snapshots liegen auf der Order). Suite
   174/174, PHPStan grün, Migration beidseitig auf SQLite verifiziert.
+- **Businesslogik 2 gefixt** (07.07.2026): Refund-/Denied-Webhooks setzen
+  jetzt Payment + Order konsistent; dabei entdeckt und mitgefixt, dass der
+  Refund-Handler wegen Refund-ID ≠ Capture-ID nie gematcht hatte (Capture-ID
+  kommt aus dem `up`-Link). Neue `PayPalWebhookTest`-Datei, Suite 178/178.
 
 ---
 
@@ -149,13 +153,19 @@ scheitert serverseitig an der Cart-Validierung. Sitemap behält bewusst alle
 Produkte. JSON-LD meldet jetzt dynamisch InStock/OutOfStock (+ aggregateRating,
 sku, url, Escaping). Test: `test_show_keeps_unavailable_products_reachable`.
 
-### 2. PayPal-seitige Refunds/Denials aktualisieren die Order nicht
+### 2. PayPal-seitige Refunds/Denials aktualisieren die Order nicht ✅
 
-Webhook-Handler `handleCaptureRefunded/Denied` setzen nur den Payment-Status;
-die Order bleibt `paid`. Der Admin-Refund-Button setzt beides — ein Refund
-direkt im PayPal-Dashboard erzeugt inkonsistente Daten.
-**Vorgehen:** In beiden Handlern auch `$payment->order` auf
-`refunded`/`failed` setzen (+ Tests).
+Webhook-Handler `handleCaptureRefunded/Denied` setzten nur den Payment-Status;
+die Order blieb `paid`. Beim Fix kam ein tieferer Bug zutage:
+`PAYMENT.CAPTURE.REFUNDED` liefert eine *Refund*-Resource — `resource.id` ist
+die Refund-ID, nicht die Capture-ID. Der alte Handler matchte also **nie**,
+Dashboard-Refunds kamen gar nicht erst an.
+**Erledigt (07.07.2026):** Capture-ID wird jetzt aus dem `up`-Link der
+Refund-Resource extrahiert (Fallback: `resource.id`); gemeinsamer
+`markPaymentAndOrder()`-Pfad setzt Payment **und** Order konsistent
+(REFUNDED/refunded bzw. FAILED/failed) — identisch zum Admin-Refund-Button.
+Neue Testdatei `PayPalWebhookTest` (Verifikation abgelehnt, Refund, Denied,
+unbekannte Capture-ID).
 
 ### 3. OrderManager::createFromCart läuft ohne Transaktion
 
@@ -236,7 +246,7 @@ dieselben „default shipping/billing"-Queries → Relation/Helper am Customer
 - Manueller Browser-Test PayPal-Sandbox + „Adresse speichern" (nach B1/B2-Fix)
 - ~~B3: Cleanup verschont invoice-Orders~~ (obsolet — Mechanik entfernt)
 - ~~B4: Produkt-Löschen mit/ohne Bestellungen~~ ✅ (2 Tests in ProductEditTest)
-- Webhook Refund/Denied → Order-Status (bei Businesslogik 2)
+- ~~Webhook Refund/Denied → Order-Status~~ ✅ (PayPalWebhookTest, 4 Tests)
 
 ## Empfohlene Reihenfolge
 
