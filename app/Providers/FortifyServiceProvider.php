@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -48,6 +50,22 @@ class FortifyServiceProvider extends ServiceProvider
         $this->configureActions();
         $this->configureViews();
         $this->configureRateLimiting();
+        $this->configureVerificationMail();
+    }
+
+    /**
+     * German copy for the email-verification notification. Ordering is gated
+     * behind a verified address, so the mail explains why it matters.
+     */
+    private function configureVerificationMail(): void
+    {
+        VerifyEmail::toMailUsing(fn (object $notifiable, string $url): MailMessage => (new MailMessage)
+            ->subject('E-Mail-Adresse bestätigen — dormed24.de')
+            ->greeting('Guten Tag!')
+            ->line('Bitte bestätigen Sie Ihre E-Mail-Adresse. Erst danach können Sie Bestellungen aufgeben.')
+            ->action('E-Mail-Adresse bestätigen', $url)
+            ->line('Falls Sie kein Kundenkonto bei dormed24.de erstellt haben, können Sie diese E-Mail ignorieren.')
+            ->salutation('Ihr dormed24-Team'));
     }
 
     /**
