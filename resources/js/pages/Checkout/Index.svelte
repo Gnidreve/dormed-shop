@@ -55,11 +55,15 @@
         <div class="mx-auto max-w-7xl px-4 py-8 lg:px-8">
             <h1 class="mb-6 text-3xl font-bold text-gray-900">Warenkorb</h1>
 
-            <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
-                <div class="flex-1">
-                    <div class="overflow-hidden rounded-lg border bg-white">
+            <div class="flex flex-col gap-6 lg:flex-row lg:items-stretch">
+                <div class="flex flex-1 flex-col">
+                    <div
+                        class="flex flex-1 flex-col overflow-hidden rounded-lg border bg-white"
+                    >
                         {#if cart.is_empty}
-                            <div class="py-16">
+                            <div
+                                class="flex flex-1 items-center justify-center py-16"
+                            >
                                 <Empty.Root>
                                     <Empty.Header>
                                         <Empty.Media variant="icon">
