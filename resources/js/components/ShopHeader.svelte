@@ -10,6 +10,7 @@
     import AppLogo from '@/components/AppLogo.svelte';
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     import CartSheet from '@/components/CartSheet.svelte'; // benötigt für auskommentierte Sidebar-Variante unten
+    import CookieBanner from '@/components/CookieBanner.svelte';
     import TestModeBanner from '@/components/TestModeBanner.svelte';
     import { Button } from '@/components/ui/button';
     import { Input } from '@/components/ui/input';
@@ -143,7 +144,7 @@
 <svelte:window onclick={handleClickOutside} onkeydown={handleKeydown} />
 
 <TestModeBanner />
-<header class="bg-white shadow-sm">
+<header class="relative z-40 bg-white shadow-sm">
     <!-- Top row: logo + search + icons -->
     <div class="border-b">
         <div
@@ -281,6 +282,9 @@
                     </SheetTrigger>
                     <SheetContent side="left" class="w-72">
                         <SheetTitle class="sr-only">Navigation</SheetTitle>
+                        <Link href="/" class="inline-flex">
+                            <AppLogo />
+                        </Link>
                         <nav class="mt-6 flex flex-col gap-1">
                             {#each staticNavStart as item (item.label)}
                                 <Link
@@ -375,3 +379,5 @@
         </div>
     </div>
 </header>
+
+<CookieBanner />
