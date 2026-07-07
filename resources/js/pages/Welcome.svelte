@@ -1,16 +1,20 @@
 <script lang="ts">
     import { Link, page } from '@inertiajs/svelte';
+    import ArrowLeft from 'lucide-svelte/icons/arrow-left';
     import ArrowRight from 'lucide-svelte/icons/arrow-right';
     import Check from 'lucide-svelte/icons/check';
     import FileCheck from 'lucide-svelte/icons/file-check';
+    import ImageIcon from 'lucide-svelte/icons/image';
     import PackageCheck from 'lucide-svelte/icons/package-check';
     import Phone from 'lucide-svelte/icons/phone';
+    import Rocket from 'lucide-svelte/icons/rocket';
     import ShieldCheck from 'lucide-svelte/icons/shield-check';
     import Truck from 'lucide-svelte/icons/truck';
     import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
     import AppFooter from '@/components/AppFooter.svelte';
     import AppHead from '@/components/AppHead.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
+    import { formatPrice } from '@/lib/currency';
 
     const trustItems = [
         {
@@ -52,6 +56,11 @@
             text: 'Vom Verbrauchsmaterial bis zur Medizintechnik bestellen Sie mit wenigen Klicks und klarer Betreuung.',
         },
     ] as const;
+
+    const featureSectionItems = Array.from({ length: 4 }, () => ({
+        title: 'Benefit driven feature title',
+        text: 'Shortly describe how this feature solves a specific user problem.',
+    }));
 
     const highlightProducts = [
         {
@@ -106,7 +115,55 @@
         fax_href: string;
     };
 
+    type RandomProduct = {
+        id: number;
+        name: string;
+        price: string | null;
+        image_url: string | null;
+    };
+
+    let {
+        randomProductsTitle = 'Entdecken Sie unser Sortiment',
+        randomProducts = [],
+    }: {
+        randomProductsTitle?: string;
+        randomProducts?: RandomProduct[];
+    } = $props();
+
     const contact = $derived(page.props.contact as ContactInfo);
+
+    let activeProductIndex = $state(0);
+    const activeProduct = $derived(
+        randomProducts[activeProductIndex] ?? randomProducts[0],
+    );
+
+    $effect(() => {
+        if (activeProductIndex >= randomProducts.length) {
+            activeProductIndex = 0;
+        }
+    });
+
+    function showPreviousProduct() {
+        if (randomProducts.length === 0) return;
+
+        activeProductIndex =
+            activeProductIndex === 0
+                ? randomProducts.length - 1
+                : activeProductIndex - 1;
+    }
+
+    function showNextProduct() {
+        if (randomProducts.length === 0) return;
+
+        activeProductIndex =
+            activeProductIndex === randomProducts.length - 1
+                ? 0
+                : activeProductIndex + 1;
+    }
+
+    function displayProductPrice(price: string | null): string {
+        return price === null ? 'Preis auf Anfrage' : formatPrice(price);
+    }
 </script>
 
 <AppHead
@@ -118,23 +175,19 @@
     <ShopHeader />
 
     <!-- Hero -->
-    <section class="relative overflow-hidden">
+    <section
+        class="relative -mt-16 min-h-[calc(72svh+4rem)] overflow-hidden pt-16 md:-mt-28 md:min-h-[calc(100svh+7rem)] md:pt-28"
+    >
         <!-- Background image fills the section -->
         <img
             src="/assets/hero.png"
             alt=""
             aria-hidden="true"
-            class="absolute inset-0 h-full w-full object-cover object-center"
+            class="absolute inset-x-0 -top-20 h-[calc(100%+5rem)] w-full object-cover object-center md:-top-28 md:h-[calc(100%+7rem)]"
         />
-        <!-- Gradient overlay: left side fully opaque navy, fades to transparent on the right -->
-        <div
-            class="absolute inset-0"
-            style="background: linear-gradient(to right, #0d1f44 38%, #0d1f4499 58%, transparent 72%)"
-        ></div>
-
         <!-- Content -->
         <div
-            class="relative z-10 mx-auto max-w-7xl px-8 py-16 lg:px-8 lg:py-20"
+            class="relative z-10 mx-auto flex min-h-[72svh] max-w-7xl items-center px-8 py-16 lg:min-h-[calc(100svh-4.5rem)] lg:px-8 lg:py-20"
         >
             <div class="max-w-lg">
                 <h1
@@ -171,10 +224,51 @@
                     >
                         02301 – 188/600
                     </span>
-                    <span class="text-2xl font-bold tracking-wide text-white lg:text-3xl">
+                    <span
+                        class="text-2xl font-bold tracking-wide text-white lg:text-3xl"
+                    >
                         {contact.phone}
                     </span>
                 </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-white px-2 py-2">
+        <div
+            class="rounded-2xl border border-gray-200 bg-white px-6 py-20 text-center sm:px-8 lg:px-12 lg:py-28"
+        >
+            <p class="text-sm font-semibold text-gray-500 lg:text-base">
+                Feature Section
+            </p>
+            <h2
+                class="mx-auto mt-6 max-w-3xl text-4xl font-bold leading-tight text-black sm:text-5xl lg:text-6xl"
+            >
+                Show your solution's impact on user success
+            </h2>
+            <p
+                class="mx-auto mt-7 max-w-2xl text-lg leading-8 text-gray-500 sm:text-xl"
+            >
+                Explain in one or two concise sentences how your solution
+                transforms users' challenges into positive outcomes.
+            </p>
+
+            <div class="mt-16 grid gap-14 md:grid-cols-2 lg:grid-cols-4">
+                {#each featureSectionItems as item, index (index)}
+                    <article class="mx-auto max-w-xs">
+                        <div
+                            class="mx-auto grid size-12 place-items-center rounded-lg border border-gray-200 bg-white shadow-sm"
+                        >
+                            <Rocket class="size-5 text-black" />
+                        </div>
+                        <h3 class="mt-8 text-base font-bold text-black">
+                            {item.title}
+                        </h3>
+                        <p class="mt-4 text-base leading-7 text-gray-500">
+                            {item.text}
+                        </p>
+                    </article>
+                {/each}
             </div>
         </div>
     </section>
@@ -236,6 +330,138 @@
             </div>
         </div>
     </section>
+
+    {#if randomProducts.length > 0 && activeProduct}
+        <section class="bg-white">
+            <div class="mx-auto max-w-7xl px-4 py-12 lg:px-8 lg:py-16">
+                <h2
+                    class="text-4xl font-bold leading-tight text-black md:text-center lg:text-5xl"
+                >
+                    {randomProductsTitle}
+                </h2>
+
+                <div class="mt-10 md:hidden">
+                    <Link
+                        href={ProductController.show.url(activeProduct)}
+                        class="block text-center"
+                    >
+                        <div
+                            class="relative grid aspect-square place-items-center overflow-hidden rounded-xl bg-[#e9e9e9]"
+                        >
+                            {#if activeProduct.image_url}
+                                <img
+                                    src={activeProduct.image_url}
+                                    alt={activeProduct.name}
+                                    class="size-full object-cover object-center"
+                                />
+                            {:else}
+                                <div
+                                    class="relative grid size-24 place-items-center rounded-full border border-gray-200 bg-[#ededed]"
+                                >
+                                    <span
+                                        class="absolute left-1/2 top-1/2 h-px w-36 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-gray-200"
+                                    ></span>
+                                    <span
+                                        class="absolute left-1/2 top-1/2 h-px w-36 -translate-x-1/2 -translate-y-1/2 -rotate-45 bg-gray-200"
+                                    ></span>
+                                    <ImageIcon
+                                        class="relative size-4 text-gray-400"
+                                    />
+                                </div>
+                            {/if}
+                        </div>
+
+                        <h3 class="mt-5 text-base font-bold text-black">
+                            {activeProduct.name}
+                        </h3>
+                        <p class="mt-3 text-2xl font-bold text-black">
+                            {displayProductPrice(activeProduct.price)}
+                        </p>
+                    </Link>
+
+                    <div class="mt-12 flex items-center justify-between gap-6">
+                        <div class="flex items-center gap-2">
+                            {#each randomProducts as product, index (product.id)}
+                                <button
+                                    type="button"
+                                    class={index === activeProductIndex
+                                        ? 'h-2 w-10 rounded-full bg-black'
+                                        : 'size-2.5 rounded-full bg-gray-300'}
+                                    aria-label={`${product.name} anzeigen`}
+                                    aria-current={index === activeProductIndex}
+                                    onclick={() =>
+                                        (activeProductIndex = index)}
+                                ></button>
+                            {/each}
+                        </div>
+
+                        <div class="flex shrink-0 items-center gap-3">
+                            <button
+                                type="button"
+                                class="grid size-12 place-items-center rounded-full border bg-white text-black shadow-sm transition hover:bg-gray-50"
+                                aria-label="Vorheriges Produkt"
+                                onclick={showPreviousProduct}
+                            >
+                                <ArrowLeft class="size-5" />
+                            </button>
+                            <button
+                                type="button"
+                                class="grid size-12 place-items-center rounded-full border bg-white text-black shadow-sm transition hover:bg-gray-50"
+                                aria-label="Nächstes Produkt"
+                                onclick={showNextProduct}
+                            >
+                                <ArrowRight class="size-5" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="mt-12 hidden gap-x-5 gap-y-10 md:grid md:grid-cols-2 lg:grid-cols-4"
+                >
+                    {#each randomProducts as product (product.id)}
+                        <Link
+                            href={ProductController.show.url(product)}
+                            class="text-center"
+                        >
+                            <div
+                                class="relative grid aspect-square place-items-center overflow-hidden rounded-xl bg-[#e9e9e9]"
+                            >
+                                {#if product.image_url}
+                                    <img
+                                        src={product.image_url}
+                                        alt={product.name}
+                                        class="size-full object-cover object-center transition duration-300 hover:scale-105"
+                                    />
+                                {:else}
+                                    <div
+                                        class="relative grid size-16 place-items-center rounded-full border border-gray-200 bg-[#ededed]"
+                                    >
+                                        <span
+                                            class="absolute left-1/2 top-1/2 h-px w-24 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-gray-200"
+                                        ></span>
+                                        <span
+                                            class="absolute left-1/2 top-1/2 h-px w-24 -translate-x-1/2 -translate-y-1/2 -rotate-45 bg-gray-200"
+                                        ></span>
+                                        <ImageIcon
+                                            class="relative size-3.5 text-gray-400"
+                                        />
+                                    </div>
+                                {/if}
+                            </div>
+
+                            <h3 class="mt-5 text-base font-bold text-black">
+                                {product.name}
+                            </h3>
+                            <p class="mt-3 text-2xl font-bold text-black">
+                                {displayProductPrice(product.price)}
+                            </p>
+                        </Link>
+                    {/each}
+                </div>
+            </div>
+        </section>
+    {/if}
 
     <section class="bg-white">
         <div class="mx-auto max-w-7xl px-4 py-12 lg:px-8 lg:py-16">
