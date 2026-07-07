@@ -1,5 +1,8 @@
 export type CartItem = {
+    line_key: string;
     product_id: number;
+    variant_id: number | null;
+    variant_label: string | null;
     name: string;
     description: string | null;
     product_number: string;

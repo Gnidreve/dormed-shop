@@ -4,6 +4,7 @@ namespace App\Support\Cart;
 
 use App\Contracts\CartStore;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\Setting;
 use App\Models\ShippingMethod;
 use Illuminate\Support\Collection;
@@ -76,31 +77,50 @@ class CartService
         ];
     }
 
-    public function add(Product $product, int $quantity): void
+    public function add(Product $product, int $quantity, ?ProductVariant $variant = null): void
     {
         $state = $this->state();
-        $productId = (string) $product->getKey();
-        $existingQuantity = (int) ($state['items'][$productId] ?? 0);
+        $lineKey = $this->lineKey((int) $product->getKey(), $variant?->getKey());
+        $existingQuantity = (int) ($state['items'][$lineKey] ?? 0);
 
-        $state['items'][$productId] = min(99, $existingQuantity + $quantity);
+        $state['items'][$lineKey] = min(99, $existingQuantity + $quantity);
 
         $this->persist($state);
     }
 
-    public function updateQuantity(Product $product, int $quantity): void
+    public function updateQuantity(Product $product, int $quantity, ?ProductVariant $variant = null): void
     {
         $state = $this->state();
-        $state['items'][(string) $product->getKey()] = min(99, max(1, $quantity));
+        $state['items'][$this->lineKey((int) $product->getKey(), $variant?->getKey())] = min(99, max(1, $quantity));
 
         $this->persist($state);
     }
 
-    public function remove(Product $product): void
+    public function remove(Product $product, ?ProductVariant $variant = null): void
     {
         $state = $this->state();
-        unset($state['items'][(string) $product->getKey()]);
+        unset($state['items'][$this->lineKey((int) $product->getKey(), $variant?->getKey())]);
 
         $this->persist($state);
+    }
+
+    /**
+     * Cart lines are keyed "productId" (no variant) or "productId:variantId",
+     * so the same product can sit in the cart once per variant.
+     */
+    private function lineKey(int $productId, ?int $variantId): string
+    {
+        return $variantId ? "{$productId}:{$variantId}" : (string) $productId;
+    }
+
+    /**
+     * @return array{0: int, 1: int|null} [productId, variantId]
+     */
+    private function parseLineKey(string $lineKey): array
+    {
+        [$productId, $variantId] = array_pad(explode(':', $lineKey, 2), 2, null);
+
+        return [(int) $productId, ((int) $variantId) > 0 ? (int) $variantId : null];
     }
 
     public function setShippingMethod(string $shippingMethod): void
@@ -160,35 +180,55 @@ class CartService
 
     private function items(array $rawItems): Collection
     {
-        $productIds = array_map('intval', array_keys($rawItems));
-
-        if ($productIds === []) {
+        if ($rawItems === []) {
             return collect();
         }
 
+        $productIds = collect(array_keys($rawItems))
+            ->map(fn (string $lineKey): int => $this->parseLineKey($lineKey)[0])
+            ->unique()
+            ->all();
+
         $products = Product::query()
-            ->with('manufacturer')
+            ->with('manufacturer', 'variants')
             ->with(['images' => fn ($query) => $query->where('sort_order', 0)])
             ->whereKey($productIds)
-            ->orderBy('name')
             ->get()
             ->keyBy(fn (Product $product) => (string) $product->getKey());
 
         return collect($rawItems)
-            ->map(function (int $quantity, string $productId) use ($products): ?array {
+            ->map(function (int $quantity, string $lineKey) use ($products): ?array {
+                [$productId, $variantId] = $this->parseLineKey($lineKey);
+
                 /** @var Product|null $product */
-                $product = $products->get($productId);
+                $product = $products->get((string) $productId);
 
                 if ($quantity < 1) {
                     return null;
                 }
 
-                $unitPriceCents = $this->amountToCents($product?->price ?? 0);
+                /** @var ProductVariant|null $variant */
+                $variant = $variantId !== null ? $product?->variants->firstWhere('id', $variantId) : null;
+                // A chosen variant that no longer exists makes the line unbuyable.
+                $variantMissing = $variantId !== null && $variant === null;
+
+                $unitPriceCents = $this->amountToCents($variant->price ?? $product->price ?? 0);
                 $lineTotalCents = $unitPriceCents * $quantity;
 
+                $name = (string) ($product?->name ?? 'Produkt nicht verfügbar');
+
+                // The variant label becomes part of the line name so cart UI,
+                // checkout, order snapshot and mails all show it consistently.
+                if ($variant !== null) {
+                    $name .= ' – '.$variant->label;
+                }
+
                 return [
-                    'product_id' => (int) $productId,
-                    'name' => (string) ($product?->name ?? 'Produkt nicht verfügbar'),
+                    'line_key' => $lineKey,
+                    'product_id' => $productId,
+                    'variant_id' => $variantId,
+                    'variant_label' => $variant?->label,
+                    'name' => $name,
                     'description' => $product?->description,
                     'product_number' => (string) ($product?->id ?? $productId),
                     'manufacturer_name' => $product?->manufacturer?->name,
@@ -198,7 +238,7 @@ class CartService
                     'line_total_cents' => $lineTotalCents,
                     'image_url' => $product?->images->first()?->url,
                     'product_url' => $product ? route('products.show', $product) : route('products.index'),
-                    'is_available' => $product !== null && $product->is_available,
+                    'is_available' => $product !== null && $product->is_available && ! $variantMissing,
                 ];
             })
             ->filter();
@@ -262,13 +302,8 @@ class CartService
 
     public function hasUnavailableItems(): bool
     {
-        $productIds = array_map('intval', array_keys($this->state()['items']));
-
-        if ($productIds === []) {
-            return false;
-        }
-
-        return Product::query()->whereKey($productIds)->available()->count() < count($productIds);
+        return $this->items($this->state()['items'])
+            ->contains(fn (array $item): bool => ! $item['is_available']);
     }
 
     public function isAddressComplete(): bool
@@ -291,17 +326,17 @@ class CartService
 
         return [
             'items' => collect($rawState['items'] ?? [])
-                ->mapWithKeys(function (mixed $item, mixed $productId): array {
-                    $normalizedProductId = (int) $productId;
+                ->mapWithKeys(function (mixed $item, mixed $lineKey): array {
+                    [$productId, $variantId] = $this->parseLineKey((string) $lineKey);
                     // Older sessions stored a {quantity, unit_price, name, product_number}
                     // shape per item; only the quantity still matters going forward.
                     $normalizedQuantity = (int) (is_array($item) ? ($item['quantity'] ?? 0) : $item);
 
-                    if ($normalizedProductId < 1 || $normalizedQuantity < 1) {
+                    if ($productId < 1 || $normalizedQuantity < 1) {
                         return [];
                     }
 
-                    return [(string) $normalizedProductId => min(99, $normalizedQuantity)];
+                    return [$this->lineKey($productId, $variantId) => min(99, $normalizedQuantity)];
                 })
                 ->all(),
             'shipping_method' => in_array(($rawState['shipping_method'] ?? null), $shippingMethodIds, true)

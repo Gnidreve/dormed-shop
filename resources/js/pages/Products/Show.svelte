@@ -226,6 +226,7 @@
             cartRoutes.items.store.url(),
             {
                 product_id: product.id,
+                variant_id: selectedVariant?.id ?? null,
                 quantity,
             },
             {

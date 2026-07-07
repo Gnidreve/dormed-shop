@@ -6,6 +6,7 @@ use App\Http\Requests\Cart\AddCartItemRequest;
 use App\Http\Requests\Cart\UpdateCartItemRequest;
 use App\Http\Requests\Cart\UpdateCartShippingMethodRequest;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Support\Cart\CartService;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -27,27 +28,44 @@ class CartController extends Controller
     public function store(AddCartItemRequest $request): RedirectResponse
     {
         $product = Product::query()->findOrFail($request->integer('product_id'));
-        $this->cartService->add($product, $request->integer('quantity'));
+
+        $variant = null;
+
+        if ($request->filled('variant_id')) {
+            /** @var ProductVariant $variant */
+            $variant = $product->variants()->findOrFail($request->integer('variant_id'));
+        }
+
+        $this->cartService->add($product, $request->integer('quantity'), $variant);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Produkt wurde in den Warenkorb gelegt.']);
 
         return back();
     }
 
-    public function update(UpdateCartItemRequest $request, Product $product): RedirectResponse
+    public function update(UpdateCartItemRequest $request, Product $product, ?ProductVariant $variant = null): RedirectResponse
     {
-        $this->cartService->updateQuantity($product, $request->integer('quantity'));
+        $this->assertVariantBelongsToProduct($product, $variant);
+
+        $this->cartService->updateQuantity($product, $request->integer('quantity'), $variant);
 
         return back();
     }
 
-    public function destroy(Product $product): RedirectResponse
+    public function destroy(Product $product, ?ProductVariant $variant = null): RedirectResponse
     {
-        $this->cartService->remove($product);
+        $this->assertVariantBelongsToProduct($product, $variant);
+
+        $this->cartService->remove($product, $variant);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Produkt wurde aus dem Warenkorb entfernt.']);
 
         return back();
+    }
+
+    private function assertVariantBelongsToProduct(Product $product, ?ProductVariant $variant): void
+    {
+        abort_unless($variant === null || $variant->product_id === $product->id, 404);
     }
 
     public function updateShipping(UpdateCartShippingMethodRequest $request): RedirectResponse

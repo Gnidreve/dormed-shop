@@ -15,22 +15,28 @@
     } from '@/components/ui/sheet';
     import { formatPrice } from '@/lib/currency';
     import cartRoutes from '@/routes/cart';
-    import type { Cart } from '@/types';
+    import type { Cart, CartItem } from '@/types';
 
     let { cart }: { cart: Cart } = $props();
 
     const formattedTotal = $derived(formatPrice(cart.total));
 
-    function updateQuantity(productId: number, quantity: number) {
+    function lineArgs(item: CartItem) {
+        return item.variant_id
+            ? { product: item.product_id, variant: item.variant_id }
+            : { product: item.product_id };
+    }
+
+    function updateQuantity(item: CartItem, quantity: number) {
         router.patch(
-            cartRoutes.items.update.url(productId),
+            cartRoutes.items.update.url(lineArgs(item)),
             { quantity },
             { preserveScroll: true, preserveState: true },
         );
     }
 
-    function removeItem(productId: number) {
-        router.delete(cartRoutes.items.destroy.url(productId), {
+    function removeItem(item: CartItem) {
+        router.delete(cartRoutes.items.destroy.url(lineArgs(item)), {
             preserveScroll: true,
             preserveState: true,
         });
@@ -84,11 +90,13 @@
             </div>
 
             {#if cart.is_empty}
-                <div class="rounded-lg border bg-white px-6 py-10 text-center text-sm text-gray-500">
+                <div
+                    class="rounded-lg border bg-white px-6 py-10 text-center text-sm text-gray-500"
+                >
                     Ihr Warenkorb ist leer.
                 </div>
             {:else}
-                {#each cart.items as item (item.product_id)}
+                {#each cart.items as item (item.line_key)}
                     <div class="mb-4 rounded-lg border bg-white p-3">
                         <div class="flex gap-3">
                             <div
@@ -101,12 +109,16 @@
                                         class="size-full object-cover object-center"
                                     />
                                 {:else}
-                                    <ShoppingCart class="size-6 text-gray-300" />
+                                    <ShoppingCart
+                                        class="size-6 text-gray-300"
+                                    />
                                 {/if}
                             </div>
 
                             <div class="min-w-0 flex-1">
-                                <div class="flex items-start justify-between gap-2">
+                                <div
+                                    class="flex items-start justify-between gap-2"
+                                >
                                     <Link
                                         href={item.product_url}
                                         class="text-sm font-semibold leading-snug text-gray-900 hover:text-[#1a6bbf]"
@@ -116,7 +128,7 @@
                                     <button
                                         class="shrink-0 rounded p-0.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
                                         aria-label="Entfernen"
-                                        onclick={() => removeItem(item.product_id)}
+                                        onclick={() => removeItem(item)}
                                     >
                                         <X class="size-4" />
                                     </button>
@@ -133,17 +145,21 @@
                             <div class="flex items-center rounded border">
                                 <button
                                     class="flex size-8 items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-800 disabled:opacity-40"
-                                    onclick={() => updateQuantity(item.product_id, item.quantity - 1)}
+                                    onclick={() =>
+                                        updateQuantity(item, item.quantity - 1)}
                                     disabled={item.quantity <= 1}
                                 >
                                     <Minus class="size-3.5" />
                                 </button>
-                                <span class="w-8 text-center text-sm font-medium">
+                                <span
+                                    class="w-8 text-center text-sm font-medium"
+                                >
                                     {item.quantity}
                                 </span>
                                 <button
                                     class="flex size-8 items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-800"
-                                    onclick={() => updateQuantity(item.product_id, item.quantity + 1)}
+                                    onclick={() =>
+                                        updateQuantity(item, item.quantity + 1)}
                                 >
                                     <Plus class="size-3.5" />
                                 </button>
@@ -159,14 +175,20 @@
             <div class="mt-4 flex flex-col gap-2 border-t pt-4 text-sm">
                 <div class="flex justify-between">
                     <span class="text-gray-600">Zwischensumme</span>
-                    <span class="font-semibold">{formatPrice(cart.subtotal)}*</span>
+                    <span class="font-semibold"
+                        >{formatPrice(cart.subtotal)}*</span
+                    >
                 </div>
                 <div class="flex justify-between">
                     <div>
                         <span class="text-gray-600">Versandkosten</span>
-                        <p class="text-xs text-gray-400">{cart.selected_shipping_method?.label}</p>
+                        <p class="text-xs text-gray-400">
+                            {cart.selected_shipping_method?.label}
+                        </p>
                     </div>
-                    <span class="font-semibold">+ {formatPrice(cart.shipping_total)}*</span>
+                    <span class="font-semibold"
+                        >+ {formatPrice(cart.shipping_total)}*</span
+                    >
                 </div>
             </div>
 

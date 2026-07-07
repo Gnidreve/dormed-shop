@@ -7,6 +7,7 @@ use App\Mail\OrderConfirmationMail;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\ShippingMethod;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
@@ -250,6 +251,160 @@ class CartFlowTest extends TestCase
                 'agreed_to_terms' => true,
             ])
             ->assertSessionHasErrors('shipping_address');
+
+        $this->assertSame(0, Order::query()->count());
+        Mail::assertNothingSent();
+    }
+
+    public function test_variant_is_added_with_its_own_price_and_label(): void
+    {
+        $product = Product::factory()->create(['name' => 'Massageliege', 'price' => '100.00']);
+        $variant = ProductVariant::factory()->for($product)->create(['label' => 'Breit', 'price' => '149.50']);
+
+        $this->post(route('cart.items.store'), [
+            'product_id' => $product->id,
+            'variant_id' => $variant->id,
+            'quantity' => 2,
+        ])->assertRedirect();
+
+        $this->get(route('checkout.index'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('cart.items.0.variant_id', $variant->id)
+                ->where('cart.items.0.variant_label', 'Breit')
+                ->where('cart.items.0.name', 'Massageliege – Breit')
+                ->where('cart.items.0.unit_price', '149.50')
+                ->where('cart.total', '299.00'));
+    }
+
+    public function test_product_with_variants_cannot_be_added_without_choosing_one(): void
+    {
+        $product = Product::factory()->create();
+        ProductVariant::factory()->for($product)->create();
+
+        $this->post(route('cart.items.store'), [
+            'product_id' => $product->id,
+            'quantity' => 1,
+        ])->assertSessionHasErrors('variant_id');
+    }
+
+    public function test_variant_of_another_product_is_rejected(): void
+    {
+        $product = Product::factory()->create();
+        $foreignVariant = ProductVariant::factory()->for(Product::factory())->create();
+
+        $this->post(route('cart.items.store'), [
+            'product_id' => $product->id,
+            'variant_id' => $foreignVariant->id,
+            'quantity' => 1,
+        ])->assertSessionHasErrors('variant_id');
+    }
+
+    public function test_different_variants_of_one_product_are_separate_cart_lines(): void
+    {
+        $product = Product::factory()->create(['price' => '10.00']);
+        $small = ProductVariant::factory()->for($product)->create(['label' => 'S', 'price' => '10.00']);
+        $large = ProductVariant::factory()->for($product)->create(['label' => 'L', 'price' => '20.00']);
+
+        $this->post(route('cart.items.store'), [
+            'product_id' => $product->id, 'variant_id' => $small->id, 'quantity' => 1,
+        ])->assertRedirect();
+        $this->post(route('cart.items.store'), [
+            'product_id' => $product->id, 'variant_id' => $large->id, 'quantity' => 1,
+        ])->assertRedirect();
+
+        $this->get(route('checkout.index'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->has('cart.items', 2)
+                ->where('cart.total', '30.00'));
+    }
+
+    public function test_variant_line_can_be_updated_and_removed(): void
+    {
+        $product = Product::factory()->create();
+        $variant = ProductVariant::factory()->for($product)->create();
+        $lineKey = "{$product->id}:{$variant->id}";
+
+        $this->withSession([
+            'cart' => [
+                'items' => [$lineKey => 1],
+                'shipping_method' => (string) $this->freeShipping->id,
+                'payment_method' => 'invoice',
+            ],
+        ])->patch(route('cart.items.update', [$product, $variant]), ['quantity' => 3])
+            ->assertRedirect()
+            ->assertSessionHas("cart.items.{$lineKey}", 3);
+
+        $this->delete(route('cart.items.destroy', [$product, $variant]))
+            ->assertRedirect();
+
+        $this->assertArrayNotHasKey($lineKey, session('cart.items'));
+    }
+
+    public function test_variant_line_rejects_a_variant_of_another_product(): void
+    {
+        $product = Product::factory()->create();
+        $foreignVariant = ProductVariant::factory()->for(Product::factory())->create();
+
+        $this->patch(route('cart.items.update', [$product, $foreignVariant]), ['quantity' => 2])
+            ->assertNotFound();
+    }
+
+    public function test_order_snapshot_captures_variant_price_and_label(): void
+    {
+        Mail::fake();
+
+        $customer = Customer::factory()->create();
+        $product = Product::factory()->create(['name' => 'Massageliege', 'price' => '100.00']);
+        $variant = ProductVariant::factory()->for($product)->create(['label' => 'Breit', 'price' => '149.50']);
+
+        $this->actingAs($customer)
+            ->withSession([
+                'cart' => [
+                    'items' => ["{$product->id}:{$variant->id}" => 2],
+                    'shipping_method' => (string) $this->freeShipping->id,
+                    'payment_method' => 'invoice',
+                    'shipping_address' => $this->completeAddress(),
+                ],
+            ])->post(route('checkout.submit'), [
+                'agreed_to_terms' => true,
+            ])->assertRedirect();
+
+        $order = Order::query()->firstOrFail();
+
+        $this->assertSame('299.00', (string) $order->total_amount);
+        $this->assertDatabaseHas('order_items', [
+            'order_id' => $order->id,
+            'product_id' => $product->id,
+            'product_name' => 'Massageliege – Breit',
+            'unit_price' => '149.50',
+            'quantity' => 2,
+        ]);
+    }
+
+    public function test_deleted_variant_blocks_the_checkout(): void
+    {
+        Mail::fake();
+
+        $customer = Customer::factory()->create();
+        $product = Product::factory()->create(['price' => '100.00']);
+        $variant = ProductVariant::factory()->for($product)->create();
+        $lineKey = "{$product->id}:{$variant->id}";
+
+        $variant->delete();
+
+        $this->actingAs($customer)
+            ->withSession([
+                'cart' => [
+                    'items' => [$lineKey => 1],
+                    'shipping_method' => (string) $this->freeShipping->id,
+                    'payment_method' => 'invoice',
+                    'shipping_address' => $this->completeAddress(),
+                ],
+            ])->post(route('checkout.submit'), [
+                'agreed_to_terms' => true,
+            ])->assertSessionHasErrors('cart');
 
         $this->assertSame(0, Order::query()->count());
         Mail::assertNothingSent();
