@@ -26,7 +26,7 @@ class CustomerOrderController extends Controller
         return Inertia::render('settings/Orders', ['orders' => $orders]);
     }
 
-    public function show(Request $request, Order $order, OrderManager $orderManager): Response
+    public function show(Request $request, Order $order, OrderManager $orderManager): Response|JsonResponse
     {
         abort_unless($order->customer_id === $request->user()->id, 404);
 
@@ -41,26 +41,33 @@ class CustomerOrderController extends Controller
             ->mapWithKeys(fn (array $method) => [$method['id'] => $method['label']])
             ->all();
 
+        $payload = [
+            'id' => $order->id,
+            'status' => $order->status,
+            'payment_method' => $order->payment_method,
+            'payment_method_label' => $paymentLabels[$order->payment_method] ?? $order->payment_method,
+            'created_at' => $order->created_at?->toIso8601String(),
+            'updated_at' => $order->updated_at?->toIso8601String(),
+            'shipping_address' => $order->shipping_address,
+            'billing_address' => $order->billing_address,
+            'items' => $order->items->map(fn ($item) => [
+                'id' => $item->id,
+                'product_name' => $item->product_name,
+                'unit_price' => (string) $item->unit_price,
+                'quantity' => $item->quantity,
+                'image_url' => $item->product?->images->first()?->url,
+            ])->values(),
+            'summary' => $summary,
+            'customer_email' => $request->user()->email,
+        ];
+
+        // JSON für die Detailansicht im User-Settings-Modal.
+        if ($request->wantsJson()) {
+            return response()->json(['order' => $payload]);
+        }
+
         return Inertia::render('settings/Orders/Show', [
-            'order' => [
-                'id' => $order->id,
-                'status' => $order->status,
-                'payment_method' => $order->payment_method,
-                'payment_method_label' => $paymentLabels[$order->payment_method] ?? $order->payment_method,
-                'created_at' => $order->created_at?->toIso8601String(),
-                'updated_at' => $order->updated_at?->toIso8601String(),
-                'shipping_address' => $order->shipping_address,
-                'billing_address' => $order->billing_address,
-                'items' => $order->items->map(fn ($item) => [
-                    'id' => $item->id,
-                    'product_name' => $item->product_name,
-                    'unit_price' => (string) $item->unit_price,
-                    'quantity' => $item->quantity,
-                    'image_url' => $item->product?->images->first()?->url,
-                ])->values(),
-                'summary' => $summary,
-                'customer_email' => $request->user()->email,
-            ],
+            'order' => $payload,
         ]);
     }
 }

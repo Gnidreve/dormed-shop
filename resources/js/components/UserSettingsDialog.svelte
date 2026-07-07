@@ -3,12 +3,14 @@
     // /settings-Seiten). Entweder dieses Modal oder die Seiten fliegen
     // nach der Bewertung wieder raus.
     import { Link, page, router } from '@inertiajs/svelte';
+    import ArrowLeft from 'lucide-svelte/icons/arrow-left';
     import LogOut from 'lucide-svelte/icons/log-out';
     import MapPin from 'lucide-svelte/icons/map-pin';
     import Package from 'lucide-svelte/icons/package';
     import Settings from 'lucide-svelte/icons/settings';
     import Shield from 'lucide-svelte/icons/shield';
     import UserCog from 'lucide-svelte/icons/user-cog';
+    import X from 'lucide-svelte/icons/x';
     import AddressForm from '@/components/AddressForm.svelte';
     import { Button } from '@/components/ui/button';
     import { Checkbox } from '@/components/ui/checkbox';
@@ -41,6 +43,31 @@
         status: string;
         total_amount: string;
         created_at: string;
+    };
+
+    type AddressSnapshot = Record<string, string> | null;
+
+    type OrderDetail = {
+        id: number;
+        status: string;
+        payment_method_label: string | null;
+        created_at: string | null;
+        shipping_address: AddressSnapshot;
+        billing_address: AddressSnapshot;
+        items: {
+            id: number;
+            product_name: string;
+            unit_price: string;
+            quantity: number;
+            image_url: string | null;
+        }[];
+        summary: {
+            subtotal: string;
+            shipping_total: string;
+            vat_rate: number;
+            vat_amount: string;
+            total: string;
+        };
     };
 
     const auth = $derived(page.props.auth);
@@ -79,6 +106,59 @@
     // --- Bestellungen ---
     let orders = $state<OrderRow[] | null>(null);
 
+    // --- Bestelldetail (vollflächig im Modal, ohne Sidebar) ---
+    let selectedOrder = $state<OrderDetail | null>(null);
+    let loadingDetail = $state(false);
+
+    const detailOpen = $derived(loadingDetail || selectedOrder !== null);
+
+    async function openOrderDetail(id: number) {
+        loadingDetail = true;
+
+        const { ok, data } = await fetchJson<{ order: OrderDetail }>(
+            `/customer/orders/${id}`,
+        );
+
+        selectedOrder = ok ? data.order : null;
+        loadingDetail = false;
+    }
+
+    function closeOrderDetail() {
+        selectedOrder = null;
+        loadingDetail = false;
+    }
+
+    function orderCode(id: number): string {
+        return `ORD-${String(id).padStart(5, '0')}`;
+    }
+
+    function formatAddress(address: AddressSnapshot): string[] {
+        if (!address) {
+            return ['-'];
+        }
+
+        const fullName = [
+            address.salutation,
+            address.first_name,
+            address.last_name,
+        ]
+            .filter(Boolean)
+            .join(' ')
+            .trim();
+
+        return [
+            address.company ?? '',
+            fullName,
+            [address.street, address.house_number]
+                .filter(Boolean)
+                .join(' ')
+                .trim(),
+            address.address_line2 ?? '',
+            [address.zip, address.city].filter(Boolean).join(' ').trim(),
+            address.country ?? '',
+        ].filter((line) => line !== '');
+    }
+
     // --- Adressen ---
     function emptyAddress(): AddressData {
         return {
@@ -112,6 +192,8 @@
 
     $effect(() => {
         if (!open) {
+            closeOrderDetail();
+
             return;
         }
 
@@ -255,68 +337,286 @@
             </DialogDescription>
 
             <div class="flex h-[520px] items-stretch">
-                <aside
-                    class="hidden w-48 shrink-0 flex-col gap-1 border-r bg-muted/30 p-3 md:flex"
-                >
-                    {#each panes as pane (pane.id)}
+                {#if !detailOpen}
+                    <aside
+                        class="hidden w-48 shrink-0 flex-col gap-1 border-r bg-muted/30 p-3 md:flex"
+                    >
+                        {#each panes as pane (pane.id)}
+                            <Button
+                                variant="ghost"
+                                class="w-full justify-start {active === pane.id
+                                    ? 'bg-muted'
+                                    : ''}"
+                                onclick={() => (active = pane.id)}
+                            >
+                                <pane.icon class="mr-2 size-4" />
+                                {pane.title}
+                            </Button>
+                        {/each}
+
+                        <Separator class="mb-2 mt-auto" />
+
                         <Button
                             variant="ghost"
-                            class="w-full justify-start {active === pane.id
-                                ? 'bg-muted'
-                                : ''}"
-                            onclick={() => (active = pane.id)}
+                            class="w-full justify-start text-muted-foreground hover:text-destructive"
+                            asChild
                         >
-                            <pane.icon class="mr-2 size-4" />
-                            {pane.title}
+                            {#snippet children(props)}
+                                <Link
+                                    href={logout()}
+                                    as="button"
+                                    class={props.class}
+                                    onclick={() => router.flushAll()}
+                                >
+                                    <LogOut class="mr-2 size-4" />
+                                    Abmelden
+                                </Link>
+                            {/snippet}
                         </Button>
-                    {/each}
-
-                    <Separator class="my-2" />
-
-                    <Button
-                        variant="ghost"
-                        class="w-full justify-start text-muted-foreground hover:text-destructive"
-                        asChild
-                    >
-                        {#snippet children(props)}
-                            <Link
-                                href={logout()}
-                                as="button"
-                                class={props.class}
-                                onclick={() => router.flushAll()}
-                            >
-                                <LogOut class="mr-2 size-4" />
-                                Abmelden
-                            </Link>
-                        {/snippet}
-                    </Button>
-                </aside>
+                    </aside>
+                {/if}
 
                 <main class="flex min-w-0 flex-1 flex-col">
                     <header
                         class="flex h-14 shrink-0 items-center gap-3 border-b px-5"
                     >
-                        <h2 class="text-base font-semibold">{activeTitle}</h2>
+                        {#if detailOpen}
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onclick={closeOrderDetail}
+                                aria-label="Zurück zu Bestellungen"
+                            >
+                                <ArrowLeft class="size-4" />
+                            </Button>
+                            <h2 class="text-base font-semibold">
+                                {selectedOrder
+                                    ? `Bestellung ${orderCode(selectedOrder.id)}`
+                                    : 'Bestellung'}
+                            </h2>
+                        {:else}
+                            <h2 class="text-base font-semibold">
+                                {activeTitle}
+                            </h2>
+                        {/if}
 
-                        <!-- Mobile: Pane-Wechsel ohne Sidebar -->
-                        <div class="ml-auto flex gap-1 md:hidden">
-                            {#each panes as pane (pane.id)}
-                                <Button
-                                    variant={active === pane.id
-                                        ? 'secondary'
-                                        : 'ghost'}
-                                    size="icon"
-                                    onclick={() => (active = pane.id)}
-                                    aria-label={pane.title}
-                                >
-                                    <pane.icon class="size-4" />
-                                </Button>
-                            {/each}
+                        <div class="ml-auto flex items-center gap-1">
+                            {#if !detailOpen}
+                                <!-- Mobile: Pane-Wechsel ohne Sidebar -->
+                                <div class="flex gap-1 md:hidden">
+                                    {#each panes as pane (pane.id)}
+                                        <Button
+                                            variant={active === pane.id
+                                                ? 'secondary'
+                                                : 'ghost'}
+                                            size="icon"
+                                            onclick={() => (active = pane.id)}
+                                            aria-label={pane.title}
+                                        >
+                                            <pane.icon class="size-4" />
+                                        </Button>
+                                    {/each}
+                                </div>
+                            {/if}
+
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onclick={() => (open = false)}
+                                aria-label="Schließen"
+                            >
+                                <X class="size-4" />
+                            </Button>
                         </div>
                     </header>
 
                     <div class="flex-1 overflow-y-auto p-5">
-                        {#if active === 'orders'}
+                        {#if detailOpen}
+                            {#if loadingDetail || !selectedOrder}
+                                <div class="flex flex-col gap-3">
+                                    <Skeleton class="h-10 w-full" />
+                                    <Skeleton class="h-24 w-full" />
+                                    <Skeleton class="h-10 w-2/3" />
+                                </div>
+                            {:else}
+                                <div class="flex flex-col gap-5">
+                                    <div class="flex items-center gap-3">
+                                        <span
+                                            class={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusClasses[selectedOrder.status] ?? 'bg-yellow-100 text-yellow-700'}`}
+                                        >
+                                            {statusLabels[
+                                                selectedOrder.status
+                                            ] ?? selectedOrder.status}
+                                        </span>
+                                        {#if selectedOrder.created_at}
+                                            <span
+                                                class="text-sm text-muted-foreground"
+                                            >
+                                                Bestellt am {formatDate(
+                                                    selectedOrder.created_at,
+                                                )}
+                                            </span>
+                                        {/if}
+                                    </div>
+
+                                    <div class="grid gap-4 sm:grid-cols-3">
+                                        <div class="rounded-lg border p-4">
+                                            <h3
+                                                class="mb-2 text-sm font-semibold"
+                                            >
+                                                Lieferadresse
+                                            </h3>
+                                            <div
+                                                class="space-y-0.5 text-sm text-muted-foreground"
+                                            >
+                                                {#each formatAddress(selectedOrder.shipping_address) as line (line)}
+                                                    <p>{line}</p>
+                                                {/each}
+                                            </div>
+                                        </div>
+                                        <div class="rounded-lg border p-4">
+                                            <h3
+                                                class="mb-2 text-sm font-semibold"
+                                            >
+                                                Rechnungsadresse
+                                            </h3>
+                                            <div
+                                                class="space-y-0.5 text-sm text-muted-foreground"
+                                            >
+                                                {#each formatAddress(selectedOrder.billing_address ?? selectedOrder.shipping_address) as line (line)}
+                                                    <p>{line}</p>
+                                                {/each}
+                                            </div>
+                                        </div>
+                                        <div class="rounded-lg border p-4">
+                                            <h3
+                                                class="mb-2 text-sm font-semibold"
+                                            >
+                                                Zahlung
+                                            </h3>
+                                            <div
+                                                class="space-y-0.5 text-sm text-muted-foreground"
+                                            >
+                                                <p>
+                                                    {selectedOrder.payment_method_label ??
+                                                        '-'}
+                                                </p>
+                                                <p>
+                                                    Gesamt: {formatPrice(
+                                                        selectedOrder.summary
+                                                            .total,
+                                                    )}*
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        class="overflow-hidden rounded-lg border"
+                                    >
+                                        {#each selectedOrder.items as item (item.id)}
+                                            <div
+                                                class="flex items-center gap-3 border-b px-4 py-3 last:border-b-0"
+                                            >
+                                                <div
+                                                    class="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded bg-gray-100"
+                                                >
+                                                    {#if item.image_url}
+                                                        <img
+                                                            src={item.image_url}
+                                                            alt={item.product_name}
+                                                            class="size-full object-cover object-center"
+                                                        />
+                                                    {:else}
+                                                        <Package
+                                                            class="size-4 text-gray-300"
+                                                        />
+                                                    {/if}
+                                                </div>
+                                                <div class="min-w-0 flex-1">
+                                                    <p
+                                                        class="truncate text-sm font-medium"
+                                                    >
+                                                        {item.product_name}
+                                                    </p>
+                                                    <p
+                                                        class="text-xs text-muted-foreground"
+                                                    >
+                                                        {item.quantity} × {formatPrice(
+                                                            item.unit_price,
+                                                        )}*
+                                                    </p>
+                                                </div>
+                                                <span
+                                                    class="text-sm font-semibold"
+                                                >
+                                                    {formatPrice(
+                                                        (
+                                                            Number(
+                                                                item.unit_price,
+                                                            ) * item.quantity
+                                                        ).toFixed(2),
+                                                    )}*
+                                                </span>
+                                            </div>
+                                        {/each}
+                                    </div>
+
+                                    <div class="rounded-lg border p-4">
+                                        <div class="space-y-1.5 text-sm">
+                                            <div class="flex justify-between">
+                                                <span
+                                                    class="text-muted-foreground"
+                                                    >Zwischensumme</span
+                                                >
+                                                <span
+                                                    >{formatPrice(
+                                                        selectedOrder.summary
+                                                            .subtotal,
+                                                    )}*</span
+                                                >
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span
+                                                    class="text-muted-foreground"
+                                                    >Versand</span
+                                                >
+                                                <span
+                                                    >{formatPrice(
+                                                        selectedOrder.summary
+                                                            .shipping_total,
+                                                    )}*</span
+                                                >
+                                            </div>
+                                            <div class="flex justify-between">
+                                                <span
+                                                    class="text-muted-foreground"
+                                                    >MwSt. ({selectedOrder
+                                                        .summary.vat_rate} %)</span
+                                                >
+                                                <span
+                                                    >{formatPrice(
+                                                        selectedOrder.summary
+                                                            .vat_amount,
+                                                    )}*</span
+                                                >
+                                            </div>
+                                            <div
+                                                class="mt-2 flex justify-between border-t pt-2 text-base font-semibold"
+                                            >
+                                                <span>Gesamt</span>
+                                                <span
+                                                    >{formatPrice(
+                                                        selectedOrder.summary
+                                                            .total,
+                                                    )}*</span
+                                                >
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {/if}
+                        {:else if active === 'orders'}
                             {#if orders === null}
                                 <div class="flex flex-col gap-3">
                                     <Skeleton class="h-10 w-full" />
@@ -334,12 +634,8 @@
                                     {#each orders as order (order.id)}
                                         <button
                                             class="flex items-center justify-between gap-3 py-3 text-left hover:bg-muted/40"
-                                            onclick={() => {
-                                                open = false;
-                                                router.visit(
-                                                    `/customer/orders/${order.id}`,
-                                                );
-                                            }}
+                                            onclick={() =>
+                                                openOrderDetail(order.id)}
                                         >
                                             <span
                                                 class="font-medium text-[#0d1f44]"

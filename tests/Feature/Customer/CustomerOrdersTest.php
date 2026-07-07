@@ -61,4 +61,35 @@ class CustomerOrdersTest extends TestCase
             ->assertOk()
             ->assertJsonPath('orders.0.id', $order->id);
     }
+
+    /**
+     * Die Detailansicht im User-Settings-Modal lädt dieselben Daten als JSON.
+     */
+    public function test_order_detail_is_returned_as_json_for_the_settings_modal(): void
+    {
+        $customer = Customer::factory()->create();
+        $order = Order::factory()->for($customer)->create(['status' => 'paid']);
+        $order->items()->create([
+            'product_name' => 'Testprodukt',
+            'unit_price' => '19.99',
+            'quantity' => 2,
+        ]);
+
+        $this->actingAs($customer)
+            ->getJson(route('customer.orders.show', $order))
+            ->assertOk()
+            ->assertJsonPath('order.id', $order->id)
+            ->assertJsonPath('order.status', 'paid')
+            ->assertJsonPath('order.items.0.product_name', 'Testprodukt');
+    }
+
+    public function test_order_detail_json_rejects_foreign_orders(): void
+    {
+        $owner = Customer::factory()->create();
+        $order = Order::factory()->for($owner)->create();
+
+        $this->actingAs(Customer::factory()->create())
+            ->getJson(route('customer.orders.show', $order))
+            ->assertNotFound();
+    }
 }
