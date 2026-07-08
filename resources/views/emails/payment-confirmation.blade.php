@@ -12,7 +12,6 @@
 
     $shopEmail = Setting::get('shop.email', 'mail@dormed.de');
     $shopPhone = Setting::get('shop.phone', '02301188600');
-    $shopFax = Setting::get('shop.fax', '02301188620');
     $shopPhoneHref = 'tel:'.preg_replace('/[^+\d]/', '', $shopPhone);
 @endphp
 
@@ -126,9 +125,6 @@
                             Bei Fragen stehen wir Ihnen gerne zur Verfügung.<br>
                             <a href="{{ $shopPhoneHref }}" style="color:#1a6bbf;text-decoration:none;">{{ $shopPhone }}</a> &middot;
                             <a href="mailto:{{ $shopEmail }}" style="color:#1a6bbf;text-decoration:none;">{{ $shopEmail }}</a>
-                            @if($shopFax)
-                                <br>Fax: {{ $shopFax }}
-                            @endif
                         </p>
                     </td>
                 </tr>
