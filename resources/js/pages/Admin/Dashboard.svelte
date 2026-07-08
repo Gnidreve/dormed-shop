@@ -29,7 +29,6 @@
     import { ChartContainer, ChartTooltip } from '@/components/ui/chart';
     import type { ChartConfig } from '@/components/ui/chart';
     import * as Popover from '@/components/ui/popover';
-    import { Separator } from '@/components/ui/separator';
     import { formatPrice } from '@/lib/currency';
     import { formatDate } from '@/lib/date';
 
@@ -41,38 +40,25 @@
         chartData.map((d) => ({ ...d, date: new Date(d.date) })),
     );
 
-    type TimeRange = '7d' | '30d' | '90d' | 'custom';
+    type TimeRange = '7d' | '30d' | '90d' | '180d' | '365d';
 
     let timeRange = $state<TimeRange>('7d');
-    let customFrom = $state('');
-    let customTo = $state('');
     let popoverOpen = $state(false);
 
-    const presets: { value: Exclude<TimeRange, 'custom'>; label: string }[] = [
-        { value: '7d', label: 'Letzte 7 Tage' },
-        { value: '30d', label: 'Letzte 30 Tage' },
-        { value: '90d', label: 'Letzte 3 Monate' },
+    const presets: { value: TimeRange; label: string; days: number }[] = [
+        { value: '7d', label: 'Letzte 7 Tage', days: 7 },
+        { value: '30d', label: 'Letzte 30 Tage', days: 30 },
+        { value: '90d', label: 'Letzte 3 Monate', days: 90 },
+        { value: '180d', label: 'Letzte 6 Monate', days: 180 },
+        { value: '365d', label: 'Letztes Jahr', days: 365 },
     ];
 
-    const timeRangeLabel = $derived.by(() => {
-        if (timeRange === 'custom' && customFrom && customTo) {
-            return `${formatDate(customFrom)} – ${formatDate(customTo)}`;
-        }
-
-        return presets.find((p) => p.value === timeRange)?.label ?? 'Zeitraum';
-    });
+    const timeRangeLabel = $derived(
+        presets.find((p) => p.value === timeRange)?.label ?? 'Zeitraum',
+    );
 
     const filteredData = $derived.by(() => {
-        if (timeRange === 'custom') {
-            const from = customFrom ? new Date(customFrom) : null;
-            const to = customTo ? new Date(customTo + 'T23:59:59') : null;
-
-            return allData.filter(
-                (d) => (!from || d.date >= from) && (!to || d.date <= to),
-            );
-        }
-
-        const days = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
+        const days = presets.find((p) => p.value === timeRange)?.days ?? 7;
         const cutoff = new Date(
             Date.UTC(
                 new Date().getUTCFullYear(),
@@ -89,15 +75,15 @@
             return '';
         }
 
-        return `${formatDate(filteredData[0].date)} – ${formatDate(filteredData[filteredData.length - 1].date)}`;
-    });
+        const from = filteredData[0].date;
+        const to = filteredData[filteredData.length - 1].date;
+        // Show the year once start/end span more than one calendar year -
+        // otherwise e.g. "Letztes Jahr" reads as "08.07. – 08.07." (same
+        // day/month, one year apart) with no way to tell them apart.
+        const withYear = from.getUTCFullYear() !== to.getUTCFullYear();
 
-    function applyCustomRange() {
-        if (customFrom && customTo) {
-            timeRange = 'custom';
-            popoverOpen = false;
-        }
-    }
+        return `${formatDate(from, { withYear })} – ${formatDate(to, { withYear })}`;
+    });
 
     // Orders (small integers, e.g. 0-50) and revenue (EUR, e.g. 0-5000) live
     // on wildly different scales. Stacked on one shared, hidden y-axis, the
@@ -128,8 +114,8 @@
 
     // Trend footer: selected period's revenue vs. the immediately preceding
     // period of the same length (e.g. last 7 days vs. the 7 days before
-    // that). Server sends 180 days so this stays available client-side even
-    // for the 90-day preset.
+    // that). Server sends 730 days so this stays available client-side even
+    // for the 1-year preset.
     const previousPeriodRevenue = $derived.by(() => {
         if (!filteredData.length) {
             return null;
@@ -146,8 +132,8 @@
         );
 
         if (prevData.length < spanDays) {
-            // Not enough history loaded to compare fairly (e.g. custom range
-            // reaching close to the 180-day window edge).
+            // Not enough history loaded to compare fairly (edge of the
+            // 730-day window).
             return null;
         }
 
@@ -229,35 +215,6 @@
                             {/if}
                         </button>
                     {/each}
-                    <Separator class="my-1" />
-                    <div class="px-3 py-2">
-                        <p
-                            class="mb-2 text-xs font-medium text-muted-foreground"
-                        >
-                            Benutzerdefiniert
-                        </p>
-                        <div class="flex flex-col gap-1.5">
-                            <input
-                                type="date"
-                                bind:value={customFrom}
-                                class="h-8 w-full rounded-md border bg-transparent px-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
-                            />
-                            <input
-                                type="date"
-                                bind:value={customTo}
-                                min={customFrom}
-                                class="h-8 w-full rounded-md border bg-transparent px-2 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
-                            />
-                            <Button
-                                size="sm"
-                                class="mt-1 h-7 text-xs"
-                                onclick={applyCustomRange}
-                                disabled={!customFrom || !customTo}
-                            >
-                                Anwenden
-                            </Button>
-                        </div>
-                    </div>
                 </Popover.Content>
             </Popover.Root>
         </CardHeader>

@@ -37,6 +37,6 @@ class DashboardControllerTest extends TestCase
 
         $this->assertSame(3, $todayRow['orders']);
         $this->assertSame(10149.0, $todayRow['revenue']);
-        $this->assertCount(180, $chartData);
+        $this->assertCount(730, $chartData);
     }
 }

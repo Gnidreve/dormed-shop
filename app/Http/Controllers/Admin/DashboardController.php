@@ -13,10 +13,11 @@ class DashboardController extends Controller
 {
     public function index(): Response
     {
-        // 180 days so the frontend can compare the selected preset (up to
-        // 90 days) against an equally long preceding period for the trend
-        // footer, without a second request.
-        $days = 180;
+        // 730 days (2 years) so the frontend can compare the largest preset
+        // (1 year) against an equally long preceding period for the trend
+        // footer, without a second request. Daily aggregates, not raw
+        // orders, so the payload stays tiny even at this range.
+        $days = 730;
         $from = Carbon::today()->subDays($days - 1)->startOfDay();
 
         $rows = Order::query()
