@@ -7,8 +7,8 @@
     import LogOut from 'lucide-svelte/icons/log-out';
     import MapPin from 'lucide-svelte/icons/map-pin';
     import Package from 'lucide-svelte/icons/package';
-    import Settings from 'lucide-svelte/icons/settings';
     import Shield from 'lucide-svelte/icons/shield';
+    import User from 'lucide-svelte/icons/user';
     import UserCog from 'lucide-svelte/icons/user-cog';
     import X from 'lucide-svelte/icons/x';
     import AddressForm from '@/components/AddressForm.svelte';
@@ -78,9 +78,9 @@
     let active = $state<Pane>('orders');
 
     const panes: { id: Pane; title: string; icon: typeof Package }[] = [
-        { id: 'orders', title: 'Bestellungen', icon: Package },
+        { id: 'profile', title: 'Profil', icon: User },
         { id: 'addresses', title: 'Adressen', icon: MapPin },
-        { id: 'profile', title: 'Profil', icon: Settings },
+        { id: 'orders', title: 'Bestellungen', icon: Package },
         { id: 'security', title: 'Sicherheit', icon: Shield },
     ];
 
