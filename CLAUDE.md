@@ -114,12 +114,14 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 - Laravel can be deployed using [Laravel Cloud](https://cloud.laravel.com/), which is the fastest way to deploy and scale production Laravel applications.
 
-=== herd rules ===
+=== local dev server ===
 
-# Laravel Herd
+# Lokaler Dev-Server
 
-- The application is served by Laravel Herd at `https?://[kebab-case-project-dir].test`. Use the `get-absolute-url` tool to generate valid URLs. Never run commands to serve the site. It is always available.
-- Use the `herd` CLI to manage services, PHP versions, and sites (e.g. `herd sites`, `herd services:start <service>`, `herd php:list`). Run `herd list` to discover all available commands.
+- Kein Laravel Herd — Entwicklung läuft auf Linux ohne Herd, das bleibt so.
+- Start: `npm run dev` (nutzt `npm-run-all`, startet `vite` + `php artisan serve` parallel). Alternativ `composer run dev`.
+- App erreichbar unter `APP_URL` aus `.env` (aktuell `http://127.0.0.1:8000`). Für URLs immer das `get-absolute-url`-Tool nutzen statt zu raten.
+- Der Dev-Server muss selbst gestartet werden (kein „ist immer verfügbar" wie bei Herd) — vor UI-Verifikation prüfen, ob er läuft.
 
 === tests rules ===
 

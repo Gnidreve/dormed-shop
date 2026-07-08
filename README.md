@@ -1,7 +1,7 @@
 # dormed24-Shop
 
 Onlineshop für Medizintechnik (dormed 24) — Ablösung für Shopware.
-**Stack:** Laravel 13 · Inertia v3 · Svelte 5 · Tailwind 4 · PHPUnit 12 · SQLite · PayPal (srmklive/paypal) · Laravel Herd (dev)
+**Stack:** Laravel 13 · Inertia v3 · Svelte 5 · Tailwind 4 · PHPUnit 12 · SQLite · PayPal (srmklive/paypal) · `npm run dev` (dev)
 
 Dieses README ist die übergreifende Landkarte: Was der Shop tut, wie die
 Kern-Flows laufen und wo was liegt. **Konvention: Wer einen Flow ändert,
