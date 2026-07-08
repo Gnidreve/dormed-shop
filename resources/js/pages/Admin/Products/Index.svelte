@@ -40,12 +40,15 @@
     import { Input } from '@/components/ui/input';
     import * as Table from '@/components/ui/table';
     import { formatPrice } from '@/lib/currency';
+    import AvailabilityBadge from './AvailabilityBadge.svelte';
     import ProductActions from './ProductActions.svelte';
+    import ProductCell from './ProductCell.svelte';
 
     type Product = {
         id: number;
         name: string;
         price: string;
+        is_available: boolean;
         manufacturer: { id: number; name: string } | null;
     };
 
@@ -82,17 +85,25 @@
         },
         {
             accessorKey: 'name',
-            header: 'Name',
-        },
-        {
-            id: 'manufacturer',
-            header: 'Hersteller',
-            accessorFn: (row) => row.manufacturer?.name ?? '—',
+            header: 'Produkt',
+            cell: ({ row }) =>
+                renderComponent(ProductCell, {
+                    name: row.original.name,
+                    manufacturer: row.original.manufacturer,
+                }),
         },
         {
             accessorKey: 'price',
             header: 'Preis',
             cell: ({ row }) => formatPrice(row.original.price),
+        },
+        {
+            accessorKey: 'is_available',
+            header: 'Verfügbarkeit',
+            cell: ({ row }) =>
+                renderComponent(AvailabilityBadge, {
+                    isAvailable: row.original.is_available,
+                }),
         },
         {
             id: 'actions',

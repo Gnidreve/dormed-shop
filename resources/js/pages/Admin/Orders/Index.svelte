@@ -115,17 +115,17 @@
                 }),
         },
         {
+            accessorKey: 'total_amount',
+            header: 'Gesamt',
+            cell: ({ row }) => formatPrice(row.original.total_amount),
+        },
+        {
             accessorKey: 'status',
             header: 'Status',
             cell: ({ row }) =>
                 renderComponent(StatusBadge, {
                     status: row.original.status,
                 }),
-        },
-        {
-            accessorKey: 'total_amount',
-            header: 'Gesamt',
-            cell: ({ row }) => formatPrice(row.original.total_amount),
         },
     ];
 
