@@ -147,7 +147,9 @@
     });
 
     function showPreviousProduct() {
-        if (randomProducts.length === 0) return;
+        if (randomProducts.length === 0) {
+            return;
+        }
 
         activeProductIndex =
             activeProductIndex === 0
@@ -156,7 +158,9 @@
     }
 
     function showNextProduct() {
-        if (randomProducts.length === 0) return;
+        if (randomProducts.length === 0) {
+            return;
+        }
 
         activeProductIndex =
             activeProductIndex === randomProducts.length - 1
@@ -396,8 +400,7 @@
                                         : 'size-2.5 rounded-full bg-gray-300'}
                                     aria-label={`${product.name} anzeigen`}
                                     aria-current={index === activeProductIndex}
-                                    onclick={() =>
-                                        (activeProductIndex = index)}
+                                    onclick={() => (activeProductIndex = index)}
                                 ></button>
                             {/each}
                         </div>

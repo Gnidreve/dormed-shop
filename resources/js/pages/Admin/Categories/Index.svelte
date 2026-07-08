@@ -5,20 +5,21 @@
 </script>
 
 <script lang="ts">
+    import { router } from '@inertiajs/svelte';
     import {
-        
-        
-        
-        
-        
-        
         getCoreRowModel,
         getFilteredRowModel,
         getPaginationRowModel,
-        getSortedRowModel
+        getSortedRowModel,
     } from '@tanstack/table-core';
-import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, SortingState, VisibilityState} from '@tanstack/table-core';
-    import { router } from '@inertiajs/svelte';
+    import type {
+        ColumnDef,
+        ColumnFiltersState,
+        PaginationState,
+        RowSelectionState,
+        SortingState,
+        VisibilityState,
+    } from '@tanstack/table-core';
     import ChevronDown from 'lucide-svelte/icons/chevron-down';
     import Plus from 'lucide-svelte/icons/plus';
     import * as AdminCategoryController from '@/actions/App/Http/Controllers/Admin/CategoryController';
@@ -93,7 +94,8 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
         {
             id: 'actions',
             header: '',
-            cell: ({ row }) => renderComponent(CategoryActions, { category: row.original }),
+            cell: ({ row }) =>
+                renderComponent(CategoryActions, { category: row.original }),
             enableSorting: false,
             enableHiding: false,
         },
@@ -127,7 +129,8 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
             pagination = typeof u === 'function' ? u(pagination) : u;
         },
         onColumnVisibilityChange: (u) => {
-            columnVisibility = typeof u === 'function' ? u(columnVisibility) : u;
+            columnVisibility =
+                typeof u === 'function' ? u(columnVisibility) : u;
         },
         state: {
             get sorting() {
@@ -155,8 +158,13 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
     <div class="flex items-center justify-between">
         <h1 class="text-xl font-semibold">Kategorien</h1>
         <div class="flex items-center gap-3">
-            <span class="text-sm text-muted-foreground">{categories.total} gesamt</span>
-            <Button onclick={() => router.visit(AdminCategoryController.create.url())}>
+            <span class="text-sm text-muted-foreground"
+                >{categories.total} gesamt</span
+            >
+            <Button
+                onclick={() =>
+                    router.visit(AdminCategoryController.create.url())}
+            >
                 <Plus class="size-4" />
                 Kategorie hinzufügen
             </Button>
@@ -180,12 +188,16 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
                 {/snippet}
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-                {#each table.getAllColumns().filter((c) => c.getCanHide()) as column (column.id)}
+                {#each table
+                    .getAllColumns()
+                    .filter((c) => c.getCanHide()) as column (column.id)}
                     <DropdownMenuCheckboxItem
                         checked={column.getIsVisible()}
                         onCheckedChange={(v) => column.toggleVisibility(v)}
                     >
-                        {typeof column.columnDef.header === 'string' ? column.columnDef.header : column.id}
+                        {typeof column.columnDef.header === 'string'
+                            ? column.columnDef.header
+                            : column.id}
                     </DropdownMenuCheckboxItem>
                 {/each}
             </DropdownMenuContent>
@@ -260,5 +272,4 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
             >
         </div>
     </div>
--e 
 </div>

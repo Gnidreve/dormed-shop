@@ -5,27 +5,32 @@
 </script>
 
 <script lang="ts">
+    import { router } from '@inertiajs/svelte';
     import {
-        
-        
-        
-        
-        
-        
         getCoreRowModel,
         getFilteredRowModel,
         getPaginationRowModel,
-        getSortedRowModel
+        getSortedRowModel,
     } from '@tanstack/table-core';
-import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, SortingState, VisibilityState} from '@tanstack/table-core';
-    import { router } from '@inertiajs/svelte';
+    import type {
+        ColumnDef,
+        ColumnFiltersState,
+        PaginationState,
+        RowSelectionState,
+        SortingState,
+        VisibilityState,
+    } from '@tanstack/table-core';
     import ChevronDown from 'lucide-svelte/icons/chevron-down';
     import Plus from 'lucide-svelte/icons/plus';
     import * as AdminProductController from '@/actions/App/Http/Controllers/Admin/ProductController';
     import AppHead from '@/components/AppHead.svelte';
     import { Button } from '@/components/ui/button';
     import { Checkbox } from '@/components/ui/checkbox';
-    import { FlexRender, createSvelteTable, renderComponent } from '@/components/ui/data-table';
+    import {
+        FlexRender,
+        createSvelteTable,
+        renderComponent,
+    } from '@/components/ui/data-table';
     import {
         DropdownMenu,
         DropdownMenuCheckboxItem,
@@ -59,8 +64,11 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
             header: ({ table }) =>
                 renderComponent(Checkbox, {
                     checked: table.getIsAllPageRowsSelected(),
-                    indeterminate: table.getIsSomePageRowsSelected() && !table.getIsAllPageRowsSelected(),
-                    onCheckedChange: (v) => table.toggleAllPageRowsSelected(!!v),
+                    indeterminate:
+                        table.getIsSomePageRowsSelected() &&
+                        !table.getIsAllPageRowsSelected(),
+                    onCheckedChange: (v) =>
+                        table.toggleAllPageRowsSelected(!!v),
                     'aria-label': 'Alle auswählen',
                 }),
             cell: ({ row }) =>
@@ -76,7 +84,7 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
             accessorKey: 'name',
             header: 'Name',
         },
-{
+        {
             id: 'manufacturer',
             header: 'Hersteller',
             accessorFn: (row) => row.manufacturer?.name ?? '—',
@@ -89,7 +97,8 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
         {
             id: 'actions',
             header: '',
-            cell: ({ row }) => renderComponent(ProductActions, { product: row.original }),
+            cell: ({ row }) =>
+                renderComponent(ProductActions, { product: row.original }),
             enableSorting: false,
             enableHiding: false,
         },
@@ -103,44 +112,45 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
 
     const table = createSvelteTable({
         get data() {
- return products.data; 
-},
+            return products.data;
+        },
         columns,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
         onSortingChange: (u) => {
- sorting = typeof u === 'function' ? u(sorting) : u; 
-},
+            sorting = typeof u === 'function' ? u(sorting) : u;
+        },
         onColumnFiltersChange: (u) => {
- columnFilters = typeof u === 'function' ? u(columnFilters) : u; 
-},
+            columnFilters = typeof u === 'function' ? u(columnFilters) : u;
+        },
         onRowSelectionChange: (u) => {
- rowSelection = typeof u === 'function' ? u(rowSelection) : u; 
-},
+            rowSelection = typeof u === 'function' ? u(rowSelection) : u;
+        },
         onPaginationChange: (u) => {
- pagination = typeof u === 'function' ? u(pagination) : u; 
-},
+            pagination = typeof u === 'function' ? u(pagination) : u;
+        },
         onColumnVisibilityChange: (u) => {
- columnVisibility = typeof u === 'function' ? u(columnVisibility) : u; 
-},
+            columnVisibility =
+                typeof u === 'function' ? u(columnVisibility) : u;
+        },
         state: {
             get sorting() {
- return sorting; 
-},
+                return sorting;
+            },
             get columnFilters() {
- return columnFilters; 
-},
+                return columnFilters;
+            },
             get rowSelection() {
- return rowSelection; 
-},
+                return rowSelection;
+            },
             get pagination() {
- return pagination; 
-},
+                return pagination;
+            },
             get columnVisibility() {
- return columnVisibility; 
-},
+                return columnVisibility;
+            },
         },
     });
 </script>
@@ -151,8 +161,13 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
     <div class="flex items-center justify-between">
         <h1 class="text-xl font-semibold">Produkte</h1>
         <div class="flex items-center gap-3">
-            <span class="text-sm text-muted-foreground">{products.total} gesamt</span>
-            <Button onclick={() => router.visit(AdminProductController.create.url())}>
+            <span class="text-sm text-muted-foreground"
+                >{products.total} gesamt</span
+            >
+            <Button
+                onclick={() =>
+                    router.visit(AdminProductController.create.url())}
+            >
                 <Plus class="size-4" />
                 Produkt hinzufügen
             </Button>
@@ -163,7 +178,8 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
         <Input
             placeholder="Name filtern…"
             value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
-            oninput={(e) => table.getColumn('name')?.setFilterValue(e.currentTarget.value)}
+            oninput={(e) =>
+                table.getColumn('name')?.setFilterValue(e.currentTarget.value)}
             class="max-w-sm"
         />
 
@@ -176,12 +192,16 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
                 {/snippet}
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-                {#each table.getAllColumns().filter((c) => c.getCanHide()) as column (column.id)}
+                {#each table
+                    .getAllColumns()
+                    .filter((c) => c.getCanHide()) as column (column.id)}
                     <DropdownMenuCheckboxItem
                         checked={column.getIsVisible()}
                         onCheckedChange={(v) => column.toggleVisibility(v)}
                     >
-                        {typeof column.columnDef.header === 'string' ? column.columnDef.header : column.id}
+                        {typeof column.columnDef.header === 'string'
+                            ? column.columnDef.header
+                            : column.id}
                     </DropdownMenuCheckboxItem>
                 {/each}
             </DropdownMenuContent>
@@ -196,7 +216,10 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
                         {#each headerGroup.headers as header (header.id)}
                             <Table.Head class="has-[[role=checkbox]]:ps-3">
                                 {#if !header.isPlaceholder}
-                                    <FlexRender content={header.column.columnDef.header} context={header.getContext()} />
+                                    <FlexRender
+                                        content={header.column.columnDef.header}
+                                        context={header.getContext()}
+                                    />
                                 {/if}
                             </Table.Head>
                         {/each}
@@ -208,13 +231,19 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
                     <Table.Row data-state={row.getIsSelected() && 'selected'}>
                         {#each row.getVisibleCells() as cell (cell.id)}
                             <Table.Cell class="has-[[role=checkbox]]:ps-3">
-                                <FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
+                                <FlexRender
+                                    content={cell.column.columnDef.cell}
+                                    context={cell.getContext()}
+                                />
                             </Table.Cell>
                         {/each}
                     </Table.Row>
                 {:else}
                     <Table.Row>
-                        <Table.Cell colspan={columns.length} class="h-24 text-center text-muted-foreground">
+                        <Table.Cell
+                            colspan={columns.length}
+                            class="h-24 text-center text-muted-foreground"
+                        >
                             Keine Produkte vorhanden.
                         </Table.Cell>
                     </Table.Row>
@@ -233,13 +262,22 @@ import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, 
             <span class="text-sm text-muted-foreground">
                 Seite {table.getState().pagination.pageIndex + 1} von {table.getPageCount()}
             </span>
-            <Button variant="outline" size="sm" onclick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+            <Button
+                variant="outline"
+                size="sm"
+                onclick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+            >
                 Zurück
             </Button>
-            <Button variant="outline" size="sm" onclick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+            <Button
+                variant="outline"
+                size="sm"
+                onclick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+            >
                 Weiter
             </Button>
         </div>
     </div>
--e 
 </div>
