@@ -66,6 +66,10 @@
                     label: 'paypal',
                 },
                 createOrder: async (): Promise<string> => {
+                    // Normally unreachable: the overlay above blocks the click
+                    // while disabled. Kept as a defense-in-depth fallback -
+                    // the server re-validates agreed_to_terms regardless
+                    // (PlaceOrderRequest).
                     if (disabled) {
                         errorMessage =
                             'Bitte akzeptieren Sie die AGB und vervollständigen Sie Ihre Lieferadresse.';
@@ -81,8 +85,6 @@
                         error?: string;
                     }>(paypalOrder.create.url(), {
                         method: 'POST',
-                        // The PayPal button can't be truly disabled after render, so the
-                        // guard above blocks unconfirmed orders; agreement is real here.
                         body: { agreed_to_terms: !disabled },
                     });
 
@@ -146,7 +148,27 @@
         </div>
     {/if}
 
-    <div id={containerId} class="min-h-[40px]"></div>
+    <div class="relative">
+        <div id={containerId} class="min-h-[40px]"></div>
+
+        {#if disabled}
+            <!-- PayPal's rendered button lives in an iframe (inline z-index:
+            100, set by their zoid component) and can't be disabled via the
+            disabled attribute; this overlay must sit above that z-index to
+            actually block the click before it reaches the button, so
+            createOrder's own guard (kept as defense-in-depth) is never hit
+            in normal use. -->
+            <button
+                type="button"
+                class="absolute inset-0 z-[200] cursor-not-allowed bg-transparent"
+                aria-label="Bitte akzeptieren Sie die AGB und vervollständigen Sie Ihre Lieferadresse."
+                onclick={() => {
+                    errorMessage =
+                        'Bitte akzeptieren Sie die AGB und vervollständigen Sie Ihre Lieferadresse.';
+                }}
+            ></button>
+        {/if}
+    </div>
 
     {#if isProcessing}
         <div class="mt-2 flex items-center justify-center gap-2">
