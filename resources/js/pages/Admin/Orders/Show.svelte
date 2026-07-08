@@ -20,7 +20,6 @@
         CardTitle,
     } from '@/components/ui/card';
     import { Separator } from '@/components/ui/separator';
-    import * as Table from '@/components/ui/table';
     import { formatPrice } from '@/lib/currency';
     import { fetchJson } from '@/lib/http';
     import {
@@ -33,6 +32,15 @@
         product_name: string;
         unit_price: string;
         quantity: number;
+        image_url: string | null;
+    };
+
+    type OrderSummary = {
+        subtotal: string;
+        shipping_total: string;
+        vat_rate: number;
+        vat_amount: string;
+        total: string;
     };
 
     type Payment = {
@@ -61,6 +69,7 @@
         customer: { id: number; name: string; email: string } | null;
         items: OrderItem[];
         payments: Payment[];
+        summary: OrderSummary;
     };
 
     let { order }: { order: OrderDetail } = $props();
@@ -369,54 +378,87 @@
         </Card>
     </div>
 
-    <!-- Positionen -->
-    <Card>
-        <CardHeader>
-            <CardTitle>Positionen</CardTitle>
-        </CardHeader>
-        <CardContent>
-            <Table.Root>
-                <Table.Header>
-                    <Table.Row>
-                        <Table.Head>Produkt</Table.Head>
-                        <Table.Head class="text-right">Einzelpreis</Table.Head>
-                        <Table.Head class="text-center">Anzahl</Table.Head>
-                        <Table.Head class="text-right">Summe</Table.Head>
-                    </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                    {#each order.items as item (item.id)}
-                        <Table.Row>
-                            <Table.Cell class="font-medium"
-                                >{item.product_name}</Table.Cell
-                            >
-                            <Table.Cell class="text-right"
-                                >{formatPrice(item.unit_price)}</Table.Cell
-                            >
-                            <Table.Cell class="text-center"
-                                >{item.quantity}</Table.Cell
-                            >
-                            <Table.Cell class="text-right font-semibold">
-                                {formatPrice(
-                                    (
-                                        parseFloat(item.unit_price) *
-                                        item.quantity
-                                    ).toFixed(2),
-                                )}
-                            </Table.Cell>
-                        </Table.Row>
-                    {:else}
-                        <Table.Row>
-                            <Table.Cell
-                                colspan="4"
-                                class="h-24 text-center text-muted-foreground"
-                            >
-                                Keine Positionen vorhanden.
-                            </Table.Cell>
-                        </Table.Row>
-                    {/each}
-                </Table.Body>
-            </Table.Root>
-        </CardContent>
-    </Card>
+    <!-- Positionen (identisch zur Kundenansicht: settings/Orders/Show.svelte) -->
+    <div class="overflow-hidden rounded-3xl border bg-white shadow-sm">
+        {#each order.items as item (item.id)}
+            <div
+                class="flex flex-col gap-4 border-b px-5 py-5 last:border-b-0 sm:flex-row sm:items-center sm:justify-between"
+            >
+                <div class="flex items-start gap-4">
+                    <div
+                        class="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gray-100"
+                    >
+                        {#if item.image_url}
+                            <img
+                                src={item.image_url}
+                                alt={item.product_name}
+                                class="size-full object-cover object-center"
+                            />
+                        {:else}
+                            <div class="size-8 rounded-full bg-gray-200"></div>
+                        {/if}
+                    </div>
+
+                    <div class="space-y-1">
+                        <p class="font-semibold text-gray-950">
+                            {item.product_name}
+                        </p>
+                        <p class="text-sm text-muted-foreground">
+                            Menge: {item.quantity}
+                        </p>
+                        <p class="text-sm text-muted-foreground">
+                            Einzelpreis: {formatPrice(item.unit_price)}*
+                        </p>
+                    </div>
+                </div>
+
+                <div
+                    class="text-left text-lg font-semibold text-gray-950 sm:text-right"
+                >
+                    {formatPrice(
+                        (Number(item.unit_price) * item.quantity).toFixed(2),
+                    )}*
+                </div>
+            </div>
+        {:else}
+            <p class="p-5 text-center text-sm text-muted-foreground">
+                Keine Positionen vorhanden.
+            </p>
+        {/each}
+    </div>
+
+    <div class="rounded-3xl border bg-white p-6 shadow-sm">
+        <div class="space-y-2 text-sm">
+            <div class="flex items-center justify-between gap-4">
+                <span class="text-muted-foreground">Zwischensumme</span>
+                <span class="font-medium text-gray-950"
+                    >{formatPrice(order.summary.subtotal)}*</span
+                >
+            </div>
+            <div class="flex items-center justify-between gap-4">
+                <span class="text-muted-foreground">Versand</span>
+                <span class="font-medium text-gray-950"
+                    >{formatPrice(order.summary.shipping_total)}*</span
+                >
+            </div>
+            <div class="flex items-center justify-between gap-4">
+                <span class="text-muted-foreground"
+                    >MwSt. ({order.summary.vat_rate} %)</span
+                >
+                <span class="font-medium text-gray-950"
+                    >{formatPrice(order.summary.vat_amount)}*</span
+                >
+            </div>
+            <div class="mt-2 border-t pt-4">
+                <div class="flex items-center justify-between gap-4">
+                    <span class="text-xl font-semibold text-gray-950"
+                        >Gesamt</span
+                    >
+                    <span class="text-xl font-semibold text-gray-950"
+                        >{formatPrice(order.summary.total)}*</span
+                    >
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

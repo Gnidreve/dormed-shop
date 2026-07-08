@@ -22,12 +22,40 @@ class OrderController extends Controller
         ]);
     }
 
-    public function show(Order $order): Response
+    public function show(Order $order, OrderManager $orderManager): Response
     {
-        $order->load(['customer', 'items', 'payments']);
+        $order->load([
+            'customer',
+            'items.product.images' => fn ($query) => $query->where('sort_order', 0),
+            'payments',
+        ]);
 
         return Inertia::render('Admin/Orders/Show', [
-            'order' => $order,
+            'order' => [
+                'id' => $order->id,
+                'status' => $order->status,
+                'payment_method' => $order->payment_method,
+                'total_amount' => $order->total_amount,
+                'shipping_amount' => $order->shipping_amount,
+                'shipping_address' => $order->shipping_address,
+                'billing_address' => $order->billing_address,
+                'created_at' => $order->created_at,
+                'updated_at' => $order->updated_at,
+                'customer' => $order->customer ? [
+                    'id' => $order->customer->id,
+                    'name' => $order->customer->name,
+                    'email' => $order->customer->email,
+                ] : null,
+                'items' => $order->items->map(fn ($item) => [
+                    'id' => $item->id,
+                    'product_name' => $item->product_name,
+                    'unit_price' => (string) $item->unit_price,
+                    'quantity' => $item->quantity,
+                    'image_url' => $item->product?->images->first()?->url,
+                ])->values(),
+                'payments' => $order->payments,
+                'summary' => $orderManager->summaryFromOrder($order),
+            ],
         ]);
     }
 
