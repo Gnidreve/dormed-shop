@@ -37,7 +37,7 @@ Zentrale Klassen (die „Geschäftslogik-Ecke"):
 | `app/Support/Cart/CartService.php` | Warenkorb: Session-State, Live-Preise, Varianten, Versand-/Zahlarten, Summen |
 | `app/Support/Orders/OrderManager.php` | Cart → Order (transaktional), `markPaid()` (idempotent), Bestätigungsmails, Summen-Berechnung |
 | `app/Services/PayPalService.php` | PayPal-REST-Client (Settings-basiert), Webhook-Verifikation, Refunds |
-| `app/Support/PaymentMode.php` | sandbox/live — Setting `payment.mode`, sonst `APP_ENV` |
+| `app/Support/PaymentMode.php` | sandbox/live — ausschließlich aus `APP_ENV` abgeleitet |
 | `app/Models/Setting.php` | Key-Value-Settings in DB, sensible Keys verschlüsselt, pro Request memoisiert |
 | `app/Http/Middleware/HandleInertiaRequests.php` | Shared Props: Cart, Auth, Kontakt, Kategorien, Sandbox-Banner |
 
@@ -138,9 +138,10 @@ Shop-Frontend angezeigt wird) — kein separates Feld, kein Fallback.
 - **Es gibt keine PayPal-Credentials in der .env** — einziger env-Pfad ist die
   Erstbefüllung über `SEED_PAYPAL_*`-Keys + `php artisan db:seed
   --class=PaymentSeeder`.
-- sandbox/live schaltet das Setting `payment.mode` (Admin → Zahlungsarten);
-  ohne Setting gilt: Produktion = live, sonst sandbox. Sandbox zeigt im
-  Frontend einen Banner.
+- sandbox/live ergibt sich ausschließlich aus `APP_ENV` (Produktion = live,
+  sonst sandbox) — kein Admin-Override. Sandbox zeigt im Frontend einen
+  Banner. Beide Zugangsdaten-Sets bleiben unabhängig vom aktiven Modus im
+  Admin (Zahlungsarten) editierbar.
 
 ---
 

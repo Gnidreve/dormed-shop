@@ -32,7 +32,6 @@
     // svelte-ignore state_referenced_locally
     const form = useForm({
         settings: {
-            'payment.mode': settings['payment.mode'] ?? paymentMode,
             'paypal.sandbox.client_id':
                 settings['paypal.sandbox.client_id'] ?? '',
             'paypal.sandbox.client_secret': hasSensitive[
@@ -57,7 +56,7 @@
         },
     });
 
-    const isSandbox = $derived(form.settings['payment.mode'] === 'sandbox');
+    const isSandbox = $derived(paymentMode === 'sandbox');
 
     let checkingPayPal = $state(false);
 
@@ -103,144 +102,117 @@
     </div>
 
     <form onsubmit={submit} class="flex flex-col gap-6">
-        <!-- Modus-Auswahl -->
-        <div class="rounded-lg border bg-card p-5 flex flex-col gap-3">
-            <p class="text-sm font-medium">Betriebsmodus</p>
-            <p class="text-xs text-muted-foreground -mt-1">
-                Sandbox für Tests, Live für echte Zahlungen. Nach dem Speichern
-                gelten die jeweiligen Zugangsdaten.
-            </p>
-            <div class="flex gap-3">
-                <label class="flex items-center gap-2 cursor-pointer">
-                    <input
-                        type="radio"
-                        name="payment_mode"
-                        value="sandbox"
-                        class="accent-primary"
-                        bind:group={form.settings['payment.mode']}
-                    />
-                    <span class="text-sm font-medium">Sandbox</span>
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer">
-                    <input
-                        type="radio"
-                        name="payment_mode"
-                        value="live"
-                        class="accent-primary"
-                        bind:group={form.settings['payment.mode']}
-                    />
-                    <span class="text-sm font-medium">Live</span>
-                </label>
-            </div>
-        </div>
+        <p class="text-xs text-muted-foreground">
+            Der Betriebsmodus (Sandbox/Live) ergibt sich ausschließlich aus der
+            Umgebung (<code>APP_ENV</code>) und ist hier nicht umschaltbar.
+            Beide Zugangsdaten-Sets bleiben unabhängig davon editierbar.
+        </p>
 
         <!-- PayPal-Felder (Zahlarten sind fix: Rechnung + PayPal) -->
         <div class="rounded-lg border bg-card p-5 flex flex-col gap-4">
             <p class="text-sm font-semibold">PayPal</p>
 
-            {#if isSandbox}
-                <div class="flex flex-col gap-3 rounded-md bg-muted/40 p-4">
-                    <p
-                        class="text-xs font-medium text-muted-foreground uppercase tracking-wide"
-                    >
-                        Sandbox-Zugangsdaten
-                    </p>
-                    <div class="flex flex-col gap-1.5">
-                        <Label for="pp_client_id">Client ID</Label>
-                        <Input
-                            id="pp_client_id"
-                            bind:value={
-                                form.settings['paypal.sandbox.client_id']
-                            }
-                        />
-                    </div>
-                    <div class="flex flex-col gap-1.5">
-                        <Label for="pp_client_secret">
-                            Client Secret
-                            {#if hasSensitive['paypal.sandbox.client_secret']}
-                                <span class="text-xs text-muted-foreground ml-1"
-                                    >(gesetzt — leer lassen zum Beibehalten)</span
-                                >
-                            {/if}
-                        </Label>
-                        <Input
-                            id="pp_client_secret"
-                            type="password"
-                            placeholder={hasSensitive[
-                                'paypal.sandbox.client_secret'
-                            ]
-                                ? '••••••••'
-                                : ''}
-                            bind:value={
-                                form.settings['paypal.sandbox.client_secret']
-                            }
-                        />
-                    </div>
-                    <div class="flex flex-col gap-1.5">
-                        <Label for="pp_merchant_id">Merchant ID</Label>
-                        <Input
-                            id="pp_merchant_id"
-                            bind:value={
-                                form.settings['paypal.sandbox.merchant_id']
-                            }
-                        />
-                    </div>
+            <div class="flex flex-col gap-3 rounded-md bg-muted/40 p-4">
+                <p
+                    class="text-xs font-medium text-muted-foreground uppercase tracking-wide"
+                >
+                    Sandbox-Zugangsdaten{isSandbox ? ' (aktiv)' : ''}
+                </p>
+                <div class="flex flex-col gap-1.5">
+                    <Label for="pp_client_id">Client ID</Label>
+                    <Input
+                        id="pp_client_id"
+                        bind:value={
+                            form.settings['paypal.sandbox.client_id']
+                        }
+                    />
                 </div>
-            {:else}
-                <div class="flex flex-col gap-3 rounded-md bg-muted/40 p-4">
-                    <p
-                        class="text-xs font-medium text-muted-foreground uppercase tracking-wide"
-                    >
-                        Live-Zugangsdaten
-                    </p>
-                    <div class="flex flex-col gap-1.5">
-                        <Label for="pp_client_id">Client ID</Label>
-                        <Input
-                            id="pp_client_id"
-                            bind:value={form.settings['paypal.live.client_id']}
-                        />
-                    </div>
-                    <div class="flex flex-col gap-1.5">
-                        <Label for="pp_client_secret">
-                            Client Secret
-                            {#if hasSensitive['paypal.live.client_secret']}
-                                <span class="text-xs text-muted-foreground ml-1"
-                                    >(gesetzt — leer lassen zum Beibehalten)</span
-                                >
-                            {/if}
-                        </Label>
-                        <Input
-                            id="pp_client_secret"
-                            type="password"
-                            placeholder={hasSensitive[
-                                'paypal.live.client_secret'
-                            ]
-                                ? '••••••••'
-                                : ''}
-                            bind:value={
-                                form.settings['paypal.live.client_secret']
-                            }
-                        />
-                    </div>
-                    <div class="flex flex-col gap-1.5">
-                        <Label for="pp_app_id">App ID</Label>
-                        <Input
-                            id="pp_app_id"
-                            placeholder="APP-…"
-                            bind:value={form.settings['paypal.live.app_id']}
-                        />
-                    </div>
-                    <div class="flex flex-col gap-1.5">
-                        <Label for="pp_merchant_id">Merchant ID</Label>
-                        <Input
-                            id="pp_merchant_id"
-                            bind:value={
-                                form.settings['paypal.live.merchant_id']
-                            }
-                        />
-                    </div>
+                <div class="flex flex-col gap-1.5">
+                    <Label for="pp_client_secret">
+                        Client Secret
+                        {#if hasSensitive['paypal.sandbox.client_secret']}
+                            <span class="text-xs text-muted-foreground ml-1"
+                                >(gesetzt — leer lassen zum Beibehalten)</span
+                            >
+                        {/if}
+                    </Label>
+                    <Input
+                        id="pp_client_secret"
+                        type="password"
+                        placeholder={hasSensitive[
+                            'paypal.sandbox.client_secret'
+                        ]
+                            ? '••••••••'
+                            : ''}
+                        bind:value={
+                            form.settings['paypal.sandbox.client_secret']
+                        }
+                    />
                 </div>
-            {/if}
+                <div class="flex flex-col gap-1.5">
+                    <Label for="pp_merchant_id">Merchant ID</Label>
+                    <Input
+                        id="pp_merchant_id"
+                        bind:value={
+                            form.settings['paypal.sandbox.merchant_id']
+                        }
+                    />
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3 rounded-md bg-muted/40 p-4">
+                <p
+                    class="text-xs font-medium text-muted-foreground uppercase tracking-wide"
+                >
+                    Live-Zugangsdaten{isSandbox ? '' : ' (aktiv)'}
+                </p>
+                <div class="flex flex-col gap-1.5">
+                    <Label for="pp_live_client_id">Client ID</Label>
+                    <Input
+                        id="pp_live_client_id"
+                        bind:value={form.settings['paypal.live.client_id']}
+                    />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <Label for="pp_live_client_secret">
+                        Client Secret
+                        {#if hasSensitive['paypal.live.client_secret']}
+                            <span class="text-xs text-muted-foreground ml-1"
+                                >(gesetzt — leer lassen zum Beibehalten)</span
+                            >
+                        {/if}
+                    </Label>
+                    <Input
+                        id="pp_live_client_secret"
+                        type="password"
+                        placeholder={hasSensitive[
+                            'paypal.live.client_secret'
+                        ]
+                            ? '••••••••'
+                            : ''}
+                        bind:value={
+                            form.settings['paypal.live.client_secret']
+                        }
+                    />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <Label for="pp_live_app_id">App ID</Label>
+                    <Input
+                        id="pp_live_app_id"
+                        placeholder="APP-…"
+                        bind:value={form.settings['paypal.live.app_id']}
+                    />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <Label for="pp_live_merchant_id">Merchant ID</Label>
+                    <Input
+                        id="pp_live_merchant_id"
+                        bind:value={
+                            form.settings['paypal.live.merchant_id']
+                        }
+                    />
+                </div>
+            </div>
 
             <!-- Webhook ID (shared) -->
             <div class="flex flex-col gap-1.5">
