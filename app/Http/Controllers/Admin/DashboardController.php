@@ -26,7 +26,6 @@ class DashboardController extends Controller
                 DB::raw('SUM(total_amount) as revenue'),
             )
             ->where('created_at', '>=', $from)
-            ->where('is_test', false)
             ->where('status', 'paid')
             ->groupBy('date')
             ->orderBy('date')

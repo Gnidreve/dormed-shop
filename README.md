@@ -110,9 +110,12 @@ Confirm-Seite (Zahlart PayPal) → PayPal-JS-SDK-Button
 ### 5. Bestellstatus-Lebenszyklus
 
 `pending` → `paid`, sowie `cancelled` / `failed` / `refunded`. `is_test`
-markiert Sandbox-Orders (Dashboard-Umsatz zählt nur echte `paid`-Orders).
-Kein separater Fulfillment-Status (`processing`/`completed`) — `paid` ist der
-finale Erfolgszustand.
+markiert Sandbox-Orders (aus `PaymentMode::isLive()`), fließt aber **nicht**
+in den Dashboard-Umsatz ein — der zählt schlicht alle `paid`-Orders. Der
+Filter wurde entfernt: `PaymentMode` hängt ausschließlich an `APP_ENV`, ohne
+Admin-Override kann in Produktion strukturell keine Sandbox-Order entstehen,
+die die Zahlen verfälschen könnte. Kein separater Fulfillment-Status
+(`processing`/`completed`) — `paid` ist der finale Erfolgszustand.
 
 - **Kontolöschung** durch den Kunden entkoppelt Orders nur
   (`customer_id = null`, FK `ON DELETE SET NULL`) — Historie bleibt für
