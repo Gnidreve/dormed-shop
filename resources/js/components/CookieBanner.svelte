@@ -1,8 +1,20 @@
 <script lang="ts">
-    let visible = $state(true);
+    import { onMount } from 'svelte';
+
+    // Approximation only: no real cookie-consent logic yet (both buttons do
+    // the same thing), just dismiss-once-per-browser-session. sessionStorage
+    // on purpose, not localStorage - this isn't meant to persist forever.
+    const STORAGE_KEY = 'cookie-banner-dismissed';
+
+    let visible = $state(false);
+
+    onMount(() => {
+        visible = sessionStorage.getItem(STORAGE_KEY) !== '1';
+    });
 
     function hideBanner() {
         visible = false;
+        sessionStorage.setItem(STORAGE_KEY, '1');
     }
 </script>
 
