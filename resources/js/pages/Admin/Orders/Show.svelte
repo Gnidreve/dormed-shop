@@ -10,6 +10,7 @@
 <script lang="ts">
     import { router } from '@inertiajs/svelte';
     import { Loader2 } from 'lucide-svelte';
+    import Package from 'lucide-svelte/icons/package';
     import { toast } from 'svelte-sonner';
     import AppHead from '@/components/AppHead.svelte';
     import { Button } from '@/components/ui/button';
@@ -118,7 +119,8 @@
                 router.reload({ only: ['order'] });
             } else {
                 toast.error(
-                    data.message ?? 'Zahlungseingang konnte nicht bestätigt werden.',
+                    data.message ??
+                        'Zahlungseingang konnte nicht bestätigt werden.',
                 );
             }
         } catch {
@@ -300,8 +302,8 @@
         <CardContent class="flex flex-col gap-4">
             {#if !canConfirmPayment && !canRefund}
                 <p class="text-sm text-muted-foreground">
-                    Diese Bestellung wird ausschließlich automatisch über
-                    PayPal verwaltet — hier ist keine manuelle Aktion möglich.
+                    Diese Bestellung wird ausschließlich automatisch über PayPal
+                    verwaltet — hier ist keine manuelle Aktion möglich.
                 </p>
             {/if}
 
@@ -378,47 +380,38 @@
         </Card>
     </div>
 
-    <!-- Positionen (identisch zur Kundenansicht: settings/Orders/Show.svelte) -->
+    <!-- Positionen (identisch zur Kundenansicht: UserSettingsDialog.svelte) -->
     <div class="overflow-hidden rounded-3xl border bg-white shadow-sm">
         {#each order.items as item (item.id)}
             <div
-                class="flex flex-col gap-4 border-b px-5 py-5 last:border-b-0 sm:flex-row sm:items-center sm:justify-between"
+                class="flex items-center gap-3 border-b px-4 py-3 last:border-b-0"
             >
-                <div class="flex items-start gap-4">
-                    <div
-                        class="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gray-100"
-                    >
-                        {#if item.image_url}
-                            <img
-                                src={item.image_url}
-                                alt={item.product_name}
-                                class="size-full object-cover object-center"
-                            />
-                        {:else}
-                            <div class="size-8 rounded-full bg-gray-200"></div>
-                        {/if}
-                    </div>
-
-                    <div class="space-y-1">
-                        <p class="font-semibold text-gray-950">
-                            {item.product_name}
-                        </p>
-                        <p class="text-sm text-muted-foreground">
-                            Menge: {item.quantity}
-                        </p>
-                        <p class="text-sm text-muted-foreground">
-                            Einzelpreis: {formatPrice(item.unit_price)}*
-                        </p>
-                    </div>
-                </div>
-
                 <div
-                    class="text-left text-lg font-semibold text-gray-950 sm:text-right"
+                    class="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded bg-gray-100"
                 >
+                    {#if item.image_url}
+                        <img
+                            src={item.image_url}
+                            alt={item.product_name}
+                            class="size-full object-cover object-center"
+                        />
+                    {:else}
+                        <Package class="size-4 text-gray-300" />
+                    {/if}
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="truncate text-sm font-medium">
+                        {item.product_name}
+                    </p>
+                    <p class="text-xs text-muted-foreground">
+                        {item.quantity} × {formatPrice(item.unit_price)}*
+                    </p>
+                </div>
+                <span class="text-sm font-semibold">
                     {formatPrice(
                         (Number(item.unit_price) * item.quantity).toFixed(2),
                     )}*
-                </div>
+                </span>
             </div>
         {:else}
             <p class="p-5 text-center text-sm text-muted-foreground">
