@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
@@ -135,7 +136,7 @@ class ProductSeeder extends Seeder
     }
 
     /**
-     * @param \Illuminate\Support\Collection<string, Category> $categories
+     * @param  Collection<string, Category>  $categories
      */
     private function seedManualProducts($categories): int
     {
@@ -150,7 +151,7 @@ class ProductSeeder extends Seeder
             categoryId: $categoryId,
             name: 'Druckpapier UPP-110HG',
             description: 'Das UPP-110HG von Sony ist ein medizinisches Druckpapier fuer den Einsatz in der medizinischen Bildgebung. Es wird hauptsaechlich in der Ultraschalluntersuchung verwendet und ermoeglicht die Erstellung von Ausdrucken im Format A6 Typ V. Dieses Verbrauchsmaterial erfuellt die Anforderungen von medizinischen Fachkraeften, die Drucksysteme zur Wiedergabe diagnostischer Bilder einsetzen.',
-            imageUrl: 'https://d17eythm3w95tp.cloudfront.net/media/201275/conversions/upp-110hg-medium.png'
+            imageUrls: ['https://d17eythm3w95tp.cloudfront.net/media/201275/conversions/upp-110hg-medium.png']
         );
 
         $this->createManualProduct(
@@ -158,7 +159,10 @@ class ProductSeeder extends Seeder
             categoryId: $categoryId,
             name: 'Druckerpapier UPP-110S',
             description: "A6-Standarddruckerpapier (Typ I) fuer den Schwarzweissdruck mit den Druckerserien UP-899 / 898 / 897.\n\nDieses Produkt ist verfuegbar in Einheiten von zehn Rollen pro Karton.\n\nHauptsaechlich verwendet bei Ultraschallanwendungen sowie in der Zahnmedizin und der Mikroskopie.\n\nRollenmasse\n110 mm (B) x 20 m\n\nBestelleinheit\n10 Rollen\n\nDruckmenge\n217 Druckseiten (mit UP-895CE)",
-            imageUrl: 'https://www.sony.com/image/6b41ecf23ba7ac1ebb1759c330667006?fmt=jpeg&wid=558&hei=336'
+            imageUrls: [
+                'https://www.dimedtec.de/medizintechnik/media/image/product/113211/md/upp-110s-a6-high-density-druckerpapier-fuer-schwarzweissdrucker-up-895ce-d895-890ce-d890-860ce-d860.jpg',
+                'https://www.doccheckshop.de/media/c6/5f/f8/1746722686/140168-dh-videopringerpapier-sony-upp-110s-neu.webp',
+            ]
         );
 
         $mindrayManufacturer = Manufacturer::firstOrCreate([
@@ -168,7 +172,7 @@ class ProductSeeder extends Seeder
         $portableUltrasound = Product::create([
             'manufacturer_id' => $mindrayManufacturer->id,
             'category_id' => $categories['ultraschallsysteme']->id ?? null,
-            'name' => 'tragbares Ultraschallsystem mindray MU7',
+            'name' => 'Tragbares Ultraschallsystem MU7',
             'description' => "Mindray MU7 - leichtes Sonographiesystem fuer mobile Einsaetze mit starker Bildgebung und ausdauerndem Akkubetrieb\n\nDas mindray MU7 ist ein portables Ultraschallgeraet fuer Praxen und mobile Einsatzbereiche, in denen Flexibilitaet, Zuverlaessigkeit und einfache Bedienung entscheidend sind. Mit einem Gewicht von nur rund 2 kg, einer Akkulaufzeit von mehr als 4 Stunden und einer robusten, stossfesten Bauweise eignet sich dieses Sonographiegeraet besonders fuer wechselnde Untersuchungsorte und den taeglichen Einsatz im Praxisalltag. Die nano ZST+ Plattform unterstuetzt eine leistungsfaehige Bildverarbeitung, waehrend Funktionen wie iTouch, iWorks und Smart Track den Workflow spuergbar erleichtern. Das 13,3-Zoll-Touchdisplay, das versiegelte Bedienfeld und die integrierte WLAN-Funktion machen das MU7 zu einem durchdachten Ultraschallgeraet fuer Anwender, die mobil arbeiten und dabei nicht auf Komfort verzichten moechten.\n\nWas zeichnet das MU7 Ultraschallgeraet besonders aus?\n\nBesonders mobil im Praxisalltag: Mit nur rund 2 kg laesst sich das Ultraschallgeraet bequem transportieren und flexibel an verschiedenen Einsatzorten nutzen.\n\nMehr Unabhaengigkeit im Arbeitsablauf: Der Li-Ionen-Akku ermoeglicht einen netzunabhaengigen Betrieb von bis zu 4 Stunden. Das ist ideal fuer Hausbesuche, flexible Raumwechsel oder kurze Untersuchungen ohne festen Geraeteplatz.\n\nEinfach und effizient zu bedienen: Das MU7 kombiniert Touchdisplay, physische Tasten und Tastatur. Individuell anpassbare Kurzbefehle helfen dabei, Untersuchungen schneller und strukturierter durchzufuehren.\n\nZuverlaessige Bildqualitaet im Alltag: Die nano ZST+ Plattform sowie Funktionen wie iTouch, PSH, iBeam und iClear unterstuetzen eine klare Bilddarstellung und eine schnelle Bildoptimierung.\n\nPraxisgerecht und hygienisch: Das versiegelte Bedienfeld erleichtert Reinigung und Desinfektion und unterstuetzt damit einen sicheren Einsatz im medizinischen Alltag.\n\nGut in bestehende Ablaeufe integrierbar: Mit DICOM, WLAN, Netzwerkanschluss, HDMI und 3 USB 3.0 Ports laesst sich das Sonographiegeraet gut in bestehende Praxisstrukturen einbinden.\n\nKV-anmeldefaehig\n\nDas mindray MU7 Ultraschallgeraet erfuellt die wichtigen Voraussetzungen fuer die Anmeldung im KV-Umfeld und ist damit auch fuer niedergelassene Praxen eine interessante mobile Loesung. Die konkrete Genehmigung erfolgt durch die jeweils zustaendige KV.",
             'price' => $this->decimal(4390),
             'is_available' => true,
@@ -224,12 +228,15 @@ class ProductSeeder extends Seeder
         return 4;
     }
 
+    /**
+     * @param  list<string>  $imageUrls
+     */
     private function createManualProduct(
         Manufacturer $manufacturer,
         ?int $categoryId,
         string $name,
         string $description,
-        string $imageUrl,
+        array $imageUrls,
     ): void {
         $product = Product::create([
             'manufacturer_id' => $manufacturer->id,
@@ -254,7 +261,7 @@ class ProductSeeder extends Seeder
             'is_default' => false,
         ]);
 
-        $this->seedCoverImage($product, $imageUrl);
+        $this->seedProductImages($product, $imageUrls);
     }
 
     private function seedCoverImage(Product $product, ?string $url): void
@@ -291,7 +298,7 @@ class ProductSeeder extends Seeder
     }
 
     /**
-     * @param list<string> $urls
+     * @param  list<string>  $urls
      */
     private function seedProductImages(Product $product, array $urls): void
     {
