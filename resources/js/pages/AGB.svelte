@@ -9,7 +9,7 @@
 <div class="flex min-h-screen flex-col bg-white">
     <ShopHeader />
 
-    <main class="flex-1 mx-auto max-w-3xl px-4 py-10 lg:px-8">
+    <main class="flex-1 mx-auto max-w-7xl px-4 py-10 lg:px-8">
         <h1 class="mb-2 text-2xl font-bold text-[#1a3a5c]">
             Allgemeine Geschäftsbedingungen
         </h1>

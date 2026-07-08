@@ -163,6 +163,13 @@
                             >FAQ</Link
                         >
                     </li>
+                    <li>
+                        <Link
+                            href="/informationen/widerrufsbelehrung"
+                            class="text-sm text-[#1a6bbf] hover:underline"
+                            >Widerrufsbelehrung</Link
+                        >
+                    </li>
                 </ul>
             </div>
 
@@ -188,13 +195,6 @@
                             href="/unternehmen/datenschutz"
                             class="text-sm text-[#1a6bbf] hover:underline"
                             >Datenschutz</Link
-                        >
-                    </li>
-                    <li>
-                        <Link
-                            href="/unternehmen/widerrufsbelehrung"
-                            class="text-sm text-[#1a6bbf] hover:underline"
-                            >Widerrufsbelehrung</Link
                         >
                     </li>
                     <li>

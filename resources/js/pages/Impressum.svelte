@@ -20,7 +20,7 @@
 <div class="flex min-h-screen flex-col bg-white">
     <ShopHeader />
 
-    <main class="mx-auto max-w-3xl flex-1 px-4 py-10 lg:px-8">
+    <main class="mx-auto max-w-7xl flex-1 px-4 py-10 lg:px-8">
         <h1 class="mb-8 text-2xl font-bold text-[#1a3a5c]">Impressum</h1>
 
         <section class="mb-8">

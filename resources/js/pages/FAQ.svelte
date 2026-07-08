@@ -124,7 +124,7 @@
     <ShopHeader />
 
     <main class="flex-1">
-        <div class="mx-auto max-w-3xl px-4 py-10 lg:px-8">
+        <div class="mx-auto max-w-7xl px-4 py-10 lg:px-8">
             <h1 class="mb-2 text-2xl font-bold text-[#1a3a5c]">Häufige Fragen</h1>
             <p class="mb-10 text-sm text-gray-500">
                 Sie finden hier Antworten auf die häufigsten Fragen zu Bestellung, Lieferung, Zahlung und unseren Serviceleistungen.

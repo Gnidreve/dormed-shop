@@ -13,7 +13,7 @@
 <div class="flex min-h-screen flex-col bg-white">
     <ShopHeader />
 
-    <main class="flex-1 mx-auto max-w-4xl px-4 py-10 lg:px-8">
+    <main class="flex-1 mx-auto max-w-7xl px-4 py-10 lg:px-8">
         <h1 class="mb-6 text-2xl font-bold text-[#1a3a5c]">Versand</h1>
 
         <p class="mb-8 text-sm text-gray-700">
@@ -21,7 +21,7 @@
             Privatpersonen und Unternehmen. Privatkunden steht ein
             Widerrufsrecht gemäß §355 BGB zu. Weitere Informationen finden Sie
             in unserer <Link
-                href="/unternehmen/widerrufsbelehrung"
+                href="/informationen/widerrufsbelehrung"
                 class="text-[#1a6bbf] hover:underline">Widerrufsbelehrung</Link
             >.
         </p>

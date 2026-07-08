@@ -226,7 +226,7 @@
                         <p class="mb-3 text-sm text-gray-600">
                             Bitte beachten Sie die
                             <Link
-                                href="/unternehmen/widerrufsbelehrung"
+                                href="/informationen/widerrufsbelehrung"
                                 class="text-[#1a6bbf] hover:underline"
                             >
                                 Widerrufsbelehrung
