@@ -10,17 +10,11 @@ use App\Support\Orders\OrderManager;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class OrderController extends Controller
 {
-    /**
-     * Order statuses an admin may set manually.
-     */
-    private const STATUSES = ['pending', 'paid', 'cancelled', 'failed', 'refunded'];
-
     public function index(): Response
     {
         return Inertia::render('Admin/Orders/Index', [
@@ -38,30 +32,33 @@ class OrderController extends Controller
     }
 
     /**
-     * Update the order status. When an invoice order is marked "paid", the
-     * confirmation flow runs so the customer is notified just like with a
-     * gateway payment.
+     * Confirm manual receipt of payment for an invoice order (bank transfer
+     * or direct debit). This is the only order-status transition an admin
+     * may trigger by hand: PayPal orders are exclusively managed by the
+     * capture flow and webhook (see PayPalController) and must never be
+     * edited here.
      */
-    public function updateStatus(Request $request, Order $order, OrderManager $orderManager): JsonResponse
+    public function confirmPayment(Request $request, Order $order, OrderManager $orderManager): JsonResponse
     {
+        if ($order->payment_method !== 'invoice' || $order->status !== 'pending') {
+            return response()->json([
+                'message' => 'Zahlungseingang kann nur für offene Rechnungsbestellungen bestätigt werden.',
+            ], 422);
+        }
+
         $validated = $request->validate([
-            'status' => ['required', Rule::in(self::STATUSES)],
             'notify' => ['sometimes', 'boolean'],
         ]);
 
-        $shouldNotify = $validated['status'] === 'paid'
-            && $order->status !== 'paid'
-            && ($validated['notify'] ?? false);
-
-        if ($shouldNotify) {
+        if ($validated['notify'] ?? false) {
             // markPaid sets the status and sends the confirmation mails once.
             $orderManager->markPaid($order);
         } else {
-            $order->update(['status' => $validated['status']]);
+            $order->update(['status' => 'paid']);
         }
 
         return response()->json([
-            'message' => 'Status aktualisiert.',
+            'message' => 'Zahlungseingang bestätigt.',
             'status' => $order->fresh()->status,
         ]);
     }

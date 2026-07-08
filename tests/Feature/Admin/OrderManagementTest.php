@@ -42,17 +42,28 @@ class OrderManagementTest extends TestCase
             );
     }
 
-    public function test_status_can_be_updated(): void
+    public function test_confirm_payment_rejects_paypal_orders(): void
     {
         Mail::fake();
-        $order = Order::factory()->create(['status' => 'pending']);
+        $order = Order::factory()->create(['status' => 'pending', 'payment_method' => 'paypal']);
 
         $this->actingAsAdmin()
-            ->patchJson(route('admin.orders.status', $order), ['status' => 'cancelled'])
-            ->assertOk()
-            ->assertJson(['status' => 'cancelled']);
+            ->patchJson(route('admin.orders.confirm-payment', $order))
+            ->assertStatus(422);
 
-        $this->assertSame('cancelled', $order->fresh()->status);
+        $this->assertSame('pending', $order->fresh()->status);
+        Mail::assertNothingSent();
+    }
+
+    public function test_confirm_payment_rejects_already_paid_orders(): void
+    {
+        Mail::fake();
+        $order = Order::factory()->create(['status' => 'paid', 'payment_method' => 'invoice']);
+
+        $this->actingAsAdmin()
+            ->patchJson(route('admin.orders.confirm-payment', $order))
+            ->assertStatus(422);
+
         Mail::assertNothingSent();
     }
 
@@ -62,7 +73,7 @@ class OrderManagementTest extends TestCase
         $order = Order::factory()->create(['status' => 'pending', 'payment_method' => 'invoice']);
 
         $this->actingAsAdmin()
-            ->patchJson(route('admin.orders.status', $order), ['status' => 'paid', 'notify' => true])
+            ->patchJson(route('admin.orders.confirm-payment', $order), ['notify' => true])
             ->assertOk();
 
         $this->assertSame('paid', $order->fresh()->status);
@@ -75,7 +86,7 @@ class OrderManagementTest extends TestCase
         $order = Order::factory()->create(['status' => 'pending', 'payment_method' => 'invoice']);
 
         $this->actingAsAdmin()
-            ->patchJson(route('admin.orders.status', $order), ['status' => 'paid', 'notify' => false])
+            ->patchJson(route('admin.orders.confirm-payment', $order), ['notify' => false])
             ->assertOk();
 
         $this->assertSame('paid', $order->fresh()->status);
@@ -92,11 +103,11 @@ class OrderManagementTest extends TestCase
             ->assertJson(['message' => 'Keine erstattbare PayPal-Zahlung gefunden.']);
     }
 
-    public function test_status_update_requires_admin(): void
+    public function test_confirm_payment_requires_admin(): void
     {
-        $order = Order::factory()->create();
+        $order = Order::factory()->create(['status' => 'pending', 'payment_method' => 'invoice']);
 
-        $this->patchJson(route('admin.orders.status', $order), ['status' => 'cancelled'])
+        $this->patchJson(route('admin.orders.confirm-payment', $order))
             ->assertRedirect(route('admin.login'));
     }
 }

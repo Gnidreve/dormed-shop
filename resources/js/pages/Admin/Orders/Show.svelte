@@ -24,8 +24,8 @@
     import { formatPrice } from '@/lib/currency';
     import { fetchJson } from '@/lib/http';
     import {
+        confirmPayment as confirmPaymentRoute,
         refund as refundRoute,
-        status as statusRoute,
     } from '@/routes/admin/orders';
 
     type OrderItem = {
@@ -51,6 +51,7 @@
     type OrderDetail = {
         id: number;
         status: string;
+        payment_method: string | null;
         total_amount: string;
         shipping_amount: string;
         shipping_address: AddressSnapshot;
@@ -72,14 +73,6 @@
         refunded: 'Rückerstattet',
     };
 
-    const statusOptions: { value: string; label: string }[] = [
-        { value: 'pending', label: 'Ausstehend' },
-        { value: 'paid', label: 'Bezahlt' },
-        { value: 'cancelled', label: 'Storniert' },
-        { value: 'failed', label: 'Fehlgeschlagen' },
-        { value: 'refunded', label: 'Rückerstattet' },
-    ];
-
     const paymentStatusLabels: Record<string, string> = {
         CREATED: 'Erstellt',
         APPROVED: 'Bestätigt',
@@ -88,46 +81,41 @@
         REFUNDED: 'Rückerstattet',
     };
 
-    // svelte-ignore state_referenced_locally
-    let selectedStatus = $state(order.status);
     let notifyCustomer = $state(false);
-    let savingStatus = $state(false);
+    let confirmingPayment = $state(false);
     let refunding = $state(false);
 
-    const willMarkPaid = $derived(
-        selectedStatus === 'paid' && order.status !== 'paid',
+    const canConfirmPayment = $derived(
+        order.payment_method === 'invoice' && order.status === 'pending',
     );
     const canRefund = $derived(
         order.payments.some((p) => p.status === 'COMPLETED'),
     );
 
-    async function saveStatus() {
-        savingStatus = true;
+    async function confirmPayment() {
+        confirmingPayment = true;
 
         try {
             const { ok, data } = await fetchJson<{ message?: string }>(
-                statusRoute.url(order.id),
+                confirmPaymentRoute.url(order.id),
                 {
                     method: 'PATCH',
-                    body: {
-                        status: selectedStatus,
-                        notify: willMarkPaid ? notifyCustomer : false,
-                    },
+                    body: { notify: notifyCustomer },
                 },
             );
 
             if (ok) {
-                toast.success(data.message ?? 'Status aktualisiert.');
+                toast.success(data.message ?? 'Zahlungseingang bestätigt.');
                 router.reload({ only: ['order'] });
             } else {
                 toast.error(
-                    data.message ?? 'Status konnte nicht aktualisiert werden.',
+                    data.message ?? 'Zahlungseingang konnte nicht bestätigt werden.',
                 );
             }
         } catch {
             toast.error('Verbindungsfehler.');
         } finally {
-            savingStatus = false;
+            confirmingPayment = false;
         }
     }
 
@@ -301,30 +289,25 @@
             <CardTitle>Aktionen</CardTitle>
         </CardHeader>
         <CardContent class="flex flex-col gap-4">
+            {#if !canConfirmPayment && !canRefund}
+                <p class="text-sm text-muted-foreground">
+                    Diese Bestellung wird ausschließlich automatisch über
+                    PayPal verwaltet — hier ist keine manuelle Aktion möglich.
+                </p>
+            {/if}
+
             <div class="flex flex-wrap items-end gap-3">
-                <div class="flex flex-col gap-1.5">
-                    <label for="order-status" class="text-sm font-medium"
-                        >Status</label
+                {#if canConfirmPayment}
+                    <Button
+                        onclick={confirmPayment}
+                        disabled={confirmingPayment}
                     >
-                    <select
-                        id="order-status"
-                        bind:value={selectedStatus}
-                        class="h-9 rounded-md border border-input bg-background px-3 text-sm"
-                    >
-                        {#each statusOptions as opt (opt.value)}
-                            <option value={opt.value}>{opt.label}</option>
-                        {/each}
-                    </select>
-                </div>
-                <Button
-                    onclick={saveStatus}
-                    disabled={savingStatus || selectedStatus === order.status}
-                >
-                    {#if savingStatus}<Loader2
-                            class="size-4 animate-spin"
-                        />{/if}
-                    Status speichern
-                </Button>
+                        {#if confirmingPayment}<Loader2
+                                class="size-4 animate-spin"
+                            />{/if}
+                        Zahlungseingang bestätigen
+                    </Button>
+                {/if}
                 {#if canRefund}
                     <Button
                         variant="destructive"
@@ -339,7 +322,7 @@
                 {/if}
             </div>
 
-            {#if willMarkPaid}
+            {#if canConfirmPayment}
                 <label
                     class="flex items-center gap-2 text-sm text-muted-foreground"
                 >

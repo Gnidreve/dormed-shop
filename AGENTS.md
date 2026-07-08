@@ -59,7 +59,7 @@ Standalone-Seiten (Welcome, Products/*, Checkout/*, statische Seiten) binden `<S
 | `routes/public/rating.php` | `POST /products/{product}/ratings` (anonym — siehe TODO) |
 | `routes/checkout.php`      | Cart (`/cart/items/{product}/{variant?}`), Checkout (`confirm`/`address`/`submit` mit `auth`+`verified`), Success, Kundenbestellungen |
 | `routes/paypal.php`        | `order/create` + `order/capture` (`auth`+`verified`), `after-payment`, `webhook` (signaturverifiziert, ohne CSRF) |
-| `routes/admin.php`         | Admin-CRUD (Produkte inkl. Bilder/Varianten, Kategorien, Hersteller, Kunden), Bestell-Aktionen (`orders.status`, `orders.refund`), Settings + Versandarten |
+| `routes/admin.php`         | Admin-CRUD (Produkte inkl. Bilder/Varianten, Kategorien, Hersteller, Kunden), Bestell-Aktionen (`orders.confirm-payment`, `orders.refund`), Settings + Versandarten |
 | `routes/settings.php`      | Profil, Adressen, Sicherheit (Kunde)      |
 
 ---
@@ -236,7 +236,16 @@ Regeln:
 - **Secrets** liegen verschlüsselt in `settings` (`Setting::$encryptedKeys`) — **Single Source of Truth**. Es gibt keine `PAYPAL_*`-env-Fallbacks mehr; Erstbefüllung nur über `SEED_PAYPAL_*` + `PaymentSeeder`.
 - **Webhooks** (`/paypal/webhook`): signaturverifiziert; `CAPTURE.COMPLETED` → `markPaid`; `CAPTURE.REFUNDED`/`DENIED` setzen Payment **und** Order (Achtung: beim Refund ist `resource.id` die Refund-ID, die Capture-ID steckt im `up`-Link).
 - **Benachrichtigungs-Empfänger** = fest Setting `shop.email` (dieselbe Kontakt-Mail-Adresse wie im Shop-Frontend), kein separates Feld, kein Fallback. Beide Bestellmails laufen **synchron** im Request (kein Queue-Worker nötig; bei ~5 Mails/Tag ist der Overhead vernachlässigbar).
-- **Admin-Bestellaktionen**: Status setzen (optional mit Kundenmail) + PayPal-Refund unter `Admin/Orders/Show` (`orders.status`, `orders.refund`).
+- **Admin-Bestellaktionen** unter `Admin/Orders/Show`: `orders.confirm-payment` (einzige manuelle Status-Änderung, s.u.) + PayPal-Refund (`orders.refund`).
+
+### Betriebsmodell — wo hört die Automatisierung auf?
+
+Der Shop deckt **ausschließlich** Bestellannahme + Zahlungsabwicklungsschicht ab. Alles danach (Rechnungsstellung, DPD-Versand, Buchhaltung) läuft **außerhalb** des Systems, manuell im Rechnungswesen — das ist bewusst so und keine offene Baustelle:
+
+- **PayPal-Bestellungen sind vollautomatisch und darf der Admin nicht manuell anfassen.** Status (`pending`/`paid`/`failed`/`refunded`/`cancelled`) wird ausschließlich vom Capture-Flow bzw. Webhook gesetzt (`PayPalController`). Es gibt **kein** Status-Dropdown im Admin.
+- **Rechnungsbestellungen (`invoice`)**: einzige manuelle Aktion ist „Zahlungseingang bestätigen" (`OrderController::confirmPayment`, Route `orders.confirm-payment`) — setzt `pending` → `paid`, wenn eine Überweisung/Lastschrift eingegangen ist. Nur möglich, wenn `payment_method === 'invoice'` **und** Status `pending` ist; sonst 422. Kein anderer Statuswert ist über die UI erreichbar.
+- **Es gibt keinen Fulfillment-Status im System** (kein „in Bearbeitung"/„versendet"/„abgeschlossen" — bewusst entfernt, siehe Git-Historie). `paid` ist der finale Erfolgszustand; Versand/Rechnung/DPD-Tracking passiert in der externen Rechnungssoftware.
+- Storno (`cancelled`) über den Admin ist aktuell **nicht** vorgesehen — nur PayPal selbst (Abbruch/Timeout) oder eine zukünftige bilaterale PayPal-Storno-Anbindung dürfen das setzen.
 
 ## Noch nicht gebaut
 
