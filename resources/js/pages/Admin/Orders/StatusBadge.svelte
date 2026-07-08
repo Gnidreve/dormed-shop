@@ -1,21 +1,13 @@
 <script lang="ts">
     import { Badge } from '@/components/ui/badge';
+    import { orderStatusBadgeClass, orderStatusLabel } from '@/lib/orderStatus';
 
-    let { status, label }: { status: string; label: string } = $props();
-
-    const statusClasses: Record<string, string> = {
-        pending: 'bg-yellow-100 text-yellow-800 border-transparent',
-        paid: 'bg-green-100 text-green-800 border-transparent',
-        cancelled: 'bg-red-100 text-red-800 border-transparent',
-        failed: 'bg-red-100 text-red-800 border-transparent',
-        refunded: 'bg-red-100 text-red-800 border-transparent',
-    };
+    let { status }: { status: string } = $props();
 </script>
 
 <Badge
     variant="outline"
-    class={statusClasses[status] ??
-        'bg-muted text-muted-foreground border-transparent'}
+    class="{orderStatusBadgeClass(status)} border-transparent"
 >
-    {label}
+    {orderStatusLabel(status)}
 </Badge>

@@ -23,6 +23,7 @@
     import { Separator } from '@/components/ui/separator';
     import { formatPrice } from '@/lib/currency';
     import { fetchJson } from '@/lib/http';
+    import { orderStatusBadgeClass, orderStatusLabel } from '@/lib/orderStatus';
     import {
         confirmPayment as confirmPaymentRoute,
         refund as refundRoute,
@@ -74,14 +75,6 @@
     };
 
     let { order }: { order: OrderDetail } = $props();
-
-    const statusLabels: Record<string, string> = {
-        pending: 'Ausstehend',
-        paid: 'Bezahlt',
-        cancelled: 'Storniert',
-        failed: 'Fehlgeschlagen',
-        refunded: 'Rückerstattet',
-    };
 
     const paymentStatusLabels: Record<string, string> = {
         CREATED: 'Erstellt',
@@ -196,16 +189,11 @@
             </p>
         </div>
         <span
-            class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium
-            {order.status === 'paid'
-                ? 'bg-green-100 text-green-700'
-                : order.status === 'cancelled' ||
-                    order.status === 'failed' ||
-                    order.status === 'refunded'
-                  ? 'bg-red-100 text-red-700'
-                  : 'bg-yellow-100 text-yellow-700'}"
+            class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium {orderStatusBadgeClass(
+                order.status,
+            )}"
         >
-            {statusLabels[order.status] ?? order.status}
+            {orderStatusLabel(order.status)}
         </span>
     </div>
 

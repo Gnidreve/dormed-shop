@@ -10,7 +10,12 @@
 
 <script lang="ts">
     import AppHead from '@/components/AppHead.svelte';
-    import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+    import {
+        Card,
+        CardContent,
+        CardHeader,
+        CardTitle,
+    } from '@/components/ui/card';
     import {
         Table,
         TableBody,
@@ -20,6 +25,7 @@
         TableRow,
     } from '@/components/ui/table';
     import { formatPrice } from '@/lib/currency';
+    import { orderStatusBadgeClass, orderStatusLabel } from '@/lib/orderStatus';
 
     type Address = {
         id: number;
@@ -64,14 +70,6 @@
 
     let { customer }: { customer: CustomerDetail } = $props();
 
-    const statusLabels: Record<string, string> = {
-        pending: 'Ausstehend',
-        paid: 'Bezahlt',
-        cancelled: 'Storniert',
-        failed: 'Fehlgeschlagen',
-        refunded: 'Erstattet',
-    };
-
     const typeLabels: Record<string, string> = {
         shipping: 'Lieferadresse',
         billing: 'Rechnungsadresse',
@@ -95,15 +93,30 @@
                 </div>
                 <div class="flex justify-between">
                     <span class="text-muted-foreground">E-Mail</span>
-                    <a href="mailto:{customer.email}" class="text-[#1a6bbf] hover:underline">{customer.email}</a>
+                    <a
+                        href="mailto:{customer.email}"
+                        class="text-[#1a6bbf] hover:underline"
+                        >{customer.email}</a
+                    >
                 </div>
                 <div class="flex justify-between">
-                    <span class="text-muted-foreground">E-Mail verifiziert</span>
-                    <span>{customer.email_verified_at ? new Date(customer.email_verified_at).toLocaleDateString('de-DE') : 'Nein'}</span>
+                    <span class="text-muted-foreground">E-Mail verifiziert</span
+                    >
+                    <span
+                        >{customer.email_verified_at
+                            ? new Date(
+                                  customer.email_verified_at,
+                              ).toLocaleDateString('de-DE')
+                            : 'Nein'}</span
+                    >
                 </div>
                 <div class="flex justify-between">
                     <span class="text-muted-foreground">Registriert</span>
-                    <span>{new Date(customer.created_at).toLocaleDateString('de-DE')}</span>
+                    <span
+                        >{new Date(customer.created_at).toLocaleDateString(
+                            'de-DE',
+                        )}</span
+                    >
                 </div>
             </CardContent>
         </Card>
@@ -136,19 +149,35 @@
                     {#each customer.addresses as addr (addr.id)}
                         <div class="rounded-lg border bg-gray-50 p-4 text-sm">
                             <div class="mb-2 flex items-center gap-2">
-                                <span class="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                                <span
+                                    class="text-xs font-medium uppercase tracking-wide text-muted-foreground"
+                                >
                                     {typeLabels[addr.type] ?? addr.type}
                                 </span>
                                 {#if addr.is_default}
-                                    <span class="rounded-full bg-[#1a6bbf]/10 px-2 py-0.5 text-xs text-[#1a6bbf]">Standard</span>
+                                    <span
+                                        class="rounded-full bg-[#1a6bbf]/10 px-2 py-0.5 text-xs text-[#1a6bbf]"
+                                        >Standard</span
+                                    >
                                 {/if}
                             </div>
-                            {#if addr.company}<p class="font-medium">{addr.company}</p>{/if}
-                            <p>{addr.fullname ?? addr.first_name + ' ' + addr.last_name}</p>
+                            {#if addr.company}<p class="font-medium">
+                                    {addr.company}
+                                </p>{/if}
+                            <p>
+                                {addr.fullname ??
+                                    addr.first_name + ' ' + addr.last_name}
+                            </p>
                             <p>{addr.street} {addr.house_number}</p>
-                            {#if addr.address_line2}<p>{addr.address_line2}</p>{/if}
+                            {#if addr.address_line2}<p>
+                                    {addr.address_line2}
+                                </p>{/if}
                             <p>{addr.zip} {addr.city}</p>
-                            {#if addr.phone}<p class="mt-1 text-muted-foreground">{addr.phone}</p>{/if}
+                            {#if addr.phone}<p
+                                    class="mt-1 text-muted-foreground"
+                                >
+                                    {addr.phone}
+                                </p>{/if}
                         </div>
                     {/each}
                 </div>
@@ -163,7 +192,9 @@
         </CardHeader>
         <CardContent>
             {#if customer.orders.length === 0}
-                <p class="py-4 text-center text-sm text-muted-foreground">Keine Bestellungen vorhanden.</p>
+                <p class="py-4 text-center text-sm text-muted-foreground">
+                    Keine Bestellungen vorhanden.
+                </p>
             {:else}
                 <Table>
                     <TableHeader>
@@ -178,18 +209,29 @@
                     <TableBody>
                         {#each customer.orders as order (order.id)}
                             <TableRow>
-                                <TableCell class="font-medium">#{order.id}</TableCell>
-                                <TableCell>{new Date(order.created_at).toLocaleDateString('de-DE')}</TableCell>
+                                <TableCell class="font-medium"
+                                    >#{order.id}</TableCell
+                                >
+                                <TableCell
+                                    >{new Date(
+                                        order.created_at,
+                                    ).toLocaleDateString('de-DE')}</TableCell
+                                >
                                 <TableCell>
-                                    <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
-                                        {order.status === 'paid' ? 'bg-green-100 text-green-700'
-                                        : order.status === 'cancelled' || order.status === 'failed' ? 'bg-red-100 text-red-700'
-                                        : 'bg-yellow-100 text-yellow-700'}">
-                                        {statusLabels[order.status] ?? order.status}
+                                    <span
+                                        class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {orderStatusBadgeClass(
+                                            order.status,
+                                        )}"
+                                    >
+                                        {orderStatusLabel(order.status)}
                                     </span>
                                 </TableCell>
                                 <TableCell>{order.items.length}</TableCell>
-                                <TableCell class="text-right font-semibold">{formatPrice(order.total_amount)}</TableCell>
+                                <TableCell class="text-right font-semibold"
+                                    >{formatPrice(
+                                        order.total_amount,
+                                    )}</TableCell
+                                >
                             </TableRow>
                         {/each}
                     </TableBody>

@@ -2,6 +2,7 @@
     import AppHead from '@/components/AppHead.svelte';
     import Heading from '@/components/Heading.svelte';
     import { formatPrice } from '@/lib/currency';
+    import { orderStatusBadgeClass, orderStatusLabel } from '@/lib/orderStatus';
 
     type OrderItem = {
         id: number;
@@ -36,22 +37,6 @@
     };
 
     let { order }: { order: OrderDetail } = $props();
-
-    const statusLabels: Record<string, string> = {
-        pending: 'Ausstehend',
-        paid: 'Bezahlt',
-        cancelled: 'Storniert',
-        failed: 'Fehlgeschlagen',
-        refunded: 'Erstattet',
-    };
-
-    const statusClasses: Record<string, string> = {
-        refunded: 'bg-green-100 text-green-700',
-        cancelled: 'bg-red-100 text-red-700',
-        failed: 'bg-red-100 text-red-700',
-        paid: 'bg-blue-100 text-blue-700',
-        pending: 'bg-yellow-100 text-yellow-700',
-    };
 
     const createdAt = $derived(
         order.created_at ? new Date(order.created_at) : null,
@@ -102,9 +87,9 @@
             />
 
             <span
-                class={`inline-flex w-fit items-center rounded-full px-3 py-1 text-sm font-medium ${statusClasses[order.status] ?? 'bg-yellow-100 text-yellow-700'}`}
+                class={`inline-flex w-fit items-center rounded-full px-3 py-1 text-sm font-medium ${orderStatusBadgeClass(order.status)}`}
             >
-                {statusLabels[order.status] ?? order.status}
+                {orderStatusLabel(order.status)}
             </span>
         </div>
 
@@ -112,8 +97,7 @@
             <p class="text-sm text-red-600">
                 Diese Bestellung wurde nicht regulär abgeschlossen. Der aktuelle
                 Status lautet
-                <span class="font-medium"
-                    >{statusLabels[order.status] ?? order.status}</span
+                <span class="font-medium">{orderStatusLabel(order.status)}</span
                 >.
             </p>
         {/if}

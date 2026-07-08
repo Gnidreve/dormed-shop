@@ -58,14 +58,6 @@
 
     let { orders }: { orders: Paginator } = $props();
 
-    const statusLabels: Record<string, string> = {
-        pending: 'Ausstehend',
-        paid: 'Bezahlt',
-        cancelled: 'Storniert',
-        failed: 'Fehlgeschlagen',
-        refunded: 'Rückerstattet',
-    };
-
     const formatDate = (date: string) =>
         new Date(date).toLocaleDateString('de-DE', {
             day: '2-digit',
@@ -128,9 +120,6 @@
             cell: ({ row }) =>
                 renderComponent(StatusBadge, {
                     status: row.original.status,
-                    label:
-                        statusLabels[row.original.status] ??
-                        row.original.status,
                 }),
         },
         {

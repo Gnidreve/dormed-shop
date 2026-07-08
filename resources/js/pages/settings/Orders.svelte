@@ -4,28 +4,13 @@
     import Heading from '@/components/Heading.svelte';
     import * as Table from '@/components/ui/table';
     import { formatPrice } from '@/lib/currency';
+    import { orderStatusBadgeClass, orderStatusLabel } from '@/lib/orderStatus';
 
     type Order = {
         id: number;
         status: string;
         total_amount: string;
         created_at: string;
-    };
-
-    const statusLabels: Record<string, string> = {
-        pending: 'Ausstehend',
-        paid: 'Bezahlt',
-        cancelled: 'Storniert',
-        failed: 'Fehlgeschlagen',
-        refunded: 'Erstattet',
-    };
-
-    const statusClass: Record<string, string> = {
-        paid: 'bg-green-100 text-green-700',
-        refunded: 'bg-green-100 text-green-700',
-        cancelled: 'bg-red-100 text-red-700',
-        failed: 'bg-red-100 text-red-700',
-        pending: 'bg-yellow-100 text-yellow-700',
     };
 
     let { orders }: { orders: Order[] } = $props();
@@ -57,26 +42,42 @@
                 {#each orders as order (order.id)}
                     <Table.Row class="hover:bg-muted/40">
                         <Table.Cell class="font-medium">
-                            <Link href={`/customer/orders/${order.id}`} class="block w-full text-[#0d1f44] hover:underline">
+                            <Link
+                                href={`/customer/orders/${order.id}`}
+                                class="block w-full text-[#0d1f44] hover:underline"
+                            >
                                 #{order.id}
                             </Link>
                         </Table.Cell>
                         <Table.Cell>
-                            <Link href={`/customer/orders/${order.id}`} class="block w-full">
-                                {new Date(order.created_at).toLocaleDateString('de-DE')}
+                            <Link
+                                href={`/customer/orders/${order.id}`}
+                                class="block w-full"
+                            >
+                                {new Date(order.created_at).toLocaleDateString(
+                                    'de-DE',
+                                )}
                             </Link>
                         </Table.Cell>
                         <Table.Cell>
-                            <Link href={`/customer/orders/${order.id}`} class="block w-full">
+                            <Link
+                                href={`/customer/orders/${order.id}`}
+                                class="block w-full"
+                            >
                                 <span
-                                    class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {statusClass[order.status] ?? 'bg-yellow-100 text-yellow-700'}"
+                                    class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {orderStatusBadgeClass(
+                                        order.status,
+                                    )}"
                                 >
-                                    {statusLabels[order.status] ?? order.status}
+                                    {orderStatusLabel(order.status)}
                                 </span>
                             </Link>
                         </Table.Cell>
                         <Table.Cell class="text-right font-semibold">
-                            <Link href={`/customer/orders/${order.id}`} class="block w-full">
+                            <Link
+                                href={`/customer/orders/${order.id}`}
+                                class="block w-full"
+                            >
                                 {formatPrice(order.total_amount)}
                             </Link>
                         </Table.Cell>

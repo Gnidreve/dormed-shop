@@ -26,6 +26,7 @@
     import { Skeleton } from '@/components/ui/skeleton';
     import { formatPrice } from '@/lib/currency';
     import { fetchJson } from '@/lib/http';
+    import { orderStatusBadgeClass, orderStatusLabel } from '@/lib/orderStatus';
     import { logout } from '@/routes';
     import {
         edit as addressesEdit,
@@ -82,26 +83,6 @@
         { id: 'profile', title: 'Profil', icon: Settings },
         { id: 'security', title: 'Sicherheit', icon: Shield },
     ];
-
-    const statusLabels: Record<string, string> = {
-        pending: 'Ausstehend',
-        paid: 'Bezahlt',
-        processing: 'In Bearbeitung',
-        completed: 'Abgeschlossen',
-        cancelled: 'Storniert',
-        failed: 'Fehlgeschlagen',
-        refunded: 'Erstattet',
-    };
-
-    const statusClasses: Record<string, string> = {
-        completed: 'bg-green-100 text-green-700',
-        refunded: 'bg-green-100 text-green-700',
-        cancelled: 'bg-red-100 text-red-700',
-        failed: 'bg-red-100 text-red-700',
-        processing: 'bg-blue-100 text-blue-700',
-        paid: 'bg-blue-100 text-blue-700',
-        pending: 'bg-yellow-100 text-yellow-700',
-    };
 
     // --- Bestellungen ---
     let orders = $state<OrderRow[] | null>(null);
@@ -397,10 +378,9 @@
                             <!-- UX-Vergleich: Badge zusätzlich im Kopf (Duplikat unten im Content) -->
                             {#if selectedOrder}
                                 <span
-                                    class={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusClasses[selectedOrder.status] ?? 'bg-yellow-100 text-yellow-700'}`}
+                                    class={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${orderStatusBadgeClass(selectedOrder.status)}`}
                                 >
-                                    {statusLabels[selectedOrder.status] ??
-                                        selectedOrder.status}
+                                    {orderStatusLabel(selectedOrder.status)}
                                 </span>
                             {/if}
                         {:else}
@@ -646,10 +626,9 @@
                                                 {formatDate(order.created_at)}
                                             </span>
                                             <span
-                                                class={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusClasses[order.status] ?? 'bg-yellow-100 text-yellow-700'}`}
+                                                class={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${orderStatusBadgeClass(order.status)}`}
                                             >
-                                                {statusLabels[order.status] ??
-                                                    order.status}
+                                                {orderStatusLabel(order.status)}
                                             </span>
                                             <span class="text-sm font-semibold">
                                                 {formatPrice(
