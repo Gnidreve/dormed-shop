@@ -13,6 +13,7 @@
     import ShopHeader from '@/components/ShopHeader.svelte';
     import { Button } from '@/components/ui/button';
     import * as Carousel from '@/components/ui/carousel';
+    import * as Empty from '@/components/ui/empty';
     import { Label } from '@/components/ui/label';
     import * as Select from '@/components/ui/select';
     import { Textarea } from '@/components/ui/textarea';
@@ -77,6 +78,8 @@
     let quantity = $state(1);
     let activeTab = $state<'beschreibung' | 'bewertungen'>('beschreibung');
     let ratingStars = $state(5);
+    let showAllRatings = $state(false);
+    const RATINGS_PREVIEW_LIMIT = 3;
     let activeImageIndex = $state(0);
     let carouselApi = $state<any>();
     let zoomActive = $state(false);
@@ -122,6 +125,9 @@
         ratingSummary.average !== null
             ? Number(ratingSummary.average.replace(',', '.'))
             : null,
+    );
+    const visibleRatings = $derived(
+        showAllRatings ? ratings : ratings.slice(0, RATINGS_PREVIEW_LIMIT),
     );
     const variantSelectLabel = $derived(
         selectedVariant?.label ?? 'Variation waehlen',
@@ -562,66 +568,70 @@
                     </div>
                 {:else}
                     <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_24rem]">
-                        <div class="space-y-6">
+                        <div
+                            class="rounded-xl border border-gray-200 bg-white p-6"
+                        >
                             <div
-                                class="rounded-xl border border-gray-200 bg-white p-6"
+                                class="flex flex-wrap items-start justify-between gap-4"
                             >
-                                <div
-                                    class="flex flex-wrap items-end justify-between gap-4"
-                                >
-                                    <div>
-                                        <p
-                                            class="text-sm font-semibold uppercase tracking-wide text-[#1a6bbf]"
-                                        >
-                                            Kundenbewertungen
+                                <div>
+                                    <h2
+                                        class="text-lg font-bold text-gray-900 sm:text-xl"
+                                    >
+                                        Bewertungen
+                                    </h2>
+                                    {#if ratingSummary.count > 0}
+                                        <p class="mt-1 text-sm text-gray-500">
+                                            {ratingSummary.count} Bewertung{ratingSummary.count ===
+                                            1
+                                                ? ''
+                                                : 'en'}
                                         </p>
-                                        <div class="mt-2 flex items-end gap-3">
-                                            <span
-                                                class="text-3xl font-bold text-gray-900"
-                                            >
-                                                {ratingSummary.average ?? '-'}
-                                            </span>
-                                            <span
-                                                class="pb-1 text-sm text-gray-500"
-                                            >
-                                                von 5 bei {ratingSummary.count} Bewertung{ratingSummary.count ===
-                                                1
-                                                    ? ''
-                                                    : 'en'}
-                                            </span>
+                                    {/if}
+                                </div>
+                                {#if ratingSummary.count > 0}
+                                    <div class="flex items-center gap-2">
+                                        <span
+                                            class="text-lg font-bold text-gray-900 sm:text-xl"
+                                        >
+                                            {ratingSummary.average}
+                                        </span>
+                                        <div
+                                            class="flex items-center gap-1 text-[#f59e0b]"
+                                        >
+                                            {#each Array.from({ length: 5 }, (_, index) => index + 1) as star (star)}
+                                                <Star
+                                                    class={cn(
+                                                        'size-5 sm:size-6',
+                                                        ratingAverageValue !==
+                                                            null &&
+                                                            star <=
+                                                                Math.round(
+                                                                    ratingAverageValue,
+                                                                )
+                                                            ? 'fill-current'
+                                                            : 'text-gray-300',
+                                                    )}
+                                                />
+                                            {/each}
                                         </div>
                                     </div>
-                                    <div
-                                        class="flex items-center gap-1 text-[#f59e0b]"
-                                    >
-                                        {#each Array.from({ length: 5 }, (_, index) => index + 1) as star (star)}
-                                            <Star
-                                                class={cn(
-                                                    'size-5',
-                                                    ratingAverageValue !==
-                                                        null &&
-                                                        star <=
-                                                            Math.round(
-                                                                ratingAverageValue,
-                                                            )
-                                                        ? 'fill-current'
-                                                        : 'text-gray-300',
-                                                )}
-                                            />
-                                        {/each}
-                                    </div>
-                                </div>
+                                {/if}
                             </div>
 
                             {#if ratings.length > 0}
-                                <div class="space-y-4">
-                                    {#each ratings as rating (rating.id)}
-                                        <article
-                                            class="rounded-xl border border-gray-200 bg-white p-6"
-                                        >
+                                <div class="mt-6 divide-y divide-gray-100">
+                                    {#each visibleRatings as rating (rating.id)}
+                                        <article class="py-4 first:pt-0">
                                             <div
-                                                class="mb-3 flex items-center justify-between gap-4"
+                                                class="flex items-center justify-between gap-4"
                                             >
+                                                {#if rating.created_at}
+                                                    <span
+                                                        class="text-sm text-gray-500"
+                                                        >{rating.created_at}</span
+                                                    >
+                                                {/if}
                                                 <div
                                                     class="flex items-center gap-1 text-[#f59e0b]"
                                                 >
@@ -637,27 +647,48 @@
                                                         />
                                                     {/each}
                                                 </div>
-                                                {#if rating.created_at}
-                                                    <span
-                                                        class="text-sm text-gray-500"
-                                                        >{rating.created_at}</span
-                                                    >
-                                                {/if}
                                             </div>
                                             <p
-                                                class="text-sm leading-6 text-gray-700"
+                                                class="mt-2 text-sm leading-6 text-gray-700"
                                             >
                                                 {rating.content}
                                             </p>
                                         </article>
                                     {/each}
                                 </div>
+
+                                {#if ratings.length > RATINGS_PREVIEW_LIMIT}
+                                    <div
+                                        class="mt-4 border-t border-gray-100 pt-4"
+                                    >
+                                        <Button
+                                            variant="outline"
+                                            class="w-full"
+                                            onclick={() =>
+                                                (showAllRatings =
+                                                    !showAllRatings)}
+                                        >
+                                            {showAllRatings
+                                                ? 'Weniger anzeigen'
+                                                : `Alle ${ratings.length} Bewertungen anzeigen`}
+                                        </Button>
+                                    </div>
+                                {/if}
                             {:else}
-                                <div
-                                    class="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-6 text-sm text-gray-500"
-                                >
-                                    Noch keine Bewertungen vorhanden.
-                                </div>
+                                <Empty.Root class="mt-6 border-none p-0">
+                                    <Empty.Header>
+                                        <Empty.Media variant="icon">
+                                            <Star class="size-5" />
+                                        </Empty.Media>
+                                        <Empty.Title
+                                            >Noch keine Bewertungen</Empty.Title
+                                        >
+                                        <Empty.Description>
+                                            Sei die oder der Erste und teile
+                                            deine Erfahrung mit diesem Produkt.
+                                        </Empty.Description>
+                                    </Empty.Header>
+                                </Empty.Root>
                             {/if}
                         </div>
 
