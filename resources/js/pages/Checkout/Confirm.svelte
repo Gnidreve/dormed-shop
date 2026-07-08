@@ -441,10 +441,6 @@
                                             !addressComplete}
                                     />
                                 </div>
-                                <p class="mt-3 text-sm text-gray-500">
-                                    Sie werden zu PayPal weitergeleitet, um die
-                                    Zahlung zu bestätigen.
-                                </p>
                             {:else}
                                 <p class="mt-3 text-sm text-gray-500">
                                     Kein aktiver Zahlungsanbieter ausgewählt.

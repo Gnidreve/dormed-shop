@@ -177,15 +177,6 @@
             </table>
         </td>
     </tr>
-
-    <tr>
-        <td style="padding:20px 0 0;text-align:center;">
-            <p style="margin:0;font-size:12px;color:#9ca3af;">
-                {{ $shopName }} &middot; {{ $shopPhone }}
-            </p>
-        </td>
-    </tr>
-
 </table>
 </td></tr>
 </table>

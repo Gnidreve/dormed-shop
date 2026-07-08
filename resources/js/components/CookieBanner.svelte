@@ -14,9 +14,6 @@
             class="mx-auto flex max-w-7xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
         >
             <div class="max-w-3xl">
-                <p class="text-sm font-semibold text-[#0d1f44]">
-                    Cookie-Einstellungen
-                </p>
                 <p class="mt-0.5 text-sm leading-5 text-muted-foreground">
                     Wir verwenden Cookies, um den Shop bereitzustellen und
                     später optionale Dienste einbinden zu können.

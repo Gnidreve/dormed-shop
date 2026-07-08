@@ -109,7 +109,7 @@
 
                 <tr>
                     <td style="padding:20px 24px;" align="center">
-                        <p style="margin:0 0 14px;font-size:13px;color:#6b7280;">Bestellung im Admin-Dashboard verwalten</p>
+                        
                         <a href="{{ $adminUrl }}"
                            style="display:inline-block;background:#111827;color:#ffffff;font-size:13px;font-weight:600;text-decoration:none;padding:10px 24px;border-radius:6px;">
                             Zum Admin-Dashboard →
@@ -120,15 +120,6 @@
             </table>
         </td>
     </tr>
-
-    <tr>
-        <td style="padding:20px 0 0;text-align:center;">
-            <p style="margin:0;font-size:12px;color:#9ca3af;">
-                {{ $shopName }} &middot; {{ $shopPhone }} &middot; {{ $shopEmail }}
-            </p>
-        </td>
-    </tr>
-
 </table>
 </td></tr>
 </table>

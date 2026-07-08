@@ -10,7 +10,6 @@
 </script>
 
 <script lang="ts">
-    import { page } from '@inertiajs/svelte';
     import { scaleUtc } from 'd3-scale';
     import { curveNatural } from 'd3-shape';
     import { Area, AreaChart, ChartClipPath } from 'layerchart';
@@ -32,9 +31,9 @@
 
     let { chartData }: { chartData: ChartEntry[] } = $props();
 
-    const allData = $derived(chartData.map((d) => ({ ...d, date: new Date(d.date) })));
-
-    const admin = $derived((page.props.auth as any).admin);
+    const allData = $derived(
+        chartData.map((d) => ({ ...d, date: new Date(d.date) })),
+    );
 
     type TimeRange = '7d' | '30d' | '90d' | 'custom';
 
@@ -67,23 +66,28 @@
         if (timeRange === 'custom') {
             const from = customFrom ? new Date(customFrom) : null;
             const to = customTo ? new Date(customTo + 'T23:59:59') : null;
+
             return allData.filter(
                 (d) => (!from || d.date >= from) && (!to || d.date <= to),
             );
         }
+
         const days = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90;
-        const cutoff = new Date(Date.UTC(
-            new Date().getUTCFullYear(),
-            new Date().getUTCMonth(),
-            new Date().getUTCDate() - days
-        ));
+        const cutoff = new Date(
+            Date.UTC(
+                new Date().getUTCFullYear(),
+                new Date().getUTCMonth(),
+                new Date().getUTCDate() - days,
+            ),
+        );
+
         return allData.filter((d) => d.date >= cutoff);
     });
 
     const dateRange = $derived.by(() => {
         if (!filteredData.length) {
-return '';
-}
+            return '';
+        }
 
         return `${fmt(filteredData[0].date)} – ${fmt(filteredData[filteredData.length - 1].date)}`;
     });
@@ -107,15 +111,6 @@ return '';
 <AppHead title="Admin Dashboard" />
 
 <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-    <div class="flex items-center justify-between">
-        <div>
-            <h2 class="text-lg font-semibold">
-                Willkommen, {admin?.name ?? 'Admin'}
-            </h2>
-            <p class="text-sm text-muted-foreground">{admin?.email}</p>
-        </div>
-    </div>
-
     <Card>
         <CardHeader
             class="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row"
