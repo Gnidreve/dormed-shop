@@ -60,9 +60,7 @@
 
     const statusLabels: Record<string, string> = {
         pending: 'Ausstehend',
-        processing: 'In Bearbeitung',
         paid: 'Bezahlt',
-        completed: 'Abgeschlossen',
         cancelled: 'Storniert',
         failed: 'Fehlgeschlagen',
         refunded: 'Rückerstattet',

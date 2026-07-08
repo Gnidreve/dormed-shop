@@ -66,9 +66,7 @@
 
     const statusLabels: Record<string, string> = {
         pending: 'Ausstehend',
-        processing: 'In Bearbeitung',
         paid: 'Bezahlt',
-        completed: 'Abgeschlossen',
         cancelled: 'Storniert',
         failed: 'Fehlgeschlagen',
         refunded: 'Rückerstattet',
@@ -76,9 +74,7 @@
 
     const statusOptions: { value: string; label: string }[] = [
         { value: 'pending', label: 'Ausstehend' },
-        { value: 'processing', label: 'In Bearbeitung' },
         { value: 'paid', label: 'Bezahlt' },
-        { value: 'completed', label: 'Abgeschlossen' },
         { value: 'cancelled', label: 'Storniert' },
         { value: 'failed', label: 'Fehlgeschlagen' },
         { value: 'refunded', label: 'Rückerstattet' },
@@ -202,15 +198,13 @@
         </div>
         <span
             class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium
-            {order.status === 'paid' || order.status === 'completed'
+            {order.status === 'paid'
                 ? 'bg-green-100 text-green-700'
                 : order.status === 'cancelled' ||
                     order.status === 'failed' ||
                     order.status === 'refunded'
                   ? 'bg-red-100 text-red-700'
-                  : order.status === 'processing'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'bg-yellow-100 text-yellow-700'}"
+                  : 'bg-yellow-100 text-yellow-700'}"
         >
             {statusLabels[order.status] ?? order.status}
         </span>

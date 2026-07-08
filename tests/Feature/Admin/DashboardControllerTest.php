@@ -14,8 +14,7 @@ class DashboardControllerTest extends TestCase
     public function test_revenue_only_counts_real_completed_orders(): void
     {
         Order::factory()->create(['status' => 'paid', 'total_amount' => '100.00', 'is_test' => false]);
-        Order::factory()->create(['status' => 'processing', 'total_amount' => '50.00', 'is_test' => false]);
-        Order::factory()->create(['status' => 'completed', 'total_amount' => '25.00', 'is_test' => false]);
+        Order::factory()->create(['status' => 'paid', 'total_amount' => '50.00', 'is_test' => false]);
 
         Order::factory()->create(['status' => 'paid', 'total_amount' => '9999.00', 'is_test' => true]);
         Order::factory()->create(['status' => 'pending', 'total_amount' => '500.00', 'is_test' => false]);
@@ -31,7 +30,7 @@ class DashboardControllerTest extends TestCase
         $chartData = collect($response->viewData('page')['props']['chartData']);
         $todayRow = $chartData->firstWhere('date', $today);
 
-        $this->assertSame(3, $todayRow['orders']);
-        $this->assertSame(175.0, $todayRow['revenue']);
+        $this->assertSame(2, $todayRow['orders']);
+        $this->assertSame(150.0, $todayRow['revenue']);
     }
 }

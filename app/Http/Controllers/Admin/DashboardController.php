@@ -24,7 +24,7 @@ class DashboardController extends Controller
             )
             ->where('created_at', '>=', $from)
             ->where('is_test', false)
-            ->whereIn('status', ['paid', 'processing', 'completed'])
+            ->where('status', 'paid')
             ->groupBy('date')
             ->orderBy('date')
             ->get()

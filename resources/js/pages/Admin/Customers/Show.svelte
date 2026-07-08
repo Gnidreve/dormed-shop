@@ -66,11 +66,10 @@
 
     const statusLabels: Record<string, string> = {
         pending: 'Ausstehend',
-        processing: 'In Bearbeitung',
         paid: 'Bezahlt',
-        completed: 'Abgeschlossen',
         cancelled: 'Storniert',
         failed: 'Fehlgeschlagen',
+        refunded: 'Erstattet',
     };
 
     const typeLabels: Record<string, string> = {
@@ -183,9 +182,8 @@
                                 <TableCell>{new Date(order.created_at).toLocaleDateString('de-DE')}</TableCell>
                                 <TableCell>
                                     <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
-                                        {order.status === 'paid' || order.status === 'completed' ? 'bg-green-100 text-green-700'
+                                        {order.status === 'paid' ? 'bg-green-100 text-green-700'
                                         : order.status === 'cancelled' || order.status === 'failed' ? 'bg-red-100 text-red-700'
-                                        : order.status === 'processing' ? 'bg-blue-100 text-blue-700'
                                         : 'bg-yellow-100 text-yellow-700'}">
                                         {statusLabels[order.status] ?? order.status}
                                     </span>

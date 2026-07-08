@@ -48,11 +48,11 @@ class OrderManagementTest extends TestCase
         $order = Order::factory()->create(['status' => 'pending']);
 
         $this->actingAsAdmin()
-            ->patchJson(route('admin.orders.status', $order), ['status' => 'processing'])
+            ->patchJson(route('admin.orders.status', $order), ['status' => 'cancelled'])
             ->assertOk()
-            ->assertJson(['status' => 'processing']);
+            ->assertJson(['status' => 'cancelled']);
 
-        $this->assertSame('processing', $order->fresh()->status);
+        $this->assertSame('cancelled', $order->fresh()->status);
         Mail::assertNothingSent();
     }
 
@@ -96,7 +96,7 @@ class OrderManagementTest extends TestCase
     {
         $order = Order::factory()->create();
 
-        $this->patchJson(route('admin.orders.status', $order), ['status' => 'processing'])
+        $this->patchJson(route('admin.orders.status', $order), ['status' => 'cancelled'])
             ->assertRedirect(route('admin.login'));
     }
 }

@@ -109,9 +109,10 @@ Confirm-Seite (Zahlart PayPal) → PayPal-JS-SDK-Button
 
 ### 5. Bestellstatus-Lebenszyklus
 
-`pending` → `paid` → `processing` → `completed`
-sowie `cancelled` / `failed` / `refunded`. `is_test` markiert Sandbox-Orders
-(Dashboard-Umsatz zählt nur echte `paid/processing/completed`).
+`pending` → `paid`, sowie `cancelled` / `failed` / `refunded`. `is_test`
+markiert Sandbox-Orders (Dashboard-Umsatz zählt nur echte `paid`-Orders).
+Kein separater Fulfillment-Status (`processing`/`completed`) — `paid` ist der
+finale Erfolgszustand.
 
 - **Kontolöschung** durch den Kunden entkoppelt Orders nur
   (`customer_id = null`, FK `ON DELETE SET NULL`) — Historie bleibt für

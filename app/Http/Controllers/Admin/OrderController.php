@@ -19,7 +19,7 @@ class OrderController extends Controller
     /**
      * Order statuses an admin may set manually.
      */
-    private const STATUSES = ['pending', 'processing', 'paid', 'completed', 'cancelled', 'failed', 'refunded'];
+    private const STATUSES = ['pending', 'paid', 'cancelled', 'failed', 'refunded'];
 
     public function index(): Response
     {
