@@ -2,7 +2,6 @@
 	import { cn, type WithElementRef, type WithoutChildren } from "@/lib/utils.js";
 	import type { HTMLAttributes } from "svelte/elements";
 	import { getPayloadConfigFromPayload, useChart, type TooltipPayload } from "./chart-utils.js";
-	import { getChartContext } from "layerchart/dist/contexts/chart.js";
 	import { Tooltip as TooltipPrimitive } from "layerchart";
 	import type { Snippet } from "svelte";
 
@@ -24,8 +23,15 @@
 		formatter,
 		nameKey,
 		color,
+		context,
 		...restProps
 	}: WithoutChildren<WithElementRef<HTMLAttributes<HTMLDivElement>>> & {
+		// Chart state as handed to the chart's marks/tooltip snippets by
+		// layerchart (`{#snippet tooltip({ context }) ... }`). Passed in as a
+		// prop rather than read via getChartContext(), which lives at an
+		// import path layerchart doesn't publicly export in this version.
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		context: any;
 		hideLabel?: boolean;
 		label?: string;
 		indicator?: "line" | "dot" | "dashed";
@@ -49,7 +55,7 @@
 	} = $props();
 
 	const chart = useChart();
-	const chartCtx = getChartContext();
+	const chartCtx = context;
 
 	// Filter to series with defined values (important for item-based charts like Pie/Arc
 	// where only the hovered item has a value)

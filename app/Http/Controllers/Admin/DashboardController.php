@@ -13,7 +13,10 @@ class DashboardController extends Controller
 {
     public function index(): Response
     {
-        $days = 90;
+        // 180 days so the frontend can compare the selected preset (up to
+        // 90 days) against an equally long preceding period for the trend
+        // footer, without a second request.
+        $days = 180;
         $from = Carbon::today()->subDays($days - 1)->startOfDay();
 
         $rows = Order::query()
