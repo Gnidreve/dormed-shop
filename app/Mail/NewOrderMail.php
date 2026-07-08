@@ -4,17 +4,12 @@ namespace App\Mail;
 
 use App\Models\Customer;
 use App\Models\Order;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
-use Illuminate\Queue\SerializesModels;
 
-class NewOrderMail extends Mailable implements ShouldQueue
+class NewOrderMail extends Mailable
 {
-    use Queueable, SerializesModels;
-
     public function __construct(
         public readonly Order $order,
         public readonly array $cart,

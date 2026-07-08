@@ -235,7 +235,7 @@ Regeln:
 - **Sandbox/Live** = `App\Support\PaymentMode`. Setting `payment.mode` (sandbox|live) gewinnt, sonst Fallback auf `APP_ENV` (production = live). Im Admin unter Einstellungen → Zahlungsarten umschaltbar.
 - **Secrets** liegen verschlüsselt in `settings` (`Setting::$encryptedKeys`) — **Single Source of Truth**. Es gibt keine `PAYPAL_*`-env-Fallbacks mehr; Erstbefüllung nur über `SEED_PAYPAL_*` + `PaymentSeeder`.
 - **Webhooks** (`/paypal/webhook`): signaturverifiziert; `CAPTURE.COMPLETED` → `markPaid`; `CAPTURE.REFUNDED`/`DENIED` setzen Payment **und** Order (Achtung: beim Refund ist `resource.id` die Refund-ID, die Capture-ID steckt im `up`-Link).
-- **Benachrichtigungs-Empfänger** = Setting `shop.notification_emails` (kommagetrennt), Fallback `mail.admin_address` → `mail.from.address`. Beide Bestellmails sind **queued** — Queue-Worker nötig.
+- **Benachrichtigungs-Empfänger** = fest Setting `shop.email` (dieselbe Kontakt-Mail-Adresse wie im Shop-Frontend), kein separates Feld, kein Fallback. Beide Bestellmails laufen **synchron** im Request (kein Queue-Worker nötig; bei ~5 Mails/Tag ist der Overhead vernachlässigbar).
 - **Admin-Bestellaktionen**: Status setzen (optional mit Kundenmail) + PayPal-Refund unter `Admin/Orders/Show` (`orders.status`, `orders.refund`).
 
 ## Noch nicht gebaut

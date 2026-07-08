@@ -118,13 +118,17 @@ sowie `cancelled` / `failed` / `refunded`. `is_test` markiert Sandbox-Orders
   GoBD/§147 AO erhalten; Adress-/Preisdaten sind ohnehin als Snapshot auf der
   Order.
 
-### 6. Mails — laufen über die Queue!
+### 6. Mails — synchron
 
-`OrderConfirmationMail` + `NewOrderMail` sind `ShouldQueue`
-(`QUEUE_CONNECTION=database`). **Ohne laufenden Queue-Worker geht keine
-Bestellmail raus.** SMTP-Konfiguration kommt aus den Admin-Settings
-(Einstellungen → Mailversand, dort auch „Verbindung prüfen").
-Admin-Empfänger: Setting `shop.notification_emails` (kommagetrennt).
+`OrderConfirmationMail` + `NewOrderMail` werden synchron beim Request
+verschickt (kein `ShouldQueue`, kein Queue-Worker nötig). Bei aktuell max. ~5
+Mails/Tag ist der Request-Overhead vernachlässigbar; eine spätere Umstellung
+auf Queue ist bei Bedarf ein kleiner Schritt (Interface + `Queueable`-Trait
+zurück auf die beiden Mailables, Worker-Prozess aufsetzen). SMTP-Konfiguration
+kommt aus den Admin-Settings (Einstellungen → Mailversand, dort auch
+„Verbindung prüfen"). Admin-Empfänger der Bestell-Benachrichtigung: fest die
+Kontakt-Mail-Adresse aus Setting `shop.email` (dieselbe, die auch im
+Shop-Frontend angezeigt wird) — kein separates Feld, kein Fallback.
 
 ### 7. Settings & PayPal-Credentials (Single Source of Truth)
 
@@ -164,13 +168,13 @@ npm run build                         # Produktions-Assets
 
 ## Betrieb / Launch-Checkliste
 
-1. **Queue-Worker** (`php artisan queue:work` via Supervisor/systemd) — sonst keine Mails.
-2. `php artisan storage:link` — Produktbilder liegen auf dem public-Disk.
-3. `APP_ENV=production`, `APP_DEBUG=false`, `SESSION_SECURE_COOKIE=true`; `config:cache`/`route:cache` sind safe.
-4. Admin-Settings pflegen: SMTP (+ Testmail), PayPal-Credentials (+ Verbindungscheck), **PayPal-Webhook-ID** (ohne sie werden alle Webhooks abgelehnt — nur im Log sichtbar).
-5. Admin-Nutzer via `php artisan admin:add` (Seeder mit Default-Passwörtern laufen nur außerhalb von Produktion).
-6. DB-Backup-Strategie klären (aktuell SQLite-Datei).
-7. Scheduler-Cron aktuell **nicht nötig** (keine Scheduled Tasks).
+1. `php artisan storage:link` — Produktbilder liegen auf dem public-Disk.
+2. `APP_ENV=production`, `APP_DEBUG=false`, `SESSION_SECURE_COOKIE=true`; `config:cache`/`route:cache` sind safe.
+3. Admin-Settings pflegen: SMTP (+ Testmail), PayPal-Credentials (+ Verbindungscheck), **PayPal-Webhook-ID** (ohne sie werden alle Webhooks abgelehnt — nur im Log sichtbar), `shop.email` (Kontakt- **und** Bestell-Benachrichtigungsadresse).
+4. Admin-Nutzer via `php artisan admin:add` (Seeder mit Default-Passwörtern laufen nur außerhalb von Produktion).
+5. DB-Backup-Strategie klären (aktuell SQLite-Datei).
+6. Scheduler-Cron aktuell **nicht nötig** (keine Scheduled Tasks).
+7. Kein Queue-Worker nötig — Mails laufen synchron (siehe Abschnitt „Mails" oben).
 
 Offene Punkte vor/nach Launch: siehe `ANALYSE-V2.md` (unten „Empfohlene
 Reihenfolge") und `TODO.md`.

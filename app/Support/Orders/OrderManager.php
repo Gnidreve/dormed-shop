@@ -104,7 +104,7 @@ class OrderManager
         }
 
         try {
-            Mail::to($this->adminRecipients())->send(new NewOrderMail($order, $this->summaryFromOrder($order), $customer));
+            Mail::to(Setting::get('shop.email'))->send(new NewOrderMail($order, $this->summaryFromOrder($order), $customer));
         } catch (\Throwable $e) {
             Log::channel('mail')->error('Admin order notification failed', [
                 'order_id' => $order->id,
@@ -146,23 +146,5 @@ class OrderManager
             'vat_amount' => number_format($vatAmountCents / 100, 2, '.', ''),
             'total' => number_format($totalCents / 100, 2, '.', ''),
         ];
-    }
-
-    /**
-     * Resolve the admin notification recipients.
-     *
-     * @return array<int, string>
-     */
-    private function adminRecipients(): array
-    {
-        $configured = Setting::get('shop.notification_emails');
-
-        if (filled($configured)) {
-            return array_values(array_filter(array_map('trim', explode(',', $configured))));
-        }
-
-        return array_values(array_filter([
-            Setting::get('mail.admin_address') ?? config('mail.from.address'),
-        ]));
     }
 }

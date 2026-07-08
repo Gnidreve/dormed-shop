@@ -931,12 +931,6 @@ parameters:
 			path: app/Support/Orders/OrderManager.php
 
 		-
-			message: '#^Parameter \#1 \$array \(array\{0\?\: mixed\}\) of array_values is already a list, call has no effect\.$#'
-			identifier: arrayValues.list
-			count: 1
-			path: app/Support/Orders/OrderManager.php
-
-		-
 			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
 			identifier: argument.unresolvableType
 			count: 1

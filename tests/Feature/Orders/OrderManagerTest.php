@@ -26,8 +26,8 @@ class OrderManagerTest extends TestCase
 
         $this->assertTrue($result);
         $this->assertSame('paid', $order->fresh()->status);
-        Mail::assertQueued(OrderConfirmationMail::class);
-        Mail::assertQueued(NewOrderMail::class);
+        Mail::assertSent(OrderConfirmationMail::class);
+        Mail::assertSent(NewOrderMail::class);
     }
 
     public function test_mark_paid_is_idempotent_and_sends_confirmations_only_once(): void
@@ -42,8 +42,8 @@ class OrderManagerTest extends TestCase
 
         $this->assertTrue($first);
         $this->assertFalse($second);
-        Mail::assertQueued(OrderConfirmationMail::class, 1);
-        Mail::assertQueued(NewOrderMail::class, 1);
+        Mail::assertSent(OrderConfirmationMail::class, 1);
+        Mail::assertSent(NewOrderMail::class, 1);
     }
 
     public function test_create_from_cart_rolls_back_order_when_an_item_fails(): void
