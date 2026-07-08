@@ -169,6 +169,7 @@ Der Cart läuft server-seitig über **`App\Support\Cart\CartService`** (Store vi
 - Controller-Routen: `import * as ProductController from '@/actions/App/Http/Controllers/ProductController'`
 - Named Routes: `import { logout } from '@/routes'`
 - URL auflösen: `toUrl(editProfile())` aus `@/lib/utils`
+- **`php artisan wayfinder:generate` manuell nur mit `--with-form`!** `vite.config.ts` hat `wayfinder({ formVariants: true })` — der Vite-Dev-Plugin generiert automatisch mit `.form()`-Helpern (von `<Form {...store.form()}>` in allen Fortify-Auth-Seiten benötigt, z.B. `auth/Login.svelte`). Ein manueller Aufruf **ohne** `--with-form` überschreibt diese Dateien mit einer Version ohne `.form()` → `store.form is not a function`, Seite crasht clientseitig komplett (leere Seite, kein Fehler im Server-Log, nur in der Browser-Konsole). Schon einmal passiert, siehe Git-Historie.
 
 ### Brand-Farben (Shop-Frontend)
 
