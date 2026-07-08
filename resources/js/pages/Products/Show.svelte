@@ -567,7 +567,7 @@
                         {/if}
                     </div>
                 {:else}
-                    <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_24rem]">
+                    <div>
                         <div
                             class="rounded-xl border border-gray-200 bg-white p-6"
                         >
@@ -692,82 +692,105 @@
                             {/if}
                         </div>
 
-                        <div
-                            class="rounded-xl border border-gray-200 bg-white p-6"
-                        >
-                            <h2 class="text-lg font-bold text-gray-900">
-                                Bewertung abgeben
-                            </h2>
-                            <p class="mt-2 text-sm text-gray-500">
-                                Ohne Login. Später kann die Moderation oder
-                                Verknüpfung zu Kunden ergänzt werden.
-                            </p>
-
-                            <Form
-                                action={ratingsRoutes.store.url(product.id)}
-                                method="post"
-                                resetOnSuccess={['content']}
-                                class="mt-6 space-y-5"
+                        <!--
+                            TODO: Bewertung darf nicht mehr ueber die Produktseite
+                            abgegeben werden - geplant ist ein Modal aus der
+                            Bestellung heraus (nur fuer tatsaechlich gekaufte
+                            Produkte, z.B. per "hat gekauft"-Middleware).
+                            Wenn Rating ordentlich aus der Bestellung heraus
+                            implementiert ist, kann das hier wieder reaktiviert
+                            und richtig konfiguriert werden.
+                        -->
+                        {#if false}
+                            <div
+                                class="rounded-xl border border-gray-200 bg-white p-6"
                             >
-                                {#snippet children({ errors, processing })}
-                                    <input
-                                        type="hidden"
-                                        name="stars"
-                                        value={ratingStars}
-                                    />
+                                <h2 class="text-lg font-bold text-gray-900">
+                                    Bewertung abgeben
+                                </h2>
+                                <p class="mt-2 text-sm text-gray-500">
+                                    Ohne Login. Später kann die Moderation oder
+                                    Verknüpfung zu Kunden ergänzt werden.
+                                </p>
 
-                                    <div class="grid gap-2">
-                                        <Label for="rating-stars">Sterne</Label>
-                                        <div
-                                            id="rating-stars"
-                                            class="star-wrapper"
-                                        >
-                                            {#each [1, 2, 3, 4, 5] as star (star)}
-                                                <button
-                                                    type="button"
-                                                    class={cn(
-                                                        `star-button s${star}`,
-                                                        star <= ratingStars &&
-                                                            'active',
-                                                    )}
-                                                    onclick={() =>
-                                                        (ratingStars = star)}
-                                                    aria-label={starLabel(star)}
-                                                    aria-pressed={star ===
-                                                        ratingStars}
-                                                >
-                                                    <Star class="size-12" />
-                                                </button>
-                                            {/each}
-                                        </div>
-                                        <p class="text-sm text-gray-500">
-                                            {starLabel(ratingStars)}
-                                        </p>
-                                        <InputError message={errors.stars} />
-                                    </div>
-
-                                    <div class="grid gap-2">
-                                        <Label for="content">Bewertung</Label>
-                                        <Textarea
-                                            id="content"
-                                            name="content"
-                                            rows={5}
-                                            required
-                                            placeholder="Wie zufrieden sind Sie mit dem Produkt?"
+                                <Form
+                                    action={ratingsRoutes.store.url(product.id)}
+                                    method="post"
+                                    resetOnSuccess={['content']}
+                                    class="mt-6 space-y-5"
+                                >
+                                    {#snippet children({ errors, processing })}
+                                        <input
+                                            type="hidden"
+                                            name="stars"
+                                            value={ratingStars}
                                         />
-                                        <InputError message={errors.content} />
-                                    </div>
 
-                                    <Button
-                                        type="submit"
-                                        class="w-full bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90"
-                                        disabled={processing}
-                                    >
-                                        Bewertung senden
-                                    </Button>
-                                {/snippet}
-                            </Form>
-                        </div>
+                                        <div class="grid gap-2">
+                                            <Label for="rating-stars"
+                                                >Sterne</Label
+                                            >
+                                            <div
+                                                id="rating-stars"
+                                                class="star-wrapper"
+                                            >
+                                                {#each [1, 2, 3, 4, 5] as star (star)}
+                                                    <button
+                                                        type="button"
+                                                        class={cn(
+                                                            `star-button s${star}`,
+                                                            star <=
+                                                                ratingStars &&
+                                                                'active',
+                                                        )}
+                                                        onclick={() =>
+                                                            (ratingStars =
+                                                                star)}
+                                                        aria-label={starLabel(
+                                                            star,
+                                                        )}
+                                                        aria-pressed={star ===
+                                                            ratingStars}
+                                                    >
+                                                        <Star class="size-12" />
+                                                    </button>
+                                                {/each}
+                                            </div>
+                                            <p class="text-sm text-gray-500">
+                                                {starLabel(ratingStars)}
+                                            </p>
+                                            <InputError
+                                                message={errors.stars}
+                                            />
+                                        </div>
+
+                                        <div class="grid gap-2">
+                                            <Label for="content"
+                                                >Bewertung</Label
+                                            >
+                                            <Textarea
+                                                id="content"
+                                                name="content"
+                                                rows={5}
+                                                required
+                                                placeholder="Wie zufrieden sind Sie mit dem Produkt?"
+                                            />
+                                            <InputError
+                                                message={errors.content}
+                                            />
+                                        </div>
+
+                                        <Button
+                                            type="submit"
+                                            class="w-full bg-[#0d1f44] text-white hover:bg-[#0d1f44]/90"
+                                            disabled={processing}
+                                        >
+                                            Bewertung senden
+                                        </Button>
+                                    {/snippet}
+                                </Form>
+                            </div>
+                        {/if}
                     </div>
                 {/if}
             </div>
