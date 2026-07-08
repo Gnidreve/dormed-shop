@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Mail\NewOrderMail;
 use App\Mail\OrderConfirmationMail;
+use App\Mail\PaymentConfirmationMail;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -67,7 +69,7 @@ class OrderManagementTest extends TestCase
         Mail::assertNothingSent();
     }
 
-    public function test_marking_paid_with_notify_sends_confirmation(): void
+    public function test_marking_paid_with_notify_sends_payment_confirmation_to_customer_only(): void
     {
         Mail::fake();
         $order = Order::factory()->create(['status' => 'pending', 'payment_method' => 'invoice']);
@@ -77,7 +79,12 @@ class OrderManagementTest extends TestCase
             ->assertOk();
 
         $this->assertSame('paid', $order->fresh()->status);
-        Mail::assertSent(OrderConfirmationMail::class);
+        // Dedicated payment-confirmation mail to the customer - not the
+        // generic order-confirmation (which still asks to transfer money),
+        // and never the operator notification (they're the one confirming).
+        Mail::assertSent(PaymentConfirmationMail::class);
+        Mail::assertNotSent(OrderConfirmationMail::class);
+        Mail::assertNotSent(NewOrderMail::class);
     }
 
     public function test_marking_paid_without_notify_does_not_send_mail(): void

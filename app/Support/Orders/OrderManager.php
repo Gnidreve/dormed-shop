@@ -4,6 +4,7 @@ namespace App\Support\Orders;
 
 use App\Mail\NewOrderMail;
 use App\Mail\OrderConfirmationMail;
+use App\Mail\PaymentConfirmationMail;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Setting;
@@ -55,16 +56,73 @@ class OrderManager
     /**
      * Mark an order as paid and send the confirmation mails exactly once.
      *
+     * This is the "your order just came in and is paid" notification path:
+     * customer confirmation *and* operator notification. Used for gateway
+     * payments (PayPal), where this is the only order/payment notice either
+     * of them gets. Not for the invoice manual-payment-confirmation flow -
+     * see confirmInvoicePayment().
+     *
      * Idempotent: returns false (and sends nothing) if the order is already paid,
      * so the PayPal capture, the PayPal return URL and the webhooks can all call
      * it without producing duplicate mails.
      */
     public function markPaid(Order $order): bool
     {
-        // Atomic status transition: the webhook and the PayPal return URL can
-        // both call this for the same order at nearly the same time. A plain
-        // read-then-write would let both pass the "already paid" check before
-        // either update lands, sending the confirmation mails twice.
+        if (! $this->transitionToPaid($order)) {
+            return false;
+        }
+
+        $this->sendConfirmations($order);
+
+        return true;
+    }
+
+    /**
+     * Confirm a manual invoice payment (bank transfer/direct debit) and
+     * notify the customer only, using a dedicated payment-confirmation
+     * mail/template - never the generic order-confirmation mail (which
+     * still asks to transfer money) and never the operator, who is the one
+     * triggering this in the admin.
+     *
+     * Idempotent like markPaid(): returns false and sends nothing if the
+     * order is already paid.
+     */
+    public function confirmInvoicePayment(Order $order): bool
+    {
+        if (! $this->transitionToPaid($order)) {
+            return false;
+        }
+
+        $order->loadMissing(['customer', 'items']);
+        $customer = $order->customer;
+
+        if (! $customer) {
+            Log::channel('mail')->warning('Payment confirmation skipped: no customer', ['order_id' => $order->id]);
+
+            return true;
+        }
+
+        try {
+            Mail::to($customer->email)->send(new PaymentConfirmationMail($order, $customer));
+        } catch (\Throwable $e) {
+            Log::channel('mail')->error('Payment confirmation mail failed', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return true;
+    }
+
+    /**
+     * Atomic pending -> paid transition, shared by markPaid() and
+     * confirmInvoicePayment(). The webhook and the PayPal return URL can
+     * both call markPaid() for the same order at nearly the same time; a
+     * plain read-then-write would let both pass the "already paid" check
+     * before either update lands, sending confirmation mails twice.
+     */
+    private function transitionToPaid(Order $order): bool
+    {
         $affected = Order::query()
             ->whereKey($order->getKey())
             ->where('status', '!=', 'paid')
@@ -75,7 +133,6 @@ class OrderManager
         }
 
         $order->refresh();
-        $this->sendConfirmations($order);
 
         return true;
     }

@@ -79,8 +79,10 @@ class OrderController extends Controller
         ]);
 
         if ($validated['notify'] ?? false) {
-            // markPaid sets the status and sends the confirmation mails once.
-            $orderManager->markPaid($order);
+            // Dedicated invoice-payment flow: sets the status and notifies
+            // only the customer, with a payment-confirmation mail (not the
+            // generic order-confirmation, which still asks to transfer money).
+            $orderManager->confirmInvoicePayment($order);
         } else {
             $order->update(['status' => 'paid']);
         }

@@ -4,6 +4,7 @@ namespace Tests\Feature\Orders;
 
 use App\Mail\NewOrderMail;
 use App\Mail\OrderConfirmationMail;
+use App\Mail\PaymentConfirmationMail;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Support\Orders\OrderManager;
@@ -44,6 +45,36 @@ class OrderManagerTest extends TestCase
         $this->assertFalse($second);
         Mail::assertSent(OrderConfirmationMail::class, 1);
         Mail::assertSent(NewOrderMail::class, 1);
+    }
+
+    public function test_confirm_invoice_payment_transitions_order_and_notifies_customer_only(): void
+    {
+        Mail::fake();
+
+        $order = Order::factory()->create(['status' => 'pending', 'payment_method' => 'invoice']);
+
+        $result = app(OrderManager::class)->confirmInvoicePayment($order);
+
+        $this->assertTrue($result);
+        $this->assertSame('paid', $order->fresh()->status);
+        Mail::assertSent(PaymentConfirmationMail::class);
+        Mail::assertNotSent(OrderConfirmationMail::class);
+        Mail::assertNotSent(NewOrderMail::class);
+    }
+
+    public function test_confirm_invoice_payment_is_idempotent_and_notifies_only_once(): void
+    {
+        Mail::fake();
+
+        $order = Order::factory()->create(['status' => 'pending', 'payment_method' => 'invoice']);
+        $manager = app(OrderManager::class);
+
+        $first = $manager->confirmInvoicePayment($order);
+        $second = $manager->confirmInvoicePayment($order->fresh());
+
+        $this->assertTrue($first);
+        $this->assertFalse($second);
+        Mail::assertSent(PaymentConfirmationMail::class, 1);
     }
 
     public function test_create_from_cart_rolls_back_order_when_an_item_fails(): void

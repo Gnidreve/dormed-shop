@@ -229,7 +229,9 @@ Zwei Bezahlarten — mehr gibt es nicht —, ein gemeinsamer Order-/Mail-Pfad ü
 
 Regeln:
 
-- **`OrderManager` ist die einzige Stelle**, die aus dem Cart eine Order baut (`createFromCart`, in DB-Transaktion), Bestätigungsmails versendet (`sendConfirmations`) und „bezahlt"-Übergänge idempotent macht (`markPaid`, atomarer Statuswechsel → keine Doppel-Mails). Neue Gateways hier andocken, nicht in den Controllern duplizieren.
+- **`OrderManager` ist die einzige Stelle**, die aus dem Cart eine Order baut (`createFromCart`, in DB-Transaktion) und „bezahlt"-Übergänge idempotent macht (atomarer Statuswechsel → keine Doppel-Mails). Neue Gateways hier andocken, nicht in den Controllern duplizieren. **Zwei getrennte Mail-Pfade, nicht austauschbar:**
+  - `sendConfirmations()` / `markPaid()` — „Bestellung ist eingegangen und bezahlt": `OrderConfirmationMail` (Kunde, inkl. Bankdaten-Block falls noch unbezahlt) **+** `NewOrderMail` (Betreiber). Für Rechnung bei `submit()` direkt (Bank-Hinweis), für PayPal einmalig bei `markPaid()` nach Capture/Webhook (einziger Zeitpunkt, an dem der Betreiber informiert wird).
+  - `confirmInvoicePayment()` — manuelle Zahlungseingangs-Bestätigung bei Rechnung (Admin-Button): **eigenes** `PaymentConfirmationMail`/`payment-confirmation.blade.php` (kein Bankdaten-Block, andere Formulierung), **nur an den Kunden**, nie an den Betreiber (der bestätigt es ja gerade selbst). Absichtlich kein `if/else` innerhalb eines gemeinsamen Templates — die beiden Zustände „bitte zahlen" und „danke, bezahlt" sind komplett getrennte Mailables/Views.
 - **Bestellen nur mit bestätigter E-Mail** (`verified`-Middleware, siehe Auth-Abschnitt).
 - **Angebotene Zahlarten sind fest verdrahtet**: Kauf auf Rechnung + PayPal (kein Admin-Setting, kein Provider-Umschalter). Labels/Reihenfolge in `config/shop.php`, Auswahl-UI: Radio auf `Checkout/Confirm`.
 - **Sandbox/Live** = `App\Support\PaymentMode`, ausschließlich aus `APP_ENV` abgeleitet (production = live, sonst sandbox). Kein Admin-Override, kein Setting — im Admin unter Einstellungen → Zahlungsarten nur Zugangsdaten für beide Modi pflegbar.
