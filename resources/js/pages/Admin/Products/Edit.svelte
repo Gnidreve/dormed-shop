@@ -6,7 +6,7 @@
 
 <script lang="ts">
     import { useForm, router } from '@inertiajs/svelte';
-    import { GripVertical, Trash2, ImagePlus, Star, Plus, Check } from 'lucide-svelte';
+    import { GripVertical, Trash2, ImagePlus, Star, Plus, Check } from '@lucide/svelte';
     import * as AdminProductController from '@/actions/App/Http/Controllers/Admin/ProductController';
     import * as AdminProductVariantController from '@/actions/App/Http/Controllers/Admin/ProductVariantController';
     import AppHead from '@/components/AppHead.svelte';
@@ -78,15 +78,13 @@
 
     // --- Image management ---
 
-    // svelte-ignore state_referenced_locally
-    let images = $state([...product.images]);
+    // Lokale, editierbare Kopie der Bilder: re-derived, sobald sich die
+    // product.images-Prop aendert (Upload/Loeschen), lokal per Drag-Reorder
+    // ueberschreibbar (writable $derived).
+    let images = $derived([...product.images]);
     let uploading = $state(false);
     let draggedId = $state<number | null>(null);
     let dragOverId = $state<number | null>(null);
-
-    $effect(() => {
-        images = [...product.images];
-    });
 
     function uploadImage(e: Event) {
         const input = e.target as HTMLInputElement;

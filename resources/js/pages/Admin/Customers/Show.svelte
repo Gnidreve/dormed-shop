@@ -165,8 +165,7 @@
                                     {addr.company}
                                 </p>{/if}
                             <p>
-                                {addr.fullname ??
-                                    addr.first_name + ' ' + addr.last_name}
+                                {addr.first_name + ' ' + addr.last_name}
                             </p>
                             <p>{addr.street} {addr.house_number}</p>
                             {#if addr.address_line2}<p>

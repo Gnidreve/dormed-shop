@@ -1,10 +1,10 @@
 <script lang="ts">
     import { Link, router } from '@inertiajs/svelte';
-    import ChevronLeft from 'lucide-svelte/icons/chevron-left';
-    import Minus from 'lucide-svelte/icons/minus';
-    import Plus from 'lucide-svelte/icons/plus';
-    import ShoppingCart from 'lucide-svelte/icons/shopping-cart';
-    import X from 'lucide-svelte/icons/x';
+    import ChevronLeft from '@lucide/svelte/icons/chevron-left';
+    import Minus from '@lucide/svelte/icons/minus';
+    import Plus from '@lucide/svelte/icons/plus';
+    import ShoppingCart from '@lucide/svelte/icons/shopping-cart';
+    import X from '@lucide/svelte/icons/x';
     import { Button } from '@/components/ui/button';
     import {
         Sheet,
@@ -74,7 +74,7 @@
         <SheetClose asChild>
             {#snippet children(props)}
                 <button
-                    onclick={props.onClick}
+                    onclick={props.onClick as () => void}
                     class="flex w-full items-center gap-2 border-b bg-gray-100 px-4 py-3 text-sm font-medium text-gray-600 hover:bg-gray-200 hover:text-gray-900"
                 >
                     <ChevronLeft class="size-4" />

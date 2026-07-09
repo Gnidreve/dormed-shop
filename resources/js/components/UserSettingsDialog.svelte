@@ -3,14 +3,14 @@
     // /settings-Seiten). Entweder dieses Modal oder die Seiten fliegen
     // nach der Bewertung wieder raus.
     import { Link, page, router } from '@inertiajs/svelte';
-    import ArrowLeft from 'lucide-svelte/icons/arrow-left';
-    import LogOut from 'lucide-svelte/icons/log-out';
-    import MapPin from 'lucide-svelte/icons/map-pin';
-    import Package from 'lucide-svelte/icons/package';
-    import Shield from 'lucide-svelte/icons/shield';
-    import User from 'lucide-svelte/icons/user';
-    import UserCog from 'lucide-svelte/icons/user-cog';
-    import X from 'lucide-svelte/icons/x';
+    import ArrowLeft from '@lucide/svelte/icons/arrow-left';
+    import LogOut from '@lucide/svelte/icons/log-out';
+    import MapPin from '@lucide/svelte/icons/map-pin';
+    import Package from '@lucide/svelte/icons/package';
+    import Shield from '@lucide/svelte/icons/shield';
+    import User from '@lucide/svelte/icons/user';
+    import UserCog from '@lucide/svelte/icons/user-cog';
+    import X from '@lucide/svelte/icons/x';
     import AddressForm from '@/components/AddressForm.svelte';
     import { Button } from '@/components/ui/button';
     import { Checkbox } from '@/components/ui/checkbox';
@@ -216,10 +216,12 @@
         addressesLoaded = true;
     }
 
-    function handleAddressUpdate(
-        event: CustomEvent<{ prefix: string; key: string; value: string }>,
-    ) {
-        const { prefix, key, value } = event.detail;
+    function handleAddressUpdate(update: {
+        prefix: string;
+        key: string;
+        value: string;
+    }) {
+        const { prefix, key, value } = update;
 
         if (prefix === 'shipping') {
             shippingAddress = { ...shippingAddress, [key]: value };
@@ -648,14 +650,13 @@
                                 </div>
                             {:else}
                                 <div class="flex flex-col gap-6">
-                                    <div onaddressupdate={handleAddressUpdate}>
-                                        <AddressForm
-                                            data={shippingAddress}
-                                            errors={addressErrors}
-                                            prefix="shipping"
-                                            legend="Lieferadresse"
-                                        />
-                                    </div>
+                                    <AddressForm
+                                        data={shippingAddress}
+                                        errors={addressErrors}
+                                        prefix="shipping"
+                                        legend="Lieferadresse"
+                                        onUpdate={handleAddressUpdate}
+                                    />
 
                                     <label
                                         class="flex cursor-pointer items-center gap-3"
@@ -668,16 +669,13 @@
                                     </label>
 
                                     {#if !billingSame}
-                                        <div
-                                            onaddressupdate={handleAddressUpdate}
-                                        >
-                                            <AddressForm
-                                                data={billingAddress}
-                                                errors={addressErrors}
-                                                prefix="billing"
-                                                legend="Rechnungsadresse"
-                                            />
-                                        </div>
+                                        <AddressForm
+                                            data={billingAddress}
+                                            errors={addressErrors}
+                                            prefix="billing"
+                                            legend="Rechnungsadresse"
+                                            onUpdate={handleAddressUpdate}
+                                        />
                                     {/if}
 
                                     <div>

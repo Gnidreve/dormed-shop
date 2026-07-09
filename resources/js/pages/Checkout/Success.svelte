@@ -1,11 +1,10 @@
 <script lang="ts">
     import { page } from '@inertiajs/svelte';
-    import CheckCircle from 'lucide-svelte/icons/circle-check-big';
-    import Mail from 'lucide-svelte/icons/mail';
+    import CheckCircle from '@lucide/svelte/icons/circle-check-big';
+    import Mail from '@lucide/svelte/icons/mail';
     import AppFooter from '@/components/AppFooter.svelte';
     import AppHead from '@/components/AppHead.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';
-    import { Button } from '@/components/ui/button';
     import { Separator } from '@/components/ui/separator';
     import { formatPrice } from '@/lib/currency';
 

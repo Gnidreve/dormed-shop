@@ -9,29 +9,32 @@
     } from '@/components/ui/select';
     import type { AddressData } from '@/types/cart';
 
+    export type AddressUpdate = {
+        prefix: string;
+        key: keyof AddressData;
+        value: string;
+    };
+
     let {
         data,
         errors = {},
         prefix,
         legend,
+        onUpdate,
     }: {
         data: AddressData;
         errors?: Record<string, string>;
         prefix: string;
         legend: string;
+        onUpdate?: (update: AddressUpdate) => void;
     } = $props();
 
     function update(key: keyof AddressData, value: string) {
-        // Dispatch to parent via input event
-        const event = new CustomEvent('addressupdate', {
-            detail: { prefix, key, value },
-            bubbles: true,
-        });
-        document.getElementById(`address-form-${prefix}`)?.dispatchEvent(event);
+        onUpdate?.({ prefix, key, value });
     }
 </script>
 
-<div id="address-form-{prefix}" class="space-y-4">
+<div class="space-y-4">
     <h3 class="font-bold text-gray-900">{legend}</h3>
 
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">

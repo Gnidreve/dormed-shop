@@ -23,7 +23,8 @@
     import { Label } from '@/components/ui/label';
     import { send } from '@/routes/verification';
 
-    const user = $derived(page.props.auth.user);
+    // Settings-Seiten laufen hinter der auth-Middleware — user ist hier immer gesetzt.
+    const user = $derived(page.props.auth.user!);
 </script>
 
 <AppHead title="Profil" />

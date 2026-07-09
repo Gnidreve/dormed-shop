@@ -1,6 +1,6 @@
 <script lang="ts">
     import { Link, page, router } from '@inertiajs/svelte';
-    import ChevronLeft from 'lucide-svelte/icons/chevron-left';
+    import ChevronLeft from '@lucide/svelte/icons/chevron-left';
     import AddressForm from '@/components/AddressForm.svelte';
     import AppFooter from '@/components/AppFooter.svelte';
     import AppHead from '@/components/AppHead.svelte';
@@ -51,10 +51,12 @@
             shippingAddress.city !== '',
     );
 
-    function handleAddressUpdate(
-        event: CustomEvent<{ prefix: string; key: string; value: string }>,
-    ) {
-        const { prefix, key, value } = event.detail;
+    function handleAddressUpdate(update: {
+        prefix: string;
+        key: string;
+        value: string;
+    }) {
+        const { prefix, key, value } = update;
 
         if (prefix === 'shipping') {
             shippingAddress = { ...shippingAddress, [key]: value };
@@ -267,14 +269,13 @@
                             </Button>
                         </div>
                         <Separator class="mb-4" />
-                        <div onaddressupdate={handleAddressUpdate}>
-                            <AddressForm
-                                data={shippingAddress}
-                                errors={addressErrors}
-                                prefix="shipping"
-                                legend=""
-                            />
-                        </div>
+                        <AddressForm
+                            data={shippingAddress}
+                            errors={addressErrors}
+                            prefix="shipping"
+                            legend=""
+                            onUpdate={handleAddressUpdate}
+                        />
                     </div>
 
                     <!-- Rechnungsadresse -->
@@ -294,15 +295,13 @@
                                 Abweichende Rechnungsadresse eingeben
                             </button>
                         {:else}
-                            <div onaddressupdate={handleAddressUpdate}>
-                                <AddressForm
-                                    data={billingAddress ??
-                                        defaultBillingAddress()}
-                                    errors={addressErrors}
-                                    prefix="billing"
-                                    legend=""
-                                />
-                            </div>
+                            <AddressForm
+                                data={billingAddress ?? defaultBillingAddress()}
+                                errors={addressErrors}
+                                prefix="billing"
+                                legend=""
+                                onUpdate={handleAddressUpdate}
+                            />
                             <button
                                 onclick={disableBillingAddress}
                                 class="mt-2 text-sm text-[#1a6bbf] hover:underline"

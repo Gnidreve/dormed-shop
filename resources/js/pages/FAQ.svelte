@@ -137,7 +137,6 @@
 
             <Accordion.Root
                 type="single"
-                collapsible={true}
                 class="divide-y divide-gray-100 border-y border-gray-100"
             >
                 {#each faqItems as item (item.id)}
