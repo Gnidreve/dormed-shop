@@ -16,7 +16,7 @@ zieht dieses Dokument nach.**
 | `README.md` | Diese Übersicht — Flows, Architektur, Betrieb |
 | `AGENTS.md` | Detail-Kontext für KI-Agenten (Layouts, Frontend-Konventionen, Routen) |
 | `database/SCHEMA.md` | Vollständiges DB-Schema — bei jeder Migration aktualisieren |
-| `ANALYSE-V1.md` / `ANALYSE-V2.md` | Audit-Checklisten Richtung 1.0 (✅ = erledigt, Kurzprotokoll oben) |
+| `ANALYSE-V1.md` / `ANALYSE-V2.md` / `ANALYSE-V3.md` | Audit-Checklisten Richtung 1.0 (✅ = erledigt, Kurzprotokoll oben) |
 | `TODO.md` | Offener Backlog (Sicherheit, UI/UX, Ideen) |
 
 ---
@@ -162,7 +162,7 @@ npm run build                         # Produktions-Assets
 ```
 
 - **Workflow:** Findings/Aufgaben laufen über die Analyse-Checklisten
-  (aktuell `ANALYSE-V2.md`) — erledigte Punkte werden mit ✅ am
+  (aktuell `ANALYSE-V3.md`) — erledigte Punkte werden mit ✅ am
   Überschriftsende abgehakt + im Kurzprotokoll oben ergänzt.
 - Feature-Tests sind die Wahrheit: jeder Fix bekommt einen Test. CSRF ist in
   Tests deaktiviert — Browser-relevante Dinge (PayPal-Button, Fetches) einmal
@@ -181,5 +181,5 @@ npm run build                         # Produktions-Assets
 6. Scheduler-Cron aktuell **nicht nötig** (keine Scheduled Tasks).
 7. Kein Queue-Worker nötig — Mails laufen synchron (siehe Abschnitt „Mails" oben).
 
-Offene Punkte vor/nach Launch: siehe `ANALYSE-V2.md` (unten „Empfohlene
+Offene Punkte vor/nach Launch: siehe `ANALYSE-V3.md` (unten „Empfohlene
 Reihenfolge") und `TODO.md`.
