@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreProductRequest;
-use App\Http\Requests\Admin\UpdateProductRequest;
 use App\Models\Category;
 use App\Models\Manufacturer;
 use App\Models\Product;
@@ -46,7 +45,7 @@ class ProductController extends Controller
         ]);
     }
 
-    public function update(UpdateProductRequest $request, Product $product): RedirectResponse
+    public function update(StoreProductRequest $request, Product $product): RedirectResponse
     {
         $product->update($request->validated());
 

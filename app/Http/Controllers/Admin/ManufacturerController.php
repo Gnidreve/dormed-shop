@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreManufacturerRequest;
-use App\Http\Requests\Admin\UpdateManufacturerRequest;
 use App\Models\Manufacturer;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -39,7 +38,7 @@ class ManufacturerController extends Controller
         ]);
     }
 
-    public function update(UpdateManufacturerRequest $request, Manufacturer $manufacturer): RedirectResponse
+    public function update(StoreManufacturerRequest $request, Manufacturer $manufacturer): RedirectResponse
     {
         $manufacturer->update($request->validated());
 
