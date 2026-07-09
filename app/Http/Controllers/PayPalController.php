@@ -122,39 +122,22 @@ class PayPalController extends Controller
         try {
             $response = $this->payPalService->captureOrder($paypalOrderId);
 
-            $captureStatus = $response['status'] ?? 'FAILED';
-            $capturedAmount = $response['purchase_units'][0]['payments']['captures'][0]['amount']['value'] ?? null;
-
-            if ($captureStatus === 'COMPLETED' && $capturedAmount !== null && number_format((float) $capturedAmount, 2, '.', '') !== number_format((float) $payment->order->total_amount, 2, '.', '')) {
-                Log::error('PayPal capture amount mismatch', ['paypal_order_id' => $paypalOrderId, 'captured' => $capturedAmount, 'expected' => $payment->order->total_amount]);
-                $captureStatus = 'FAILED';
-            }
-
-            if ($captureStatus === 'COMPLETED') {
-                $captureId = $this->payPalService->getCaptureIdFromOrder($response);
-
-                $payment->update([
+            if ($this->completeCapture($payment, $response)) {
+                return response()->json([
                     'status' => 'COMPLETED',
-                    'paypal_capture_id' => $captureId,
-                    'paypal_payer_id' => $response['payer']['payer_id'] ?? $payment->paypal_payer_id,
-                    'payer_email' => $response['payer']['email_address'] ?? $payment->payer_email,
-                    'payer_name' => ($response['payer']['name']['given_name'] ?? '').' '.($response['payer']['name']['surname'] ?? ''),
-                    'response_data' => $response,
+                    'paypal_order_id' => $paypalOrderId,
                 ]);
-
-                $this->orderManager->markPaid($payment->order);
-                $this->cartService->clear();
-            } else {
-                $payment->update([
-                    'status' => 'FAILED',
-                    'response_data' => $response,
-                ]);
-
-                $payment->order->update(['status' => 'failed']);
             }
+
+            $payment->update([
+                'status' => 'FAILED',
+                'response_data' => $response,
+            ]);
+
+            $payment->order->update(['status' => 'failed']);
 
             return response()->json([
-                'status' => $captureStatus,
+                'status' => 'FAILED',
                 'paypal_order_id' => $paypalOrderId,
             ]);
         } catch (\Throwable $e) {
@@ -243,26 +226,8 @@ class PayPalController extends Controller
         // If still pending/created, try to capture
         try {
             $response = $this->payPalService->captureOrder($token);
-            $captureStatus = $response['status'] ?? 'FAILED';
-            $capturedAmount = $response['purchase_units'][0]['payments']['captures'][0]['amount']['value'] ?? null;
 
-            if ($captureStatus === 'COMPLETED' && $capturedAmount !== null && number_format((float) $capturedAmount, 2, '.', '') !== number_format((float) $payment->order->total_amount, 2, '.', '')) {
-                Log::error('PayPal capture amount mismatch', ['token' => $token, 'captured' => $capturedAmount, 'expected' => $payment->order->total_amount]);
-                $captureStatus = 'FAILED';
-            }
-
-            if ($captureStatus === 'COMPLETED') {
-                $captureId = $this->payPalService->getCaptureIdFromOrder($response);
-
-                $payment->update([
-                    'status' => 'COMPLETED',
-                    'paypal_capture_id' => $captureId,
-                    'response_data' => $response,
-                ]);
-
-                $this->orderManager->markPaid($payment->order);
-                $this->cartService->clear();
-
+            if ($this->completeCapture($payment, $response)) {
                 return to_route('checkout.success', ['paypal_order_id' => $token]);
             }
 
@@ -275,6 +240,51 @@ class PayPalController extends Controller
 
             return to_route('checkout.error');
         }
+    }
+
+    /**
+     * Shared capture completion for the JS-SDK capture endpoint and the
+     * return-URL fallback: verifies the captured amount against the order,
+     * persists the capture on the payment, marks the order paid (idempotent)
+     * and clears the cart. Returns false when the capture did not complete
+     * or the amount does not match — the callers decide how to fail.
+     *
+     * @param  array<string, mixed>  $response
+     */
+    private function completeCapture(Payment $payment, array $response): bool
+    {
+        $captureStatus = $response['status'] ?? 'FAILED';
+        $capturedAmount = $response['purchase_units'][0]['payments']['captures'][0]['amount']['value'] ?? null;
+
+        if ($captureStatus === 'COMPLETED' && $capturedAmount !== null && number_format((float) $capturedAmount, 2, '.', '') !== number_format((float) $payment->order->total_amount, 2, '.', '')) {
+            Log::error('PayPal capture amount mismatch', [
+                'paypal_order_id' => $payment->paypal_order_id,
+                'captured' => $capturedAmount,
+                'expected' => $payment->order->total_amount,
+            ]);
+
+            return false;
+        }
+
+        if ($captureStatus !== 'COMPLETED') {
+            return false;
+        }
+
+        $payerName = trim(($response['payer']['name']['given_name'] ?? '').' '.($response['payer']['name']['surname'] ?? ''));
+
+        $payment->update([
+            'status' => 'COMPLETED',
+            'paypal_capture_id' => $this->payPalService->getCaptureIdFromOrder($response),
+            'paypal_payer_id' => $response['payer']['payer_id'] ?? $payment->paypal_payer_id,
+            'payer_email' => $response['payer']['email_address'] ?? $payment->payer_email,
+            'payer_name' => $payerName !== '' ? $payerName : $payment->payer_name,
+            'response_data' => $response,
+        ]);
+
+        $this->orderManager->markPaid($payment->order);
+        $this->cartService->clear();
+
+        return true;
     }
 
     /**
