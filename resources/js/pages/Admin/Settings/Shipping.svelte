@@ -9,7 +9,7 @@
 
 <script lang="ts">
     import { router } from '@inertiajs/svelte';
-    import { Plus, Pencil, Trash2, Check, X } from 'lucide-svelte';
+    import { Plus, Pencil, Trash2, Check, X } from '@lucide/svelte';
     import AppHead from '@/components/AppHead.svelte';
     import { Button } from '@/components/ui/button';
     import { Input } from '@/components/ui/input';

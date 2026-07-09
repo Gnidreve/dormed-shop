@@ -1,6 +1,6 @@
 <script lang="ts">
     import { page } from '@inertiajs/svelte';
-    import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down';
+    import ChevronsUpDown from '@lucide/svelte/icons/chevrons-up-down';
     import CustomerInfo from '@/components/CustomerInfo.svelte';
     import CustomerMenuContent from '@/components/CustomerMenuContent.svelte';
     import {

@@ -3,7 +3,7 @@
 	import { getEmblaContext } from "./context.js";
 	import { cn } from "@/lib/utils.js";
 	import { Button, type Props } from "@/components/ui/button/index.js";
-	import ChevronLeftIcon from 'lucide-svelte/icons/chevron-left';
+	import ChevronLeftIcon from '@lucide/svelte/icons/chevron-left';
 
 	let {
 		ref = $bindable(null),

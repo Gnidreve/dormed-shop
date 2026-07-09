@@ -1,9 +1,9 @@
 <script lang="ts">
     import { router } from '@inertiajs/svelte';
-    import Ellipsis from 'lucide-svelte/icons/ellipsis';
-    import ExternalLink from 'lucide-svelte/icons/external-link';
-    import Pencil from 'lucide-svelte/icons/pencil';
-    import Trash2 from 'lucide-svelte/icons/trash-2';
+    import Ellipsis from '@lucide/svelte/icons/ellipsis';
+    import ExternalLink from '@lucide/svelte/icons/external-link';
+    import Pencil from '@lucide/svelte/icons/pencil';
+    import Trash2 from '@lucide/svelte/icons/trash-2';
     import * as AdminProductController from '@/actions/App/Http/Controllers/Admin/ProductController';
     import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
     import { Button } from '@/components/ui/button';

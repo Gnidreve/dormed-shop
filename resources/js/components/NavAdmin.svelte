@@ -1,7 +1,7 @@
 <script lang="ts">
     import { page, router } from '@inertiajs/svelte';
-    import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down';
-    import LogOut from 'lucide-svelte/icons/log-out';
+    import ChevronsUpDown from '@lucide/svelte/icons/chevrons-up-down';
+    import LogOut from '@lucide/svelte/icons/log-out';
     import * as AdminLoginController from '@/actions/App/Http/Controllers/Admin/LoginController';
     import {
         DropdownMenu,

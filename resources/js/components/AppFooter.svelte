@@ -1,8 +1,8 @@
 <script lang="ts">
     import { Link, page } from '@inertiajs/svelte';
-    import Mail from 'lucide-svelte/icons/mail';
-    import Phone from 'lucide-svelte/icons/phone';
-    import Printer from 'lucide-svelte/icons/printer';
+    import Mail from '@lucide/svelte/icons/mail';
+    import Phone from '@lucide/svelte/icons/phone';
+    import Printer from '@lucide/svelte/icons/printer';
 
     type ContactInfo = {
         email: string;

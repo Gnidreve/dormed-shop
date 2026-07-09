@@ -9,8 +9,8 @@
 
 <script lang="ts">
     import { router } from '@inertiajs/svelte';
-    import { Loader2 } from 'lucide-svelte';
-    import Package from 'lucide-svelte/icons/package';
+    import { Loader2 } from '@lucide/svelte';
+    import Package from '@lucide/svelte/icons/package';
     import { toast } from 'svelte-sonner';
     import AppHead from '@/components/AppHead.svelte';
     import { Button } from '@/components/ui/button';

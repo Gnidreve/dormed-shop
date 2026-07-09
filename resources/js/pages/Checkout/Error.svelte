@@ -1,7 +1,7 @@
 <script lang="ts">
     import { page } from '@inertiajs/svelte';
     import { Link } from '@inertiajs/svelte';
-    import AlertCircle from 'lucide-svelte/icons/circle-alert';
+    import AlertCircle from '@lucide/svelte/icons/circle-alert';
     import AppFooter from '@/components/AppFooter.svelte';
     import AppHead from '@/components/AppHead.svelte';
     import ShopHeader from '@/components/ShopHeader.svelte';

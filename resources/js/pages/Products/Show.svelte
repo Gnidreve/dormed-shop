@@ -1,10 +1,10 @@
 <script lang="ts">
     import { Form, Link, router } from '@inertiajs/svelte';
-    import ChevronRight from 'lucide-svelte/icons/chevron-right';
-    import Minus from 'lucide-svelte/icons/minus';
-    import Plus from 'lucide-svelte/icons/plus';
-    import ShoppingCart from 'lucide-svelte/icons/shopping-cart';
-    import Star from 'lucide-svelte/icons/star';
+    import ChevronRight from '@lucide/svelte/icons/chevron-right';
+    import Minus from '@lucide/svelte/icons/minus';
+    import Plus from '@lucide/svelte/icons/plus';
+    import ShoppingCart from '@lucide/svelte/icons/shopping-cart';
+    import Star from '@lucide/svelte/icons/star';
     import * as CategoryController from '@/actions/App/Http/Controllers/CategoryController';
     import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
     import AppFooter from '@/components/AppFooter.svelte';

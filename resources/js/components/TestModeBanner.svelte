@@ -1,6 +1,6 @@
 <script lang="ts">
     import { page } from '@inertiajs/svelte';
-    import { FlaskConical } from 'lucide-svelte';
+    import { FlaskConical } from '@lucide/svelte';
 </script>
 
 {#if page.props.sandbox}

@@ -1,13 +1,13 @@
 <script lang="ts">
     import { Link, page, router } from '@inertiajs/svelte';
-    import ChevronRight from 'lucide-svelte/icons/chevron-right';
-    import LogOut from 'lucide-svelte/icons/log-out';
-    import Search from 'lucide-svelte/icons/search';
-    import Settings from 'lucide-svelte/icons/settings';
-    import ShoppingCart from 'lucide-svelte/icons/shopping-cart';
-    import User from 'lucide-svelte/icons/user';
-    import UserPlus from 'lucide-svelte/icons/user-plus';
-    import X from 'lucide-svelte/icons/x';
+    import ChevronRight from '@lucide/svelte/icons/chevron-right';
+    import LogOut from '@lucide/svelte/icons/log-out';
+    import Search from '@lucide/svelte/icons/search';
+    import Settings from '@lucide/svelte/icons/settings';
+    import ShoppingCart from '@lucide/svelte/icons/shopping-cart';
+    import User from '@lucide/svelte/icons/user';
+    import UserPlus from '@lucide/svelte/icons/user-plus';
+    import X from '@lucide/svelte/icons/x';
     import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
     import CustomerInfo from '@/components/CustomerInfo.svelte';
     import { Button } from '@/components/ui/button';

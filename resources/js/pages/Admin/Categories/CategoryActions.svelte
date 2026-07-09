@@ -1,8 +1,8 @@
 <script lang="ts">
     import { router } from '@inertiajs/svelte';
-    import Ellipsis from 'lucide-svelte/icons/ellipsis';
-    import Pencil from 'lucide-svelte/icons/pencil';
-    import Trash2 from 'lucide-svelte/icons/trash-2';
+    import Ellipsis from '@lucide/svelte/icons/ellipsis';
+    import Pencil from '@lucide/svelte/icons/pencil';
+    import Trash2 from '@lucide/svelte/icons/trash-2';
     import * as AdminCategoryController from '@/actions/App/Http/Controllers/Admin/CategoryController';
     import { Button } from '@/components/ui/button';
     import {

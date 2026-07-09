@@ -1,15 +1,15 @@
 <script lang="ts">
     import { Link } from '@inertiajs/svelte';
-    import Building2 from 'lucide-svelte/icons/building-2';
-    import CreditCard from 'lucide-svelte/icons/credit-card';
-    import LayoutGrid from 'lucide-svelte/icons/layout-grid';
-    import Mail from 'lucide-svelte/icons/mail';
-    import Package from 'lucide-svelte/icons/package';
-    import Settings from 'lucide-svelte/icons/settings';
-    import ShoppingCart from 'lucide-svelte/icons/shopping-cart';
-    import Tag from 'lucide-svelte/icons/tag';
-    import Truck from 'lucide-svelte/icons/truck';
-    import Users from 'lucide-svelte/icons/users';
+    import Building2 from '@lucide/svelte/icons/building-2';
+    import CreditCard from '@lucide/svelte/icons/credit-card';
+    import LayoutGrid from '@lucide/svelte/icons/layout-grid';
+    import Mail from '@lucide/svelte/icons/mail';
+    import Package from '@lucide/svelte/icons/package';
+    import Settings from '@lucide/svelte/icons/settings';
+    import ShoppingCart from '@lucide/svelte/icons/shopping-cart';
+    import Tag from '@lucide/svelte/icons/tag';
+    import Truck from '@lucide/svelte/icons/truck';
+    import Users from '@lucide/svelte/icons/users';
     import type { Snippet } from 'svelte';
     import AppLogo from '@/components/AppLogo.svelte';
     import NavAdmin from '@/components/NavAdmin.svelte';

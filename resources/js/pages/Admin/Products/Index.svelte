@@ -6,6 +6,8 @@
 
 <script lang="ts">
     import { router } from '@inertiajs/svelte';
+    import ChevronDown from '@lucide/svelte/icons/chevron-down';
+    import Plus from '@lucide/svelte/icons/plus';
     import {
         getCoreRowModel,
         getFilteredRowModel,
@@ -20,8 +22,6 @@
         SortingState,
         VisibilityState,
     } from '@tanstack/table-core';
-    import ChevronDown from 'lucide-svelte/icons/chevron-down';
-    import Plus from 'lucide-svelte/icons/plus';
     import * as AdminProductController from '@/actions/App/Http/Controllers/Admin/ProductController';
     import AppHead from '@/components/AppHead.svelte';
     import { Button } from '@/components/ui/button';

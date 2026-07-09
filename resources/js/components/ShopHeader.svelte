@@ -1,11 +1,11 @@
 <script lang="ts">
     import { Link, page, router } from '@inertiajs/svelte';
-    import ChevronRight from 'lucide-svelte/icons/chevron-right';
-    import Menu from 'lucide-svelte/icons/menu';
-    import Search from 'lucide-svelte/icons/search';
-    import ShoppingCart from 'lucide-svelte/icons/shopping-cart';
-    import User from 'lucide-svelte/icons/user';
-    import X from 'lucide-svelte/icons/x';
+    import ChevronRight from '@lucide/svelte/icons/chevron-right';
+    import Menu from '@lucide/svelte/icons/menu';
+    import Search from '@lucide/svelte/icons/search';
+    import ShoppingCart from '@lucide/svelte/icons/shopping-cart';
+    import User from '@lucide/svelte/icons/user';
+    import X from '@lucide/svelte/icons/x';
     import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
     import AppLogo from '@/components/AppLogo.svelte';
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

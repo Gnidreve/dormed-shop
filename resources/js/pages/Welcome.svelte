@@ -1,15 +1,15 @@
 <script lang="ts">
     import { Link, page } from '@inertiajs/svelte';
-    import ArrowLeft from 'lucide-svelte/icons/arrow-left';
-    import ArrowRight from 'lucide-svelte/icons/arrow-right';
-    import Check from 'lucide-svelte/icons/check';
-    import FileCheck from 'lucide-svelte/icons/file-check';
-    import ImageIcon from 'lucide-svelte/icons/image';
-    import PackageCheck from 'lucide-svelte/icons/package-check';
-    import Phone from 'lucide-svelte/icons/phone';
-    import Rocket from 'lucide-svelte/icons/rocket';
-    import ShieldCheck from 'lucide-svelte/icons/shield-check';
-    import Truck from 'lucide-svelte/icons/truck';
+    import ArrowLeft from '@lucide/svelte/icons/arrow-left';
+    import ArrowRight from '@lucide/svelte/icons/arrow-right';
+    import Check from '@lucide/svelte/icons/check';
+    import FileCheck from '@lucide/svelte/icons/file-check';
+    import ImageIcon from '@lucide/svelte/icons/image';
+    import PackageCheck from '@lucide/svelte/icons/package-check';
+    import Phone from '@lucide/svelte/icons/phone';
+    import Rocket from '@lucide/svelte/icons/rocket';
+    import ShieldCheck from '@lucide/svelte/icons/shield-check';
+    import Truck from '@lucide/svelte/icons/truck';
     import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
     import AppFooter from '@/components/AppFooter.svelte';
     import AppHead from '@/components/AppHead.svelte';

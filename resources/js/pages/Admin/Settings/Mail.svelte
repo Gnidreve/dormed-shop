@@ -9,7 +9,7 @@
 
 <script lang="ts">
     import { useForm } from '@inertiajs/svelte';
-    import { Loader2 } from 'lucide-svelte';
+    import { Loader2 } from '@lucide/svelte';
     import { toast } from 'svelte-sonner';
     import * as AdminSettingController from '@/actions/App/Http/Controllers/Admin/SettingController';
     import AppHead from '@/components/AppHead.svelte';

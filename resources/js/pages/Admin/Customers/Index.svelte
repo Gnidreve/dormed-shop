@@ -5,6 +5,7 @@
 </script>
 
 <script lang="ts">
+    import ChevronDown from '@lucide/svelte/icons/chevron-down';
     import {
         
         
@@ -18,7 +19,6 @@
         getSortedRowModel
     } from '@tanstack/table-core';
 import type {ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, SortingState, VisibilityState} from '@tanstack/table-core';
-    import ChevronDown from 'lucide-svelte/icons/chevron-down';
     import AppHead from '@/components/AppHead.svelte';
     import TableCellLink from '@/components/TableCellLink.svelte';
     import { Button } from '@/components/ui/button';

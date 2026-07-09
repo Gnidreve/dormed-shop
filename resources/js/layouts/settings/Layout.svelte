@@ -1,10 +1,10 @@
 <script lang="ts">
     import { Link, router } from '@inertiajs/svelte';
-    import LogOut from 'lucide-svelte/icons/log-out';
-    import MapPin from 'lucide-svelte/icons/map-pin';
-    import Package from 'lucide-svelte/icons/package';
-    import Settings from 'lucide-svelte/icons/settings';
-    import Shield from 'lucide-svelte/icons/shield';
+    import LogOut from '@lucide/svelte/icons/log-out';
+    import MapPin from '@lucide/svelte/icons/map-pin';
+    import Package from '@lucide/svelte/icons/package';
+    import Settings from '@lucide/svelte/icons/settings';
+    import Shield from '@lucide/svelte/icons/shield';
     import type { Snippet } from 'svelte';
     import Heading from '@/components/Heading.svelte';
     import { Button } from '@/components/ui/button';

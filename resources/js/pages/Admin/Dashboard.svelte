@@ -10,11 +10,11 @@
 </script>
 
 <script lang="ts">
+    import TrendingDown from '@lucide/svelte/icons/trending-down';
+    import TrendingUp from '@lucide/svelte/icons/trending-up';
     import { scaleUtc } from 'd3-scale';
     import { curveNatural } from 'd3-shape';
     import { Area, AreaChart, ChartClipPath } from 'layerchart';
-    import TrendingDown from 'lucide-svelte/icons/trending-down';
-    import TrendingUp from 'lucide-svelte/icons/trending-up';
     import { cubicInOut } from 'svelte/easing';
     import AppHead from '@/components/AppHead.svelte';
     import { Button } from '@/components/ui/button';
