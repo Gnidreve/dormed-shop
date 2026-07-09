@@ -273,6 +273,7 @@
 </script>
 
 <AppHead
+    canonical={ProductController.show.url(product.id)}
     title={product.name}
     description={metaDescription}
     ogImage={product.images[0]?.url ?? null}

@@ -22,7 +22,12 @@
         total,
         query,
         sort = 'name_asc',
-    }: { products: { data: Product[] }; total: number; query: string; sort: string } = $props();
+    }: {
+        products: { data: Product[] };
+        total: number;
+        query: string;
+        sort: string;
+    } = $props();
 
     const sortOptions = [
         { value: 'name_asc', label: 'Name A-Z' },
@@ -40,6 +45,7 @@
 </script>
 
 <AppHead
+    canonical={ProductController.index.url()}
     title={query ? `Suchergebnisse für „${query}"` : 'Produkte'}
     description={query
         ? `Suchergebnisse für „${query}" im dormed24-Sortiment – Medizintechnik für Praxis und Klinik.`
@@ -61,8 +67,12 @@
                         {total === 1 ? 'Ergebnis' : 'Ergebnisse'}
                     </p>
                 {:else}
-                    <h1 class="text-xl font-semibold text-gray-900">Alle Produkte</h1>
-                    <p class="mt-1 text-sm text-muted-foreground">{total} Produkte</p>
+                    <h1 class="text-xl font-semibold text-gray-900">
+                        Alle Produkte
+                    </h1>
+                    <p class="mt-1 text-sm text-muted-foreground">
+                        {total} Produkte
+                    </p>
                 {/if}
             </div>
             <select

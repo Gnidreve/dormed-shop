@@ -4,12 +4,15 @@
     let {
         title = '',
         description = null,
+        canonical = null,
         ogImage = null,
         ogType = 'website',
         children,
     }: {
         title?: string;
         description?: string | null;
+        /** Pfad (oder absolute URL) der kanonischen Version dieser Seite — ohne Query-Parameter übergeben. */
+        canonical?: string | null;
         ogImage?: string | null;
         ogType?: string;
         children?: Snippet;
@@ -19,6 +22,15 @@
     const fullTitle = $derived(title ? `${title} - ${appName}` : appName);
     const metaDescription = $derived(description ?? null);
     const ogTitle = $derived(fullTitle);
+    const canonicalUrl = $derived.by(() => {
+        if (!canonical) {
+            return null;
+        }
+
+        return typeof window === 'undefined'
+            ? canonical
+            : new URL(canonical, window.location.origin).href;
+    });
 </script>
 
 <svelte:head>
@@ -28,8 +40,15 @@
         <meta name="description" content={metaDescription} />
     {/if}
 
+    {#if canonicalUrl}
+        <link rel="canonical" href={canonicalUrl} />
+    {/if}
+
     <!-- Open Graph -->
     <meta property="og:type" content={ogType} />
+    {#if canonicalUrl}
+        <meta property="og:url" content={canonicalUrl} />
+    {/if}
     <meta property="og:title" content={ogTitle} />
     {#if metaDescription}
         <meta property="og:description" content={metaDescription} />
@@ -39,7 +58,10 @@
     {/if}
 
     <!-- Twitter Card -->
-    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+    <meta
+        name="twitter:card"
+        content={ogImage ? 'summary_large_image' : 'summary'}
+    />
     <meta name="twitter:title" content={ogTitle} />
     {#if metaDescription}
         <meta name="twitter:description" content={metaDescription} />

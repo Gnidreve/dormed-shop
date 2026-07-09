@@ -171,14 +171,54 @@
     function displayProductPrice(price: string | null): string {
         return price === null ? 'Preis auf Anfrage' : formatPrice(price);
     }
+
+    const siteUrl = $derived(
+        typeof window === 'undefined' ? '' : window.location.origin,
+    );
+
+    const organizationSchema = $derived.by(() => {
+        const schema = {
+            '@context': 'https://schema.org',
+            '@graph': [
+                {
+                    '@type': 'Organization',
+                    name: 'dormed 24',
+                    url: siteUrl || '/',
+                    logo: `${siteUrl}/logo.svg`,
+                    email: contact.email,
+                    telephone: contact.phone,
+                },
+                {
+                    '@type': 'WebSite',
+                    name: 'dormed24.de',
+                    url: siteUrl || '/',
+                },
+            ],
+        };
+
+        // "<" escaped so setting-supplied content (email/phone) can never
+        // close the surrounding script tag early (script-breakout injection).
+        return JSON.stringify(schema).replace(/</g, '\\u003c');
+    });
+
+    const organizationJsonLdHtml = $derived(
+        `<script type="application/ld+json">${organizationSchema}<` +
+            `/script>`,
+    );
 </script>
 
 <svelte:window bind:scrollY />
 
 <AppHead
+    canonical="/"
     title="Willkommen"
     description="Verlässliche Medizintechnik für Praxis, MVZ und Klinik – direkt bestellen mit Beratung, Einweisung und Gewährleistung. Ihr Partner für Diagnostik, Monitoring und Zubehör."
 />
+
+<svelte:head>
+    <!-- eslint-disable-next-line svelte/no-at-html-tags -- JSON-LD; "<" is escaped in organizationSchema -->
+    {@html organizationJsonLdHtml}
+</svelte:head>
 
 <div class="min-h-screen bg-white">
     <ShopHeader />
@@ -192,6 +232,10 @@
             src="/assets/hero.png"
             alt=""
             aria-hidden="true"
+            width="1920"
+            height="1080"
+            fetchpriority="high"
+            decoding="async"
             class="absolute inset-x-0 -top-20 h-[calc(100%+5rem)] w-full object-cover object-center md:-top-28 md:h-[calc(100%+7rem)]"
             style:transform={`translate3d(0, ${heroParallaxOffset}px, 0)`}
         />

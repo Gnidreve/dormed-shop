@@ -1,5 +1,6 @@
 <script lang="ts">
     import { InfiniteScroll, Link, router } from '@inertiajs/svelte';
+    import * as CategoryController from '@/actions/App/Http/Controllers/CategoryController';
     import * as ProductController from '@/actions/App/Http/Controllers/ProductController';
     import AppFooter from '@/components/AppFooter.svelte';
     import AppHead from '@/components/AppHead.svelte';
@@ -29,8 +30,12 @@
         products,
         total,
         sort = 'name_asc',
-    }: { category: Category; products: { data: Product[] }; total: number; sort: string } =
-        $props();
+    }: {
+        category: Category;
+        products: { data: Product[] };
+        total: number;
+        sort: string;
+    } = $props();
 
     const sortOptions = [
         { value: 'name_asc', label: 'Name A-Z' },
@@ -48,6 +53,7 @@
 </script>
 
 <AppHead
+    canonical={CategoryController.show.url(category.slug)}
     title={category.name}
     description={category.description ??
         `${category.name} – Medizintechnik im dormed24-Sortiment direkt online bestellen.`}
@@ -59,11 +65,17 @@
     <main class="mx-auto flex-1 max-w-7xl px-4 py-8 lg:px-8">
         <div class="mb-6 flex items-center justify-between gap-4">
             <div>
-                <h1 class="text-xl font-semibold text-gray-900">{category.name}</h1>
+                <h1 class="text-xl font-semibold text-gray-900">
+                    {category.name}
+                </h1>
                 {#if category.description}
-                    <p class="mt-1 text-sm text-muted-foreground">{category.description}</p>
+                    <p class="mt-1 text-sm text-muted-foreground">
+                        {category.description}
+                    </p>
                 {:else}
-                    <p class="mt-1 text-sm text-muted-foreground">{total} Produkte</p>
+                    <p class="mt-1 text-sm text-muted-foreground">
+                        {total} Produkte
+                    </p>
                 {/if}
             </div>
             <select
@@ -79,7 +91,9 @@
 
         {#if products.data.length === 0}
             <div class="py-16 text-center">
-                <p class="text-muted-foreground">Keine Produkte in dieser Kategorie.</p>
+                <p class="text-muted-foreground">
+                    Keine Produkte in dieser Kategorie.
+                </p>
                 <Link
                     href={ProductController.index.url()}
                     class="mt-4 inline-block text-sm text-[#1a6bbf] hover:underline"
