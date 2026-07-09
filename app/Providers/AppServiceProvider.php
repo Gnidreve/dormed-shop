@@ -6,6 +6,7 @@ use App\Contracts\CartStore;
 use App\Models\Setting;
 use App\Support\Cart\SessionCartStore;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
@@ -75,6 +76,10 @@ class AppServiceProvider extends ServiceProvider
         DB::prohibitDestructiveCommands(
             app()->isProduction(),
         );
+
+        // Surface N+1 queries during development/testing; in production a
+        // lazy load stays a silent performance issue instead of a crash.
+        Model::preventLazyLoading(! app()->isProduction());
 
         Password::defaults(fn (): ?Password => app()->isProduction()
             ? Password::min(12)

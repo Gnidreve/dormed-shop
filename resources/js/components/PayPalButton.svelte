@@ -6,11 +6,9 @@
     import paypalOrder from '@/routes/paypal/order';
 
     let {
-        total: _total = 0,
         clientId = '',
         disabled = false,
     }: {
-        total?: number;
         clientId?: string;
         disabled?: boolean;
     } = $props();

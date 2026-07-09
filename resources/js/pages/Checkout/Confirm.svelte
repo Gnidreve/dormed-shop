@@ -435,7 +435,6 @@
                             {:else if isPayPal && paypal_client_id}
                                 <div class="mt-6">
                                     <PayPalButton
-                                        total={Number(cart.total)}
                                         clientId={paypal_client_id ?? ''}
                                         disabled={!agreedToTerms ||
                                             !addressComplete}
