@@ -55,6 +55,12 @@ export default ts.config(
         },
         rules: {
             'no-undef': 'off',
+            // SvelteKit-spezifische Regel (`resolve()` aus `$app/paths`), die es
+            // in diesem Inertia-+-Wayfinder-Stack nicht gibt: interne Navigation
+            // laeuft ueber <Link> + Wayfinder-`.url()`, die restlichen Treffer
+            // sind tel:/mailto:/externe Links. Kam mit einem eslint-plugin-svelte-
+            // Update in flat/recommended dazu und matcht hier durchgaengig falsch.
+            'svelte/no-navigation-without-resolve': 'off',
             '@typescript-eslint/no-explicit-any': 'off',
             '@typescript-eslint/no-unused-vars': [
                 'error',
