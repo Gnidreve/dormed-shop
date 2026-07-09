@@ -2,6 +2,9 @@
     "$schema": "https://www.schemastore.org/package.json",
     "private": true,
     "type": "module",
+    "engines": {
+        "node": ">=20.19"
+    },
     "scripts": {
         "build": "vite build",
         "build:ssr": "vite build && vite build --ssr",
@@ -38,6 +41,7 @@
         "@inertiajs/svelte": "^3.0.0",
         "@inertiajs/vite": "^3.0.0",
         "@laravel/passkeys": "^0.2.0",
+        "@lucide/svelte": "^1.24.0",
         "@sveltejs/vite-plugin-svelte": "^7.0.0",
         "@tanstack/table-core": "^8.21.3",
         "bits-ui": "^2.15.0",
@@ -45,16 +49,19 @@
         "d3-scale": "^4.0.2",
         "d3-shape": "^3.2.0",
         "embla-carousel-svelte": "^8.6.0",
+        "formsnap": "^2.0.1",
         "laravel-vite-plugin": "^3.0.0",
         "layerchart": "^2.0.0-next.65",
-        "lucide-svelte": "^0.468.0",
         "npm-run-all": "^4.1.5",
+        "paneforge": "^1.0.2",
         "svelte": "^5.16.0",
         "svelte-sonner": "^0.3.28",
+        "sveltekit-superforms": "^2.30.2",
         "tailwind-merge": "^3.2.0",
         "tailwind-variants": "^3.2.2",
         "tailwindcss": "^4.1.1",
-        "tw-animate-css": "^1.2.5"
+        "tw-animate-css": "^1.2.5",
+        "vaul-svelte": "^0.3.2"
     },
     "optionalDependencies": {
         "@rollup/rollup-linux-x64-gnu": "4.9.5",
