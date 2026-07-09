@@ -121,7 +121,6 @@ resources/js/
 │   └── settings/Layout.svelte      # Settings-Sub-Layout
 ├── actions/                        # Wayfinder (Controller-Routen als TS-Funktionen)
 ├── routes/                         # Wayfinder (Named Routes als TS-Funktionen)
-├── data/cart.json                  # Altlast/Referenz — NICHT Source of Truth
 └── types/                          # auth.ts, cart.ts (CartItem inkl. line_key/variant_*), …
 ```
 
@@ -133,7 +132,7 @@ Rohe `fetch()`-Aufrufe **müssen** über `fetchJson()` aus `@/lib/http` laufen
 
 ## Cart/Checkout-Daten
 
-Der Cart läuft server-seitig über **`App\Support\Cart\CartService`** (Store via `CartStore`-Contract). `CartService::cart()` liefert das vollständige Cart-Array (Items, Versand-/Zahlungsarten, Adressen, Summen) und wird in `HandleInertiaRequests` als shared Prop `cart` verteilt. `resources/js/data/cart.json` ist nur noch Altlast/Referenz, **nicht** die Source of Truth.
+Der Cart läuft server-seitig über **`App\Support\Cart\CartService`** (Store via `CartStore`-Contract). `CartService::cart()` liefert das vollständige Cart-Array (Items, Versand-/Zahlungsarten, Adressen, Summen) und wird in `HandleInertiaRequests` als shared Prop `cart` verteilt.
 
 - **Session-State:** `items[lineKey => quantity]`; Line-Key = `productId` oder `productId:variantId` (Varianten = eigene Zeilen).
 - **Preise live:** Namen/Preise werden bei jedem Aufruf aus der DB gelesen; der Snapshot entsteht erst in der Order (`OrderManager::createFromCart`, transaktional).
@@ -211,11 +210,11 @@ Der Cart läuft server-seitig über **`App\Support\Cart\CartService`** (Store vi
 
 ## Backup-Dateien (nicht aktiv)
 
-- `ShopHeader-left-align.svelte` — alte linksbündige Header-Variante
 - `ShopHeader-with-hover.svelte` — Mega-Menü-Variante
 
 Nicht importiert. **Entscheidung Linus (07/2026): die Hover-Variante bleibt
-erhalten und darf nicht gelöscht werden.**
+erhalten und darf nicht gelöscht werden.** (Die frühere left-align-Variante
+wurde 07/2026 entfernt.)
 
 ---
 
