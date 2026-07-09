@@ -1,2 +1,10 @@
 User-agent: *
 Disallow: /admin
+Disallow: /cart
+Disallow: /warenkorb
+Disallow: /checkout
+Disallow: /customer
+Disallow: /settings
+Disallow: /paypal
+
+Sitemap: https://dormed24.de/sitemap.xml
