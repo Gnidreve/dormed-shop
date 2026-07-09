@@ -21,6 +21,7 @@ class ProductVariant extends Model
 {
     /** @use HasFactory<ProductVariantFactory> */
     use HasFactory;
+
     protected function casts(): array
     {
         return [
@@ -29,6 +30,9 @@ class ProductVariant extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Product, $this>
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);

@@ -13,12 +13,16 @@ use Illuminate\Support\Facades\Storage;
  * @property int $product_id
  * @property string $path
  * @property int $sort_order
+ * @property-read string $url
  */
 #[Fillable(['product_id', 'path', 'sort_order'])]
 class ProductImage extends Model
 {
     protected $appends = ['url'];
 
+    /**
+     * @return BelongsTo<Product, $this>
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);

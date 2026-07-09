@@ -21,6 +21,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'payer_name',
     'response_data',
 ])]
+/**
+ * @property int $id
+ * @property int $order_id
+ * @property string|null $paypal_order_id
+ * @property string|null $paypal_payer_id
+ * @property string|null $paypal_capture_id
+ * @property string $status
+ * @property string $amount
+ * @property string $currency
+ * @property string|null $fee
+ * @property string|null $payer_email
+ * @property string|null $payer_name
+ * @property array<string, mixed>|null $response_data
+ */
 class Payment extends Model
 {
     /** @use HasFactory<PaymentFactory> */
@@ -35,6 +49,9 @@ class Payment extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Order, $this>
+     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);

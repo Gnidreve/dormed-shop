@@ -12,7 +12,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
- * @property int $manufacturer_id
+ * @property int|null $manufacturer_id
+ * @property int|null $category_id
  * @property string $name
  * @property string|null $description
  * @property string $price
@@ -32,26 +33,41 @@ class Product extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Category, $this>
+     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
+    /**
+     * @return BelongsTo<Manufacturer, $this>
+     */
     public function manufacturer(): BelongsTo
     {
         return $this->belongsTo(Manufacturer::class);
     }
 
+    /**
+     * @return HasMany<ProductImage, $this>
+     */
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class)->orderBy('sort_order');
     }
 
+    /**
+     * @return HasMany<ProductVariant, $this>
+     */
     public function variants(): HasMany
     {
         return $this->hasMany(ProductVariant::class)->orderBy('sort_order');
     }
 
+    /**
+     * @return HasMany<Rating, $this>
+     */
     public function ratings(): HasMany
     {
         return $this->hasMany(Rating::class)->latest();
