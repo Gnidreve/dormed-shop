@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Cart\UpdateCartPaymentMethodRequest;
 use App\Http\Requests\Checkout\PlaceOrderRequest;
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Setting;
 use App\Support\Address\AddressRules;
@@ -53,23 +54,14 @@ class CheckoutController extends Controller
             return;
         }
 
+        /** @var Customer $customer */
         $customer = $request->user();
 
-        $shipping = $customer->addresses()
-            ->whereIn('type', ['shipping', 'both'])
-            ->where('is_default', true)
-            ->first();
-
-        if ($shipping) {
+        if ($shipping = $customer->defaultShippingAddress()) {
             $this->cartService->setShippingAddress($shipping->toAddressArray());
         }
 
-        $billing = $customer->addresses()
-            ->where('type', 'billing')
-            ->where('is_default', true)
-            ->first();
-
-        if ($billing) {
+        if ($billing = $customer->defaultBillingAddress()) {
             $this->cartService->setBillingAddress($billing->toAddressArray());
         }
     }

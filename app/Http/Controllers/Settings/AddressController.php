@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Models\Customer;
 use App\Support\Address\AddressRules;
 use App\Support\Cart\CartService;
 use Illuminate\Http\JsonResponse;
@@ -15,17 +16,11 @@ class AddressController extends Controller
 {
     public function edit(Request $request): Response|JsonResponse
     {
+        /** @var Customer $customer */
         $customer = $request->user();
 
-        $shipping = $customer->addresses()
-            ->whereIn('type', ['shipping', 'both'])
-            ->where('is_default', true)
-            ->first();
-
-        $billing = $customer->addresses()
-            ->where('type', 'billing')
-            ->where('is_default', true)
-            ->first();
+        $shipping = $customer->defaultShippingAddress();
+        $billing = $customer->defaultBillingAddress();
 
         // JSON für das User-Settings-Modal (lädt die Formulardaten per fetch).
         if ($request->wantsJson()) {
@@ -49,13 +44,11 @@ class AddressController extends Controller
             ...AddressRules::forPrefix('billing', required: false),
         ]);
 
+        /** @var Customer $customer */
         $customer = $request->user();
         $billingSame = (bool) ($data['billing_same_as_shipping'] ?? true);
 
-        $shipping = $customer->addresses()
-            ->whereIn('type', ['shipping', 'both'])
-            ->where('is_default', true)
-            ->first();
+        $shipping = $customer->defaultShippingAddress();
 
         $shippingData = array_merge($data['shipping'], ['type' => 'shipping', 'is_default' => true]);
 
@@ -68,10 +61,7 @@ class AddressController extends Controller
         if ($billingSame) {
             $customer->addresses()->where('type', 'billing')->delete();
         } else {
-            $billing = $customer->addresses()
-                ->where('type', 'billing')
-                ->where('is_default', true)
-                ->first();
+            $billing = $customer->defaultBillingAddress();
 
             $billingData = array_merge($data['billing'] ?? [], ['type' => 'billing', 'is_default' => true]);
 

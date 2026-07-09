@@ -38,18 +38,39 @@ class Customer extends Authenticatable implements MustVerifyEmail, PasskeyUser
     protected $table = 'customers';
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * @return HasMany<Address, $this>
      */
     public function addresses(): HasMany
     {
         return $this->hasMany(Address::class);
     }
 
+    /**
+     * @return HasMany<Order, $this>
+     */
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class)->latest();
+    }
+
+    /**
+     * The customer's default shipping address (type shipping or both).
+     * Shared by checkout prefill and the address settings page.
+     */
+    public function defaultShippingAddress(): ?Address
+    {
+        return $this->addresses()
+            ->whereIn('type', ['shipping', 'both'])
+            ->where('is_default', true)
+            ->first();
+    }
+
+    public function defaultBillingAddress(): ?Address
+    {
+        return $this->addresses()
+            ->where('type', 'billing')
+            ->where('is_default', true)
+            ->first();
     }
 
     protected function casts(): array
