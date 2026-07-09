@@ -21,6 +21,33 @@ stichprobenartig verifiziert.
 
 ## ✅ Seit V2 erledigt / verifiziert (Kurzprotokoll)
 
+- **B2 umgesetzt — Frontend-Qualitäts-Gate grün (09.07.2026):** svelte-check
+  **219 → 0 Fehler**, ESLint sauber, Build grün, Suite 200/200. Im Detail:
+  (1) **lucide-Paket vereinheitlicht** — das deprecatete `lucide-svelte` komplett
+  raus, alles auf `@lucide/svelte` (75 Dateien, Import-Pfade global umgestellt).
+  (2) **UI-Kit zentral kompatibel gemacht statt gelöscht** (shadcn `add --all`
+  bleibt): fehlende Helper-Typen (`WithElementRef`, `WithoutChild(ren)(OrChild)`)
+  in `lib/utils.ts`, `buttonVariants`/`ButtonVariant`/`ButtonSize`/`ButtonProps`
+  am lokalen Button ergänzt (neue `button/variants.ts`), vier fehlende Kit-
+  Peer-Deps installiert (vaul-svelte, formsnap, sveltekit-superforms, paneforge).
+  (3) **Alle App-Typfehler gefixt**: `AddressForm` von einem
+  `document.getElementById`+CustomEvent-Hack auf eine typsichere `onUpdate`-
+  Callback-Prop umgestellt (Confirm + UserSettingsDialog, 4 Call-Sites);
+  `settings/Profile` user-null (auth-gated); PayPal-SDK-Global via
+  `types/paypal.d.ts`; FAQ-Accordion `collapsible`-Prop raus (bits-ui v2
+  Default); `CartSheet` onClick-Cast; `Admin/Customers/Show` `fullname`-Tippfehler.
+  (4) **Ungenutzte, gegen neuere bits-ui/vaul-APIs generierte Kit-Komponenten**
+  (drawer, field, input-group, command, item, button-group, calendar, form)
+  aus svelte-check ausgeschlossen (`tsconfig.json` exclude) — Dateien bleiben
+  auf Platte, werden typisiert sobald genutzt (Entscheidung Linus: nicht löschen).
+  (5) **ESLint**: `svelte/no-navigation-without-resolve` abgeschaltet (SvelteKit-
+  Regel, in diesem Inertia-/Wayfinder-Stack durchgängig Fehlmatch auf
+  tel:/mailto:/externe Links), zwei echte Fehler gefixt (toter Button-Import in
+  Checkout/Success, `$state`+`$effect` → writable `$derived` in Products/Edit).
+  (6) **`engines: node >=20.19` + `.nvmrc`** eingecheckt (System-Node 18 crasht
+  Vite 8). Verbleiben 4 vorbestehende svelte-check-**Warnings** (2× Dialog-
+  `<slot>`-Deprecation, chart-tooltip, ShopHeader-Hover-Backup) — blockieren
+  den Exit-Code nicht, separat aufräumbar.
 - **Q1–Q3 umgesetzt (09.07.2026):** Q1 — tote Dateien raus (`AppHeader.svelte`
   + `AppHeaderLayout.svelte`, `data/cart.json`, `ShopHeader-left-align.svelte`,
   `old-hero.png`), AGENTS.md nachgezogen. **Ausnahme (Entscheidung Linus): die
@@ -119,7 +146,7 @@ Erstbefüllung als expliziten Aufruf dokumentieren (`db:seed
 `DB::prohibitDestructiveCommands()` schützt hier **nicht** (das greift nur
 bei `migrate:fresh` & Co., nicht bei Seedern). Launch-Checkliste ergänzen.
 
-### B2. Frontend-Qualitäts-Gate ist rot (svelte-check + ESLint), README verspricht grün
+### B2. Frontend-Qualitäts-Gate ist rot (svelte-check + ESLint), README verspricht grün ✅ (09.07.2026 — Kurzprotokoll oben)
 
 `npm run lint && npm run types:check` ist laut README Pflicht-Workflow —
 aktuell: **ESLint 2 Fehler** (`Checkout/Success.svelte` unbenutzter
@@ -394,15 +421,16 @@ gegen CLS. Der Parallax-Transform selbst ist unkritisch (nur `transform`).
 - Nach B-2: Test „Cart-Zeile ohne Variante wird unbuyable, sobald das
   Produkt Varianten hat".
 - Nach B1: Test/Guard „ProductSeeder läuft nicht in Produktion".
-- `svelte-check`/`lint` als CI-Gate, sobald B2 grün ist — sonst driftet es
-  sofort wieder.
+- ~~`svelte-check`/`lint` als CI-Gate, sobald B2 grün ist~~ — B2 ist grün
+  (09.07.2026); CI-Gate jetzt einrichtbar, sonst driftet es wieder.
 
 ## Empfohlene Reihenfolge
 
 1. **B1** (Seeder-Guard — 15 Minuten, verhindert den teuersten Unfall)
    → **S-1** (Rating-Route zu — 5 Minuten).
-2. **B2** (Qualitäts-Gate grün: UI-Kit-Leichen raus, 13 Typfehler,
-   2 Lint-Fehler, engines/.nvmrc) — danach CI-fähig.
+2. ~~**B2** (Qualitäts-Gate grün: lucide-Paket vereinheitlicht, UI-Kit
+   kompatibel, App-Typfehler, Lint, engines/.nvmrc)~~ ✅ (09.07.2026) —
+   jetzt CI-fähig.
 3. **B-1 + B-2** (Versandpreis-null, Alt-Cart-Variantenzwang) — je mit Test.
 4. **SEO-Paket:** ~~Favicons (2) → robots-Sitemap-Zeile (4) → Canonical (3)
    → Hero-Attribute (5)~~ ✅ → Hero-Konvertierung (5) + SSR (1, größter
