@@ -122,5 +122,16 @@
         "resources/js/**/*.ts",
         "resources/js/**/*.d.ts",
         "resources/js/**/*.svelte"
+    ],
+    "//exclude": "Ungenutzte shadcn-Kit-Komponenten (per `add --all` mitgezogen), die gegen neuere bits-ui/vaul-APIs bzw. ref-durchreichende Primitives generiert wurden und daher nicht typechecken. Bleiben bewusst auf Platte; sobald eine davon tatsaechlich verwendet wird, hier entfernen und typisieren.",
+    "exclude": [
+        "resources/js/components/ui/drawer",
+        "resources/js/components/ui/field",
+        "resources/js/components/ui/input-group",
+        "resources/js/components/ui/command",
+        "resources/js/components/ui/item",
+        "resources/js/components/ui/button-group",
+        "resources/js/components/ui/calendar",
+        "resources/js/components/ui/form"
     ]
 }
