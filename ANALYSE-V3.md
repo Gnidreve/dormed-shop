@@ -21,6 +21,24 @@ stichprobenartig verifiziert.
 
 ## ✅ Seit V2 erledigt / verifiziert (Kurzprotokoll)
 
+- **Q1–Q3 umgesetzt (09.07.2026):** Q1 — tote Dateien raus (`AppHeader.svelte`
+  + `AppHeaderLayout.svelte`, `data/cart.json`, `ShopHeader-left-align.svelte`,
+  `old-hero.png`), AGENTS.md nachgezogen. **Ausnahme (Entscheidung Linus): die
+  ungenutzten shadcn-Kit-Dateien unter `components/ui/` bleiben bewusst
+  (shadcn `add --all`)** — der B2-Fix muss also über Kompatibilität statt
+  Löschen laufen. Q3 — `completeCapture()` im PayPalController extrahiert
+  (S3); byte-identische `UpdateProduct/ManufacturerRequest` gelöscht,
+  `update()` nutzt die Store-Requests (S4; Category-Paar bleibt — legitimer
+  unique-ignore-Unterschied); `defaultShipping/BillingAddress()`-Helper am
+  Customer, drei Call-Sites umgestellt (S5); ungenutzte `total`-Prop aus
+  PayPalButton entfernt + `Model::preventLazyLoading()` außerhalb Produktion
+  aktiviert — Suite läuft komplett ohne Lazy-Load-Violation (S6;
+  `sessions.user_id` bleibt als rein kosmetisch offen). Q2 — alle Modelle mit
+  `@property`-Docblocks + Relation-Generics typisiert, Baseline regeneriert:
+  **180 → 117 Einträge (−35 %)**; der Rest ist überwiegend das bekannte
+  Cart-Array/DTO-Thema (CartService/PayPalService). Verifiziert: Suite
+  200/200, PHPStan grün, Pint, ESLint, Build grün, Shop-Seiten per
+  Smoke-Test 200.
 - **SEO-Paket 1 umgesetzt (09.07.2026):** SEO-2 (favicon.ico + apple-touch-icon
   aus dem SVG neu erzeugt, Blade-Links vervollständigt), SEO-3 (AppHead um
   `canonical`-Prop erweitert — rendert `<link rel="canonical">` + `og:url`;
@@ -127,10 +145,13 @@ Dazu ein Umgebungsproblem: mit dem System-Node **v18** crasht Vite 8
 (`CustomEvent is not defined`) und svelte-check meldet 404× „No Svelte
 configuration found" — erst mit Node ≥ 20.19 (nvm v20.20.1 ist vorhanden)
 laufen Build und Checks überhaupt.
-**Vorgehen:** (1) ungenutzte UI-Kit-Dateien löschen oder auf das lokale Kit
-umschreiben, (2) die 13 App-Typfehler fixen, (3) beide ESLint-Fehler fixen,
-(4) `"engines": { "node": ">=20.19" }` + `.nvmrc` ins Repo, damit der
-Node-18-Crash nicht erst auf dem Server auffällt.
+**Vorgehen:** (1) UI-Kit-Dateien kompatibel machen — **nicht löschen**
+(Entscheidung Linus 09.07.2026: shadcn `add --all`, Kit bleibt vollständig;
+d. h. `@lucide/svelte`-Imports/fehlende Exports auf das lokale Kit
+umschreiben oder das Kit aktualisieren), (2) die 13 App-Typfehler fixen,
+(3) beide ESLint-Fehler fixen, (4) `"engines": { "node": ">=20.19" }` +
+`.nvmrc` ins Repo, damit der Node-18-Crash nicht erst auf dem Server
+auffällt.
 
 ---
 
@@ -247,7 +268,7 @@ für 1.0 — unverändert festgehalten.
 
 ## 🔵 Simplifizierung & Code-Refinement
 
-### Q1. Toter Starter-Kit-/Altlast-Code raus
+### Q1. Toter Starter-Kit-/Altlast-Code raus ✅ (UI-Kit-Dateien bleiben bewusst)
 
 - `AppHeader.svelte` + `layouts/app/AppHeaderLayout.svelte`: nirgends
   verwendet, `AppHeader` importiert sogar ein nicht existentes `dashboard`
@@ -260,7 +281,7 @@ für 1.0 — unverändert festgehalten.
 - `public/assets/old-hero.png` (179 KB, ungenutzt, per „CLEANUP"-Commit
   versehentlich eingecheckt).
 
-### Q2. PHPStan-Baseline wächst statt zu schrumpfen
+### Q2. PHPStan-Baseline wächst statt zu schrumpfen ✅ (180 → 117; Rest = Cart-DTO)
 
 Seit V2 sind ~90 neue Baseline-Zeilen dazugekommen (u. a. mit den
 Admin-Orders- und Mail-Commits); Stand jetzt 180 ignorierte Fehler. Die
@@ -269,7 +290,7 @@ clean landen. Empfehlung: Baseline-Diff im Review beachten; mittelfristig
 die Order/Payment-Property-Typen (der Großteil der Einträge) über
 `@property`-PHPDoc am Model lösen statt per Ignore.
 
-### Q3. Carry-over aus V2 (unverändert offen, nach Gelegenheit)
+### Q3. Carry-over aus V2 ✅ (bis auf `sessions.user_id`, kosmetisch)
 
 - **S3:** Capture-Logik doppelt in `PayPalController::captureOrder()` und
   `afterPayment()` (Betragsabgleich + COMPLETED-Handling zeilengleich) →
@@ -387,4 +408,5 @@ gegen CLS. Der Parallax-Transform selbst ist unkritisch (nur `transform`).
    → Hero-Attribute (5)~~ ✅ → Hero-Konvertierung (5) + SSR (1, größter
    Brocken, lohnt vor Launch — Entscheidung Linus: macht er später selbst).
 5. S-2/S-3/S-4 (drei Middleware-Zeilen) + S-5 nach Gelegenheit.
-6. Q1–Q3 (tote Dateien, Baseline-Disziplin, V2-Simplifizierungen) laufend.
+6. ~~Q1–Q3 (tote Dateien, Baseline-Disziplin, V2-Simplifizierungen)~~ ✅
+   (09.07.2026; UI-Kit bleibt, `sessions.user_id` offen).
