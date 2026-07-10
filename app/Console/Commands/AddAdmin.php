@@ -36,12 +36,14 @@ class AddAdmin extends Command
             : null
         );
 
-        User::create([
+        // is_admin ist nicht fillable (Privileg-Flag) — hier bewusst explizit.
+        $user = new User([
             'name' => $name,
             'email' => $email,
             'password' => Hash::make($pw),
-            'is_admin' => true,
         ]);
+        $user->is_admin = true;
+        $user->save();
 
         $this->info("Admin \"{$name}\" ({$email}) wurde erstellt.");
 

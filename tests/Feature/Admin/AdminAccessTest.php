@@ -71,4 +71,33 @@ class AdminAccessTest extends TestCase
             ->get(route('admin.dashboard'))
             ->assertRedirect(route('admin.login'));
     }
+
+    public function test_is_admin_is_not_mass_assignable(): void
+    {
+        // Das Privileg-Flag darf nie aus (potenziell request-basierten)
+        // Massenzuweisungen gesetzt werden.
+        $user = new User;
+        $user->fill([
+            'name' => 'Eve',
+            'email' => 'eve@example.com',
+            'password' => 'secret-password',
+            'is_admin' => true,
+        ]);
+
+        $this->assertFalse((bool) $user->is_admin);
+    }
+
+    public function test_add_admin_command_creates_a_flagged_admin(): void
+    {
+        $this->artisan('add:admin')
+            ->expectsQuestion('Name', 'Neuer Admin')
+            ->expectsQuestion('E-Mail', 'neuer-admin@dormed24.de')
+            ->expectsQuestion('Passwort', 'ein-sicheres-passwort')
+            ->assertSuccessful();
+
+        $user = User::query()->where('email', 'neuer-admin@dormed24.de')->first();
+
+        $this->assertNotNull($user);
+        $this->assertTrue((bool) $user->is_admin);
+    }
 }

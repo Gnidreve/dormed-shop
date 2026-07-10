@@ -9,7 +9,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'is_admin'])]
+/**
+ * `is_admin` ist bewusst NICHT fillable: das Privileg-Flag darf nie aus
+ * Request-Daten gesetzt werden. Admins entstehen ausschliesslich über den
+ * `add:admin`-Command (explizites Setzen) bzw. die Factory-`admin()`-State.
+ */
+#[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
