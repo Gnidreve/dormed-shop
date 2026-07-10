@@ -192,26 +192,31 @@ ist **weiterhin aktiv**: anonym, ungedrosselt, ohne Moderation — und die
 Bewertungen fließen ungefiltert in die öffentliche Produktseite **und ins
 JSON-LD/`aggregateRating`** (Sterne-Snippets in Google). Da kein legitimer
 Client den Endpoint mehr aufruft, ist jeder Treffer Missbrauch.
-**Vorgehen (5 Minuten):** Route auskommentieren/entfernen, bis die
-Order-basierte Lösung kommt — Controller + Tests können bleiben. Mindestens:
-`throttle:3,1` + `auth`. Damit wäre der älteste offene Punkt der Serie
-(V1 Punkt 9 → V2 S-C → V3) endlich vom Tisch.
+**Erledigt (10.07.2026):** Route **auskommentiert** (`routes/public/rating.php`,
+inkl. Imports) mit gegenseitigem Verweis auf das ebenfalls auskommentierte
+Produktdetail-Formular (`Products/Show.svelte`, `{#if false}`) — **beides wird
+gemeinsam reaktiviert**, sobald Bewertungen order-scoped über die Bestellung
+laufen. `RatingController` + `StoreRatingRequest` bleiben; die zwei
+Submission-Tests sind `markTestSkipped` (nicht gelöscht), der Anzeige-Test
+bleibt aktiv. Damit ist der älteste offene Punkt der Serie (V1 Punkt 9 →
+V2 S-C → V3) vom Tisch.
 
-### S-2. Kein Throttle auf `paypal/order/create` (Carry-over V2 S-C)
+### S-2. Kein Throttle auf `paypal/order/create` (Carry-over V2 S-C) ✅
 
-Jeder Klick = PayPal-API-Call + DB-Order + (durch `cancelStalePending…`)
-UPDATE-Query. Auth-pflichtig, aber ein eingeloggter Kunde/Bot kann beliebig
-Orders erzeugen. `->middleware('throttle:10,1')` kostet eine Zeile.
+**Erledigt (10.07.2026):** `throttle:10,1` ergänzt (zusätzlich zu `auth`+`verified`).
 
-### S-3. `paypal/after-payment` ohne Auth/Ownership (Carry-over V2 S-C)
+### S-3. `paypal/after-payment` ohne Auth/Ownership (Carry-over V2 S-C) ✅
 
-Capture durch Dritte mit bekanntem Token weiterhin triggerbar (Geld fließt
-an den Shop, Success-Seite prüft Ownership — Risiko gering). `auth` wäre
-unschädlich: PayPal leitet den eingeloggten Käufer zurück.
+**Erledigt (10.07.2026):** `auth`-Middleware ergänzt — Capture-Rückkehr nur für
+den eingeloggten Käufer, nicht per bekanntem Token durch Dritte triggerbar
+(Success-Seite prüft zusätzlich Ownership). Neuer Test
+`test_after_payment_requires_authentication`, die bestehenden after-payment-
+Tests um `actingAs` ergänzt.
 
-### S-4. `checkout.payment.update` als einzige Checkout-Route ohne `auth` (Carry-over V2 S6)
+### S-4. `checkout.payment.update` als einzige Checkout-Route ohne `auth` (Carry-over V2 S6) ✅
 
-Harmlos (session-scoped), aber inkonsistent — eine Zeile.
+**Erledigt (10.07.2026):** `auth`-Middleware ergänzt (session-scoped, aber jetzt
+konsistent zu den anderen Checkout-Routen).
 
 ### S-5. Kleinere Härtungen (neu + Rest aus V2) ✅ (bis auf Cookie-Banner, 10.07.2026)
 
@@ -426,7 +431,7 @@ gegen CLS. Der Parallax-Transform selbst ist unkritisch (nur `transform`).
 ## Empfohlene Reihenfolge
 
 1. **B1** (Seeder-Guard — 15 Minuten, verhindert den teuersten Unfall)
-   → **S-1** (Rating-Route zu — 5 Minuten).
+   → ~~**S-1** (Rating-Route zu)~~ ✅ (10.07.2026).
 2. ~~**B2** (Qualitäts-Gate grün: lucide-Paket vereinheitlicht, UI-Kit
    kompatibel, App-Typfehler, Lint, engines/.nvmrc)~~ ✅ (09.07.2026) —
    jetzt CI-fähig.
@@ -434,7 +439,7 @@ gegen CLS. Der Parallax-Transform selbst ist unkritisch (nur `transform`).
 4. **SEO-Paket:** ~~Favicons (2) → robots-Sitemap-Zeile (4) → Canonical (3)
    → Hero-Attribute (5)~~ ✅ → Hero-Konvertierung (5) + SSR (1, größter
    Brocken, lohnt vor Launch — Entscheidung Linus: macht er später selbst).
-5. S-2/S-3/S-4 (drei Middleware-Zeilen) + ~~S-5~~ ✅ (10.07.2026; Cookie-Banner
-   bewusst offen).
+5. ~~S-2/S-3/S-4 (drei Middleware-Zeilen)~~ ✅ + ~~S-5~~ ✅ (10.07.2026;
+   Cookie-Banner bewusst offen).
 6. ~~Q1–Q3 (tote Dateien, Baseline-Disziplin, V2-Simplifizierungen)~~ ✅
    (09.07.2026; UI-Kit bleibt, `sessions.user_id` offen).
