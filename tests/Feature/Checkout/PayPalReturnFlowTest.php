@@ -14,15 +14,27 @@ class PayPalReturnFlowTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_after_payment_requires_authentication(): void
+    {
+        $payment = Payment::factory()->completed()->create();
+
+        // S-3: Capture-Rueckkehr nur fuer den eingeloggten Kaeufer, nicht per
+        // bekanntem Token durch Dritte triggerbar.
+        $this->get(route('paypal.after-payment', ['token' => $payment->paypal_order_id]))
+            ->assertRedirect(route('login'));
+    }
+
     public function test_after_payment_without_token_redirects_to_checkout(): void
     {
-        $this->get(route('paypal.after-payment'))
+        $this->actingAs(Customer::factory()->create())
+            ->get(route('paypal.after-payment'))
             ->assertRedirect(route('checkout.index'));
     }
 
     public function test_after_payment_with_unknown_token_redirects_to_checkout(): void
     {
-        $this->get(route('paypal.after-payment', ['token' => 'UNKNOWN123']))
+        $this->actingAs(Customer::factory()->create())
+            ->get(route('paypal.after-payment', ['token' => 'UNKNOWN123']))
             ->assertRedirect(route('checkout.index'));
     }
 
@@ -30,7 +42,8 @@ class PayPalReturnFlowTest extends TestCase
     {
         $payment = Payment::factory()->completed()->create();
 
-        $this->get(route('paypal.after-payment', ['token' => $payment->paypal_order_id]))
+        $this->actingAs(Customer::factory()->create())
+            ->get(route('paypal.after-payment', ['token' => $payment->paypal_order_id]))
             ->assertRedirect(route('checkout.success', ['paypal_order_id' => $payment->paypal_order_id]));
     }
 
@@ -51,7 +64,8 @@ class PayPalReturnFlowTest extends TestCase
                 ->andReturn('CAPTURE123456789');
         });
 
-        $this->get(route('paypal.after-payment', ['token' => $payment->paypal_order_id]))
+        $this->actingAs(Customer::factory()->create())
+            ->get(route('paypal.after-payment', ['token' => $payment->paypal_order_id]))
             ->assertRedirect(route('checkout.success', ['paypal_order_id' => $payment->paypal_order_id]));
 
         $this->assertSame('COMPLETED', $payment->fresh()->status);
@@ -67,7 +81,8 @@ class PayPalReturnFlowTest extends TestCase
             $mock->shouldReceive('captureOrder')->once()->andReturn(['status' => 'DECLINED']);
         });
 
-        $this->get(route('paypal.after-payment', ['token' => $payment->paypal_order_id]))
+        $this->actingAs(Customer::factory()->create())
+            ->get(route('paypal.after-payment', ['token' => $payment->paypal_order_id]))
             ->assertRedirect(route('checkout.error'));
     }
 
