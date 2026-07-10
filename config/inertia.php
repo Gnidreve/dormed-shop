@@ -18,7 +18,9 @@ return [
     'ssr' => [
         'enabled' => (bool) env('INERTIA_SSR_ENABLED', false),
         'url' => env('INERTIA_SSR_URL', 'http://127.0.0.1:13714'),
-        // 'bundle' => base_path('bootstrap/ssr/ssr.mjs'),
+        // Das per `npm run build:ssr` gebaute Bundle (@inertiajs/vite wrappt
+        // resources/js/app.ts). `inertia:start-ssr` liest diesen Pfad.
+        'bundle' => base_path('bootstrap/ssr/app.js'),
 
     ],
 

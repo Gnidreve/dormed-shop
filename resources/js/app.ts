@@ -27,5 +27,10 @@ createInertiaApp({
     },
 });
 
-// This will listen for flash toast data from the server...
-initializeFlashToast();
+// Flash-Toasts sind rein clientseitig (svelte-sonner + Browser-Events).
+// Der @inertiajs/vite-Plugin ersetzt beim SSR-Build nur den createInertiaApp-
+// Aufruf, behält aber den restlichen Datei-Code — dieser Aufruf würde also im
+// Node-SSR mitlaufen und dort crashen. Deshalb nur im Browser starten.
+if (typeof window !== 'undefined') {
+    initializeFlashToast();
+}

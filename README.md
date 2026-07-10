@@ -158,8 +158,12 @@ vendor/bin/pint --dirty               # PHP-Codestyle (Pflicht vor Commit)
 vendor/bin/phpstan analyse            # Level 7, Baseline — muss grün bleiben
 npm run lint && npm run types:check   # ESLint + svelte-check
 php artisan wayfinder:generate        # Nach Routen-Änderungen (TS-Routen)
-npm run build                         # Produktions-Assets
+npm run build                         # Produktions-Assets (Client)
+npm run build:ssr                     # Client + SSR-Bundle (bootstrap/ssr/app.js)
 ```
+
+- **SSR ist lokal aus** (`INERTIA_SSR_ENABLED=false`) — zum Entwickeln reicht
+  Client-Rendering. Produktions-Setup: siehe Launch-Checkliste Punkt „SSR".
 
 - **Workflow:** Findings/Aufgaben laufen über die Analyse-Checklisten
   (aktuell `ANALYSE-V3.md`) — erledigte Punkte werden mit ✅ am
@@ -180,6 +184,18 @@ npm run build                         # Produktions-Assets
 5. DB-Backup-Strategie klären (aktuell SQLite-Datei).
 6. Scheduler-Cron aktuell **nicht nötig** (keine Scheduled Tasks).
 7. Kein Queue-Worker nötig — Mails laufen synchron (siehe Abschnitt „Mails" oben).
+8. **SSR (Server-Side Rendering)** für Crawler/Link-Vorschauen (WhatsApp,
+   Slack, LinkedIn …):
+   - `npm run build:ssr` baut Client- **und** SSR-Bundle
+     (`bootstrap/ssr/app.js`, gitignored — beim Deploy neu bauen).
+   - `INERTIA_SSR_ENABLED=true` setzen.
+   - `php artisan inertia:start-ssr` als **Dauerprozess** (Supervisor/systemd)
+     neben PHP laufen lassen (Node-Prozess auf `127.0.0.1:13714`). Health:
+     `php artisan inertia:check-ssr`. Fällt der Prozess aus, rendert Inertia
+     automatisch clientseitig weiter — kein harter Ausfall, nur keine
+     Vorschauen mehr.
+   - Kein separater Einstiegspunkt nötig: `@inertiajs/vite` wrappt beim
+     `--ssr`-Build automatisch `resources/js/app.ts`.
 
 Offene Punkte vor/nach Launch: siehe `ANALYSE-V3.md` (unten „Empfohlene
 Reihenfolge") und `TODO.md`.

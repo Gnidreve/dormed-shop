@@ -18,6 +18,12 @@ export default defineConfig({
     plugins: [
         laravel({
             input: ['resources/app.css', 'resources/js/app.ts'],
+            // SSR-Eingang: dieselbe app.ts wie fürs Client-Rendering. Der
+            // @inertiajs/vite-Plugin wrappt sie beim `vite build --ssr`
+            // automatisch mit Server-Bootstrap. Ohne diese Zeile würde das
+            // Laravel-Plugin die komplette input-Liste (inkl. app.css) als
+            // SSR-Entry nehmen. Ausgabe -> bootstrap/ssr/.
+            ssr: 'resources/js/app.ts',
             refresh: true,
             fonts: [
                 bunny('Instrument Sans', {
