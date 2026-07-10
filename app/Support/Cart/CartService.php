@@ -210,6 +210,13 @@ class CartService
                 $variant = $variantId !== null ? $product?->variants->firstWhere('id', $variantId) : null;
                 // A chosen variant that no longer exists makes the line unbuyable.
                 $variantMissing = $variantId !== null && $variant === null;
+                // The variant requirement is enforced at add-time (AddCartItemRequest),
+                // but a line added BEFORE variants existed would otherwise stay buyable
+                // at the base price. If the product now has variants and none is chosen,
+                // the price is ambiguous -> mark the line unbuyable so checkout blocks it.
+                $variantRequiredButMissing = $variantId === null
+                    && $product !== null
+                    && $product->variants->isNotEmpty();
 
                 $unitPriceCents = $this->amountToCents($variant->price ?? $product->price ?? 0);
                 $lineTotalCents = $unitPriceCents * $quantity;
@@ -237,7 +244,7 @@ class CartService
                     'line_total_cents' => $lineTotalCents,
                     'image_url' => $product?->images->first()?->url,
                     'product_url' => $product ? route('products.show', $product) : route('products.index'),
-                    'is_available' => $product !== null && $product->is_available && ! $variantMissing,
+                    'is_available' => $product !== null && $product->is_available && ! $variantMissing && ! $variantRequiredButMissing,
                 ];
             })
             ->filter();
@@ -245,7 +252,16 @@ class CartService
 
     private function shippingMethodModels(): Collection
     {
-        return $this->shippingMethodModelsCache ??= ShippingMethod::orderBy('sort_order')->get();
+        // Nur Versandarten mit gesetztem Preis sind im Self-Service-Checkout
+        // wählbar. Ein NULL-Preis heißt "auf Anfrage" und darf NICHT als 0,00 €
+        // durchgehen (sonst kostenloser Versand als stille Umsatz-Falle) —
+        // solche Methoden werden hier komplett ausgeblendet, damit sie weder
+        // auswählbar noch Default noch summierbar sind. Ein echter
+        // "Preis auf Anfrage"-Flow (Kontaktaufnahme) wäre ein eigenes Feature.
+        return $this->shippingMethodModelsCache ??= ShippingMethod::query()
+            ->whereNotNull('price')
+            ->orderBy('sort_order')
+            ->get();
     }
 
     private function shippingMethods(string $selectedId): array

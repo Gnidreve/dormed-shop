@@ -409,4 +409,56 @@ class CartFlowTest extends TestCase
         $this->assertSame(0, Order::query()->count());
         Mail::assertNothingSent();
     }
+
+    public function test_cart_line_without_variant_is_blocked_once_the_product_gains_variants(): void
+    {
+        Mail::fake();
+
+        $customer = Customer::factory()->create();
+        $product = Product::factory()->create(['name' => 'Druckerpapier', 'price' => '20.00']);
+
+        // Alter Warenkorb: Produkt ohne Variante (Line-Key = productId), noch
+        // bevor Varianten existierten.
+        $this->actingAs($customer)
+            ->withSession([
+                'cart' => [
+                    'items' => [(string) $product->id => 1],
+                    'shipping_method' => (string) $this->freeShipping->id,
+                    'payment_method' => 'invoice',
+                    'shipping_address' => $this->completeAddress(),
+                ],
+            ]);
+
+        // Danach bekommt das Produkt Varianten -> die variantenlose Zeile ist
+        // preislich mehrdeutig und darf nicht mehr zum Basispreis durchgehen.
+        ProductVariant::factory()->for($product)->create(['label' => 'Groß', 'price' => '35.00']);
+
+        $this->get(route('checkout.index'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->where('cart.items.0.is_available', false));
+
+        $this->post(route('checkout.submit'), ['agreed_to_terms' => true])
+            ->assertSessionHasErrors('cart');
+
+        $this->assertSame(0, Order::query()->count());
+        Mail::assertNothingSent();
+    }
+
+    public function test_shipping_method_without_price_is_not_offered(): void
+    {
+        $onRequest = ShippingMethod::factory()->create([
+            'name' => 'Spedition auf Anfrage',
+            'price' => null,
+            'sort_order' => 5,
+        ]);
+
+        // "Preis auf Anfrage" (NULL) darf im Self-Service-Checkout nicht als
+        // 0,00 € auswählbar sein — die Methode taucht gar nicht erst auf.
+        $this->get(route('checkout.index'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->where(
+                'cart.shipping_methods',
+                fn ($methods) => collect($methods)->pluck('id')->doesntContain((string) $onRequest->id)
+            ));
+    }
 }
