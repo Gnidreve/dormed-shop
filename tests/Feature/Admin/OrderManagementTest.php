@@ -6,6 +6,7 @@ use App\Mail\NewOrderMail;
 use App\Mail\OrderConfirmationMail;
 use App\Mail\PaymentConfirmationMail;
 use App\Models\Order;
+use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
@@ -41,6 +42,24 @@ class OrderManagementTest extends TestCase
                 fn ($page) => $page
                     ->component('Admin/Orders/Show')
                     ->where('order.id', $order->id)
+            );
+    }
+
+    public function test_show_does_not_expose_raw_paypal_response_data(): void
+    {
+        $order = Order::factory()->create(['payment_method' => 'paypal']);
+        Payment::factory()->completed()->for($order)->create([
+            'response_data' => ['secret_payer_detail' => 'nicht-nach-vorne'],
+        ]);
+
+        $this->actingAsAdmin()
+            ->get(route('admin.orders.show', $order))
+            ->assertOk()
+            ->assertInertia(
+                fn ($page) => $page
+                    ->has('order.payments', 1)
+                    ->has('order.payments.0.status')
+                    ->missing('order.payments.0.response_data')
             );
     }
 

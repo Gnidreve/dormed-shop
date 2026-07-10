@@ -49,6 +49,28 @@ class ProductBrowsingTest extends TestCase
             ->assertInertia(fn ($page) => $page->where('total', 1));
     }
 
+    public function test_search_treats_like_wildcards_literally(): void
+    {
+        Product::factory()->create(['name' => 'Beatmungsgerät Pro']);
+        Product::factory()->create(['name' => 'Infusionspumpe']);
+
+        // "%" darf nicht als LIKE-Platzhalter wirken (sonst kaemen alle
+        // Produkte zurueck) — als literaler String matcht es nichts.
+        $this->getJson(route('products.search', ['q' => '%']))
+            ->assertOk()
+            ->assertJson(['total' => 0, 'results' => []]);
+    }
+
+    public function test_search_finds_product_with_literal_percent_in_name(): void
+    {
+        Product::factory()->create(['name' => 'Rabatt 10% Set']);
+        Product::factory()->create(['name' => 'Infusionspumpe']);
+
+        $this->getJson(route('products.search', ['q' => '10%']))
+            ->assertOk()
+            ->assertJson(['total' => 1]);
+    }
+
     public function test_index_accepts_price_sort(): void
     {
         Product::factory()->create();

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -10,6 +11,23 @@ use Inertia\Response;
 
 class ProductController extends Controller
 {
+    /**
+     * Name-Teilstringsuche mit escapten LIKE-Wildcards: `%` und `_` im
+     * Suchbegriff werden literal gematcht, nicht als Platzhalter (verhindert,
+     * dass z. B. "%" alle Produkte zieht). ESCAPE-Klausel für Portabilität
+     * MySQL/SQLite.
+     *
+     * @param  Builder<Product>  $query
+     * @return Builder<Product>
+     */
+    private function whereNameLike(Builder $query, string $term): Builder
+    {
+        return $query->whereRaw('name LIKE ? ESCAPE ?', [
+            '%'.addcslashes($term, '%_\\').'%',
+            '\\',
+        ]);
+    }
+
     public function index(Request $request): Response
     {
         $query = $request->string('q')->trim();
@@ -24,7 +42,7 @@ class ProductController extends Controller
 
         $baseQuery = Product::available()
             ->with(['manufacturer', 'images' => fn ($q) => $q->where('sort_order', 0)])
-            ->when($query, fn ($q) => $q->where('name', 'like', "%{$query}%"))
+            ->when($query->isNotEmpty(), fn ($q) => $this->whereNameLike($q, $query->toString()))
             ->orderBy($column, $direction)
             ->orderBy('id');
 
@@ -80,9 +98,10 @@ class ProductController extends Controller
             return response()->json(['results' => [], 'total' => 0]);
         }
 
-        $results = Product::available()
-            ->with(['images' => fn ($q) => $q->where('sort_order', 0)])
-            ->where('name', 'like', "%{$query}%")
+        $results = $this->whereNameLike(
+            Product::available()->with(['images' => fn ($q) => $q->where('sort_order', 0)]),
+            $query->toString(),
+        )
             ->orderBy('name')
             ->limit(5)
             ->get(['id', 'name', 'price'])
@@ -93,7 +112,7 @@ class ProductController extends Controller
                 'image_url' => $product->images->first()?->url,
             ]);
 
-        $total = Product::available()->where('name', 'like', "%{$query}%")->count();
+        $total = $this->whereNameLike(Product::available(), $query->toString())->count();
 
         return response()->json([
             'results' => $results,

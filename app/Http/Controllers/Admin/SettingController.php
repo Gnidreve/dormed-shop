@@ -102,6 +102,8 @@ class SettingController extends Controller
                     'settings' => "Ungültiger Wert für \"{$key}\".",
                 ]);
             }
+
+            $this->assertValidFormat($key, $value);
         }
 
         foreach ($data['settings'] as $key => $value) {
@@ -113,6 +115,37 @@ class SettingController extends Controller
         }
 
         return back()->with('success', 'Einstellungen gespeichert.');
+    }
+
+    /**
+     * Format-Validierung für Keys, bei denen ein Tippfehler sonst erst
+     * auffällt, wenn Mails still im Log landen (shop.email ist der Empfänger
+     * aller Bestellbenachrichtigungen). Leere Werte sind zulässig (= löschen).
+     */
+    private function assertValidFormat(string $key, ?string $value): void
+    {
+        if ($value === null || $value === '' || $value === '••••••••') {
+            return;
+        }
+
+        $error = match ($key) {
+            'shop.email' => filter_var($value, FILTER_VALIDATE_EMAIL) === false
+                ? 'Bitte eine gültige E-Mail-Adresse angeben.'
+                : null,
+            'mail.smtp_user' => str_contains($value, '@') && filter_var($value, FILTER_VALIDATE_EMAIL) === false
+                ? 'Bitte eine gültige E-Mail-Adresse angeben.'
+                : null,
+            'mail.smtp_port' => ! ctype_digit($value) || (int) $value < 1 || (int) $value > 65535
+                ? 'Der SMTP-Port muss eine Zahl zwischen 1 und 65535 sein.'
+                : null,
+            default => null,
+        };
+
+        if ($error !== null) {
+            throw ValidationException::withMessages([
+                "settings.{$key}" => $error,
+            ]);
+        }
     }
 
     public function checkMail(): JsonResponse

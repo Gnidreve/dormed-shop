@@ -37,4 +37,38 @@ class SettingControllerTest extends TestCase
 
         $this->assertNull(Setting::get('not.a.real.key'));
     }
+
+    public function test_update_rejects_invalid_shop_email(): void
+    {
+        $this->asAdmin()
+            ->put(route('admin.settings.update'), [
+                'settings' => ['shop.email' => 'kein-at-zeichen'],
+            ])
+            ->assertSessionHasErrors('settings.shop.email');
+
+        $this->assertNull(Setting::get('shop.email'));
+    }
+
+    public function test_update_rejects_invalid_smtp_port(): void
+    {
+        $this->asAdmin()
+            ->put(route('admin.settings.update'), [
+                'settings' => ['mail.smtp_port' => '99999'],
+            ])
+            ->assertSessionHasErrors('settings.mail.smtp_port');
+
+        $this->assertNull(Setting::get('mail.smtp_port'));
+    }
+
+    public function test_update_accepts_valid_shop_email_and_port(): void
+    {
+        $this->asAdmin()
+            ->put(route('admin.settings.update'), [
+                'settings' => ['shop.email' => 'shop@dormed24.de', 'mail.smtp_port' => '587'],
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('shop@dormed24.de', Setting::get('shop.email'));
+        $this->assertSame('587', Setting::get('mail.smtp_port'));
+    }
 }

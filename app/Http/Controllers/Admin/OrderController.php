@@ -53,7 +53,20 @@ class OrderController extends Controller
                     'quantity' => $item->quantity,
                     'image_url' => $item->product?->images->first()?->url,
                 ])->values(),
-                'payments' => $order->payments,
+                // Explizites Mapping statt der rohen Models: der komplette
+                // PayPal-API-Response (payments.response_data, inkl. Payer-
+                // Rohdaten) gehört nicht in die Frontend-Props.
+                'payments' => $order->payments->map(fn (Payment $payment) => [
+                    'id' => $payment->id,
+                    'status' => $payment->status,
+                    'paypal_order_id' => $payment->paypal_order_id,
+                    'paypal_capture_id' => $payment->paypal_capture_id,
+                    'amount' => $payment->amount,
+                    'currency' => $payment->currency,
+                    'payer_email' => $payment->payer_email,
+                    'payer_name' => $payment->payer_name,
+                    'created_at' => $payment->created_at,
+                ])->values(),
                 'summary' => $orderManager->summaryFromOrder($order),
             ],
         ]);
@@ -123,7 +136,7 @@ class OrderController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            return response()->json(['message' => 'Erstattung fehlgeschlagen: '.$e->getMessage()], 422);
+            return response()->json(['message' => 'Erstattung fehlgeschlagen. Bitte prüfen Sie das Log und den PayPal-Status.'], 422);
         }
     }
 }
