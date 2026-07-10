@@ -11,8 +11,18 @@ class RatingTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * Die anonyme Bewertungs-Route ist deaktiviert (S-1,
+     * routes/public/rating.php) - reaktiviert wird sie GEMEINSAM mit dem
+     * ebenfalls auskommentierten Produktdetail-Formular, dann order-scoped.
+     * Diese beiden Submission-Tests bleiben als Grundlage bestehen und werden
+     * mit der Route wieder scharf geschaltet (ggf. auf den Order-Flow
+     * angepasst).
+     */
     public function test_guest_can_submit_a_rating(): void
     {
+        $this->markTestSkipped('Rating-Route deaktiviert (S-1) - reaktiviert gemeinsam mit dem order-basierten UI.');
+
         $product = Product::factory()->create();
 
         $this->post(route('ratings.store', $product), [
@@ -29,6 +39,8 @@ class RatingTest extends TestCase
 
     public function test_rating_submission_is_validated(): void
     {
+        $this->markTestSkipped('Rating-Route deaktiviert (S-1) - reaktiviert gemeinsam mit dem order-basierten UI.');
+
         $product = Product::factory()->create();
 
         $this->from(route('products.show', $product))

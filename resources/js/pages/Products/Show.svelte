@@ -701,6 +701,9 @@
                             Wenn Rating ordentlich aus der Bestellung heraus
                             implementiert ist, kann das hier wieder reaktiviert
                             und richtig konfiguriert werden.
+                            Die zugehoerige Route ist ebenfalls deaktiviert
+                            (routes/public/rating.php) - beides wird GEMEINSAM
+                            reaktiviert.
                         -->
                         {#if false}
                             <div
