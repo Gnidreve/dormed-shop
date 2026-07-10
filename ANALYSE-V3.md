@@ -213,33 +213,32 @@ unschädlich: PayPal leitet den eingeloggten Käufer zurück.
 
 Harmlos (session-scoped), aber inkonsistent — eine Zeile.
 
-### S-5. Kleinere Härtungen (neu + Rest aus V2)
+### S-5. Kleinere Härtungen (neu + Rest aus V2) ✅ (bis auf Cookie-Banner, 10.07.2026)
 
-- **Admin-Refund leakt Exception-Text an den Client:**
-  `OrderController::refund` → `'Erstattung fehlgeschlagen: '.$e->getMessage()`.
-  Nur Admin-UI, aber inkonsistent zur sonstigen Praxis (loggen, generische
-  Meldung). Gleiches Muster wurde in V1 (Punkt 7) kundenseitig entfernt.
-- **`Admin/Orders/Show` reicht `payments` als volle Models durch** — inkl.
-  `response_data` (kompletter roher PayPal-API-Response mit Payer-Daten).
-  Nur Admins sichtbar, aber Datenminimierung: explizites Mapping wie beim
-  Rest der Props.
-- **Settings-Format-Validierung:** `shop.email` (Empfänger aller
-  Bestellbenachrichtigungen!) akzeptiert jeden String, `mail.smtp_port`
-  ebenso. Tippfehler fällt erst auf, wenn Mails still im Log landen.
-  `email`/`numeric`-Rules für diese Keys.
-- **LIKE-Wildcards ungefiltert:** Produktsuche (`index`/`search`) setzt
-  User-Input roh in `like "%…%"` — `%`/`_` werden nicht escaped. Kein
-  Injection-Risiko, nur Kuriosum/Mini-DoS; `addcslashes($q, '%_\\')` wenn
-  es stört.
-- **`is_admin` weiter fillable** (`User`-Model, TODO.md-Punkt): kein
-  Endpoint schreibt Request-Daten in `User`, Risiko gering — aber die
-  Entfernung kostet nichts und schließt die Klasse Fehler für immer.
+- **Admin-Refund leakt Exception-Text an den Client:** ✅ `OrderController::refund`
+  gibt jetzt eine generische Meldung zurück (der Fehler wird weiter geloggt) —
+  wie kundenseitig in V1 Punkt 7.
+- **`Admin/Orders/Show` reicht `payments` als volle Models durch:** ✅ jetzt
+  explizites Feld-Mapping (id, status, order/capture-id, amount, currency,
+  payer_email/name, created_at) — der rohe `response_data`-Block (kompletter
+  PayPal-API-Response mit Payer-Rohdaten) geht nicht mehr nach vorne. Test:
+  `test_show_does_not_expose_raw_paypal_response_data`.
+- **Settings-Format-Validierung:** ✅ `SettingController::update` prüft jetzt
+  `shop.email`/`mail.smtp_user` als E-Mail und `mail.smtp_port` als Port
+  (1–65535); leere Werte bleiben zulässig (= löschen). 3 neue Tests.
+- **LIKE-Wildcards ungefiltert:** ✅ Produktsuche (`index`/`search`) escaped
+  `%`/`_`/`\` (gemeinsamer `whereNameLike()`-Helper mit `ESCAPE`-Klausel für
+  MySQL/SQLite). 2 neue Tests (Wildcard literal, Treffer mit literalem `%`).
+- **`is_admin` fillable:** ✅ aus dem `User`-`#[Fillable]` entfernt; der
+  `add:admin`-Command setzt das Flag jetzt explizit (nicht mehr per
+  Mass-Assignment). Tests: Mass-Assignment-Guard + Command flaggt Admin.
 - **Cookie-Banner ist Attrappe:** „Nur notwendige" und „Alle Cookies
   erlauben" tun exakt dasselbe (Banner ausblenden, sessionStorage). Solange
   ausschließlich technisch notwendige Cookies gesetzt werden, ist das
   DSGVO-seitig okay — aber der „Alle erlauben"-Button suggeriert eine Wahl,
   die es nicht gibt. Vor Einbindung von Analytics/Drittdiensten braucht es
   echtes Consent-Management; bis dahin ehrlicherweise nur „OK"-Button.
+  **Bewusst offen gelassen (Entscheidung Linus 10.07.2026).**
 
 ---
 
@@ -435,6 +434,7 @@ gegen CLS. Der Parallax-Transform selbst ist unkritisch (nur `transform`).
 4. **SEO-Paket:** ~~Favicons (2) → robots-Sitemap-Zeile (4) → Canonical (3)
    → Hero-Attribute (5)~~ ✅ → Hero-Konvertierung (5) + SSR (1, größter
    Brocken, lohnt vor Launch — Entscheidung Linus: macht er später selbst).
-5. S-2/S-3/S-4 (drei Middleware-Zeilen) + S-5 nach Gelegenheit.
+5. S-2/S-3/S-4 (drei Middleware-Zeilen) + ~~S-5~~ ✅ (10.07.2026; Cookie-Banner
+   bewusst offen).
 6. ~~Q1–Q3 (tote Dateien, Baseline-Disziplin, V2-Simplifizierungen)~~ ✅
    (09.07.2026; UI-Kit bleibt, `sessions.user_id` offen).
