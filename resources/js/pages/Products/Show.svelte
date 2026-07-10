@@ -20,7 +20,6 @@
     import { formatPrice } from '@/lib/currency';
     import { cn } from '@/lib/utils';
     import cartRoutes from '@/routes/cart';
-    import ratingsRoutes from '@/routes/ratings';
 
     type ProductImage = { id: number; url: string; sort_order: number };
     type ProductVariant = {
@@ -718,7 +717,7 @@
                                 </p>
 
                                 <Form
-                                    action={ratingsRoutes.store.url(product.id)}
+                                    action={`/products/${product.id}/ratings`}
                                     method="post"
                                     resetOnSuccess={['content']}
                                     class="mt-6 space-y-5"
