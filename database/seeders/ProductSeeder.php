@@ -26,6 +26,23 @@ class ProductSeeder extends Seeder
 
     public function run(): void
     {
+        // Schutz vor Datenverlust: dieser Seeder LÖSCHT den kompletten Katalog
+        // (Produkte, Varianten, Kategorien, Hersteller) samt hochgeladener
+        // Bilder und ersetzt ihn durch den Shopware-CSV-Stand. In Produktion
+        // würde ein versehentliches `db:seed` bzw. `db:seed --class=ProductSeeder`
+        // damit alle im Admin gepflegten Produkte + Bilder vernichten. Deshalb
+        // läuft er in Produktion nur, wenn der Erstimport bewusst mit
+        // SEED_PRODUCTS_FORCE=true angefordert wird (fail-safe: im Zweifel
+        // überspringen, nichts löschen).
+        if (app()->isProduction() && ! config('shop.seed_products_force')) {
+            $this->command?->warn(
+                'ProductSeeder in Produktion übersprungen: würde den kompletten Katalog inkl. Bilder löschen. '
+                .'Für einen bewussten Erstimport SEED_PRODUCTS_FORCE=true setzen.'
+            );
+
+            return;
+        }
+
         $rows = $this->readCsvRows(base_path(self::CSV_PATH));
 
         if ($rows === []) {

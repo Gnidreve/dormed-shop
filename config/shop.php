@@ -1,6 +1,17 @@
 <?php
 
 return [
+    /*
+    |--------------------------------------------------------------------------
+    | ProductSeeder-Freigabe in Produktion
+    |--------------------------------------------------------------------------
+    | Der ProductSeeder LÖSCHT den kompletten Katalog inkl. Bilder und
+    | importiert die Shopware-CSV neu. In Produktion läuft er nur, wenn dies
+    | bewusst über SEED_PRODUCTS_FORCE=true (Erstimport) freigegeben wird.
+    | Default false = fail-safe: im Zweifel nichts löschen.
+    */
+    'seed_products_force' => env('SEED_PRODUCTS_FORCE', false),
+
     'cart' => [
         'session_key' => 'cart',
         'vat_rate' => 19,
