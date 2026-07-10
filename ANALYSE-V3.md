@@ -355,17 +355,22 @@ die Order/Payment-Property-Typen (der Großteil der Einträge) über
 Grundgerüst gut (Titles/Descriptions überall, Product- + FAQ-JSON-LD,
 Sitemap, robots, `lang="de"`). Konkrete Lücken, nach Impact sortiert:
 
-### SEO-1. Kein SSR → Link-Previews und Nicht-Google-Crawler sehen nichts
+### SEO-1. Kein SSR → Link-Previews und Nicht-Google-Crawler sehen nichts ✅ (10.07.2026)
 
-Inertia rendert rein clientseitig; `config/inertia.php` hat den
-SSR-Bundle-Eintrag auskommentiert, `npm run build:ssr` existiert schon.
-Google führt JS aus — aber **WhatsApp/Slack/Teams/LinkedIn-Preview-Bots
-nicht**: Wer eine Produktseite teilt, bekommt keinen Titel, keine
-Beschreibung, kein OG-Bild (alle Meta-Tags entstehen erst per JS). Für
-einen Shop, dessen Produkte per Mail/Messenger geteilt werden, ist das der
-größte SEO/Sharing-Hebel. Inertia v3 macht SSR im Dev-Mode bereits
-automatisch (via `@inertiajs/vite`) — Produktionsseitig fehlen nur
-Bundle-Build + Config-Zeile + Prozess (oder `inertia:start-ssr`).
+**Erledigt:** SSR aktiviert (Inertia v3 + `@inertiajs/vite`). Der Plugin wrappt
+beim `--ssr`-Build automatisch `resources/js/app.ts` mit Server-Bootstrap — kein
+separater SSR-Einstieg nötig. Änderungen: `app.ts` (client-only
+`initializeFlashToast()` hinter `typeof window`-Guard, sonst crasht es im Node-
+SSR), `vite.config.ts` (`ssr: 'resources/js/app.ts'`), `config/inertia.php`
+(`bundle => bootstrap/ssr/app.js`), `.env(.example)` (`INERTIA_SSR_ENABLED`,
+lokal aus). Nebenbei ein S-1-Folgefehler gefixt: `Products/Show.svelte`
+importierte noch die von Wayfinder entfernte `@/routes/ratings` (toter Import im
+`{#if false}`-Block) — der SSR-Build deckte es auf.
+**Verifiziert** produktionsnah: SSR-Server via `inertia:start-ssr`, zweite
+Laravel-Instanz mit `INERTIA_SSR_ENABLED=true` — die rohe HTML-Antwort enthält
+`data-server-rendered`, Titel/Description/OG-Tags im `<head>` und
+Produktname + JSON-LD im Body **ohne JS-Ausführung**; mit SSR aus ist der
+`#app`-Container leer. Betrieb: siehe README-Launch-Checkliste Punkt „SSR".
 
 ### SEO-2. Favicon-Links zeigen auf gelöschte Dateien ✅
 
@@ -450,8 +455,8 @@ gegen CLS. Der Parallax-Transform selbst ist unkritisch (nur `transform`).
    jetzt CI-fähig.
 3. ~~**B-1 + B-2** (Versandpreis-null, Alt-Cart-Variantenzwang)~~ ✅ (10.07.2026, je mit Test).
 4. **SEO-Paket:** ~~Favicons (2) → robots-Sitemap-Zeile (4) → Canonical (3)
-   → Hero-Attribute (5)~~ ✅ → Hero-Konvertierung (5) + SSR (1, größter
-   Brocken, lohnt vor Launch — Entscheidung Linus: macht er später selbst).
+   → Hero-Attribute (5) → SSR (1)~~ ✅ → offen nur noch Hero-Konvertierung (5,
+   WebP/AVIF).
 5. ~~S-2/S-3/S-4 (drei Middleware-Zeilen)~~ ✅ + ~~S-5~~ ✅ (10.07.2026;
    Cookie-Banner bewusst offen).
 6. ~~Q1–Q3 (tote Dateien, Baseline-Disziplin, V2-Simplifizierungen)~~ ✅
