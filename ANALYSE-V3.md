@@ -117,7 +117,18 @@ stichprobenartig verifiziert.
 
 ## 🔴 Release-Blocker
 
-### B1. `php artisan db:seed` in Produktion vernichtet den kompletten Katalog
+### B1. `php artisan db:seed` in Produktion vernichtet den kompletten Katalog ✅ (10.07.2026)
+
+**Erledigt:** Guard ganz am Anfang von `ProductSeeder::run()` — in Produktion
+bricht der Seeder ab (Warnung, kein Löschen), **bevor** irgendetwas gelesen oder
+gewiped wird, solange nicht `SEED_PRODUCTS_FORCE=true` gesetzt ist
+(Config `shop.seed_products_force`, Default `false` = fail-safe). Schützt beide
+Angriffspfade (`db:seed` **und** `db:seed --class=ProductSeeder`);
+`migrate:fresh` war ohnehin schon durch `DB::prohibitDestructiveCommands()`
+geblockt. Dev bleibt unverändert (nicht-Produktion läuft normal durch). Test
+`test_seeder_does_not_wipe_the_catalog_in_production`.
+
+<details><summary>Ursprünglicher Befund</summary>
 
 `DatabaseSeeder` ruft `ProductSeeder` **unconditionally** auf (nur User/
 Customer/Rating-Seeder sind production-gegated) — und `ProductSeeder`
@@ -145,6 +156,7 @@ Erstbefüllung als expliziten Aufruf dokumentieren (`db:seed
 `app()->isProduction() && ! $this->command->confirm(...)`-Guard einbauen.
 `DB::prohibitDestructiveCommands()` schützt hier **nicht** (das greift nur
 bei `migrate:fresh` & Co., nicht bei Seedern). Launch-Checkliste ergänzen.
+</details>
 
 ### B2. Frontend-Qualitäts-Gate ist rot (svelte-check + ESLint), README verspricht grün ✅ (09.07.2026 — Kurzprotokoll oben)
 
@@ -249,26 +261,25 @@ konsistent zu den anderen Checkout-Routen).
 
 ## 🟡 Businesslogik
 
-### B-1. Versandart „Preis auf Anfrage" wird als 0,00 € verkauft
+### B-1. Versandart „Preis auf Anfrage" wird als 0,00 € verkauft ✅ (10.07.2026)
 
-`shipping_methods.price` ist nullable („null = auf Anfrage", so dokumentiert
-in SCHEMA.md und im Admin anlegbar). `CartService::amountToCents(null)`
-macht daraus aber **0 Cent** — eine „auf Anfrage"-Versandart erscheint im
-Checkout als kostenlos und ist bestellbar. Entweder (a) null-Preis-Methoden
-aus der Checkout-Auswahl ausblenden, (b) UI-Label „auf Anfrage" + nicht
-wählbar, oder (c) das nullable-Konzept abschaffen und Preis verpflichtend
-machen. Aktuell ist es eine stille Umsatz-Falle.
+`shipping_methods.price` ist nullable („null = auf Anfrage"), `amountToCents(null)`
+machte daraus **0 Cent** → kostenloser Versand als stille Umsatz-Falle.
+**Erledigt (Variante a):** `CartService::shippingMethodModels()` filtert
+`whereNotNull('price')` — Versandarten ohne Preis sind im Self-Service-Checkout
+weder wählbar noch Default noch summierbar. Ein echter „Preis auf Anfrage"-Flow
+(Kontaktaufnahme) bliebe ein eigenes Feature. Ein *echter* 0,00-€-Versand
+(explizit gesetzt, z. B. Selbstabholung) bleibt zulässig. Test
+`test_shipping_method_without_price_is_not_offered`.
 
-### B-2. Alt-Cart-Zeilen umgehen den Variantenzwang
+### B-2. Alt-Cart-Zeilen umgehen den Variantenzwang ✅ (10.07.2026)
 
-Der Variantenzwang greift nur beim **Hinzufügen** (`AddCartItemRequest`).
-Liegt ein Produkt bereits ohne Variante im Warenkorb und der Admin legt
-danach Varianten an, bleibt die Zeile gültig (`is_available` prüft nur
-Produkt + gewählte Variante) und wird zum alten Basispreis bestellt —
-genau das Szenario, das der after-Hook verhindern soll. Fix: in
-`CartService::items()` eine Zeile ohne `variant_id` als unbuyable markieren,
-wenn `$product->variants` nicht leer ist (eine Bedingung, Daten sind schon
-geladen).
+Der Variantenzwang griff nur beim Hinzufügen (`AddCartItemRequest`); eine Zeile,
+die *vor* dem Anlegen der Varianten in den Warenkorb kam, blieb zum Basispreis
+bestellbar. **Erledigt:** `CartService::items()` markiert eine Zeile ohne
+`variant_id` als `is_available = false`, sobald das Produkt Varianten hat
+(`$variantRequiredButMissing`) → Checkout blockiert serverseitig. Test
+`test_cart_line_without_variant_is_blocked_once_the_product_gains_variants`.
 
 ### B-3. Capture-Betragsabweichung: Geld ist bei PayPal eingezogen, Order steht auf `failed`
 
@@ -404,8 +415,10 @@ gegen CLS. Der Parallax-Transform selbst ist unkritisch (nur `transform`).
 
 1. **Node ≥ 20.19 auf dem Build-System** (System-Node 18 crasht Vite 8) —
    `engines`-Feld + `.nvmrc` einchecken (B2).
-2. **Niemals blankes `db:seed` in Produktion**, solange B1 nicht gefixt ist;
-   Erstbefüllung dokumentiert über explizite Seeder-Klassen.
+2. **Katalog-Erstimport in Produktion** nur bewusst mit
+   `SEED_PRODUCTS_FORCE=true php artisan db:seed --class=ProductSeeder` (B1-Guard
+   verhindert sonst jeden versehentlichen Katalog-Wipe). Danach Flag wieder
+   entfernen; Produkte werden im Admin gepflegt.
 3. `php artisan storage:link`, `APP_ENV=production`, `APP_DEBUG=false`,
    `SESSION_SECURE_COOKIE=true`, `config:cache`/`route:cache` — unverändert.
 4. Admin-Settings: SMTP (+ Testmail), PayPal-Credentials (+ Check),
@@ -430,12 +443,12 @@ gegen CLS. Der Parallax-Transform selbst ist unkritisch (nur `transform`).
 
 ## Empfohlene Reihenfolge
 
-1. **B1** (Seeder-Guard — 15 Minuten, verhindert den teuersten Unfall)
+1. ~~**B1** (Seeder-Guard)~~ ✅ (10.07.2026)
    → ~~**S-1** (Rating-Route zu)~~ ✅ (10.07.2026).
 2. ~~**B2** (Qualitäts-Gate grün: lucide-Paket vereinheitlicht, UI-Kit
    kompatibel, App-Typfehler, Lint, engines/.nvmrc)~~ ✅ (09.07.2026) —
    jetzt CI-fähig.
-3. **B-1 + B-2** (Versandpreis-null, Alt-Cart-Variantenzwang) — je mit Test.
+3. ~~**B-1 + B-2** (Versandpreis-null, Alt-Cart-Variantenzwang)~~ ✅ (10.07.2026, je mit Test).
 4. **SEO-Paket:** ~~Favicons (2) → robots-Sitemap-Zeile (4) → Canonical (3)
    → Hero-Attribute (5)~~ ✅ → Hero-Konvertierung (5) + SSR (1, größter
    Brocken, lohnt vor Launch — Entscheidung Linus: macht er später selbst).
